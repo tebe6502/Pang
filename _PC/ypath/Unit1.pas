@@ -1,0 +1,271 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Menus;
+
+type
+  TForm1 = class(TForm)
+    Image1: TImage;
+    Bevel1: TBevel;
+    LabeledEdit1: TLabeledEdit;
+    LabeledEdit2: TLabeledEdit;
+    UpDown1: TUpDown;
+    UpDown2: TUpDown;
+    LabeledEdit3: TLabeledEdit;
+    Edit1: TEdit;
+    UpDown3: TUpDown;
+    Image2: TImage;
+    Bevel2: TBevel;
+    LabeledEdit4: TLabeledEdit;
+    LabeledEdit5: TLabeledEdit;
+    UpDown4: TUpDown;
+    UpDown5: TUpDown;
+    LabeledEdit6: TLabeledEdit;
+    Edit2: TEdit;
+    UpDown6: TUpDown;
+    Image3: TImage;
+    Bevel3: TBevel;
+    LabeledEdit7: TLabeledEdit;
+    LabeledEdit8: TLabeledEdit;
+    UpDown7: TUpDown;
+    UpDown8: TUpDown;
+    LabeledEdit9: TLabeledEdit;
+    Edit3: TEdit;
+    UpDown9: TUpDown;
+    Image4: TImage;
+    Bevel4: TBevel;
+    LabeledEdit10: TLabeledEdit;
+    LabeledEdit11: TLabeledEdit;
+    UpDown10: TUpDown;
+    UpDown11: TUpDown;
+    LabeledEdit12: TLabeledEdit;
+    Edit4: TEdit;
+    UpDown12: TUpDown;
+    Image5: TImage;
+    Bevel5: TBevel;
+    LabeledEdit13: TLabeledEdit;
+    LabeledEdit14: TLabeledEdit;
+    UpDown13: TUpDown;
+    UpDown14: TUpDown;
+    LabeledEdit15: TLabeledEdit;
+    Edit5: TEdit;
+    UpDown15: TUpDown;
+    MainMenu1: TMainMenu;
+    File1: TMenuItem;
+    Load1: TMenuItem;
+    Save1: TMenuItem;
+    N1: TMenuItem;
+    Exit1: TMenuItem;
+    OpenDialog1: TOpenDialog;
+    SaveDialog1: TSaveDialog;
+    Generate1: TMenuItem;
+    procedure Edit1Change(Sender: TObject);
+    procedure LabeledEdit1Change(Sender: TObject);
+    procedure Load1Click(Sender: TObject);
+    procedure Save1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Generate1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+
+var
+  Form1: TForm1;
+
+  tb: array [0..4, 0..127] of integer;
+
+
+implementation
+
+{$R *.dfm}
+
+
+procedure licz(h,g: integer; _t:real; var pic:TImage; idx: byte);
+var t, y: real;
+    ry, i: integer;
+    bmp: TBitmap;
+begin
+
+ bmp:=Tbitmap.Create;
+ bmp.Width:=64; bmp.Height:=128;
+
+ with bmp.Canvas do begin
+  Pen.Color:=0; Brush.Color:=0;
+  rectangle(0,0,64,128);
+ end;
+
+ t := 0;
+ y := 0;
+
+ for i:=0 to 127 do begin
+
+  tb[idx, i]:=-1;
+
+  y := y + g * t;
+  t := t + _t;
+
+  ry:=128-h+round(y);
+
+  if ry in [0..127] then begin
+   bmp.Canvas.Pixels[i,ry]:=clWhite;
+
+   tb[idx, i]:=ry;
+  end;
+ 
+ end;
+
+ pic.Picture.Bitmap:=bmp;
+
+ bmp.Free;
+end;
+
+
+procedure TForm1.Edit1Change(Sender: TObject);
+var a: real;
+
+const
+    x = 0.01;
+    
+begin
+
+ case TEdit(Sender).Tag of
+  0: begin a:=x*StrToInt(Edit1.Text); LabeledEdit3.Text:=FloatToStr(a) end;
+  1: begin a:=x*StrToInt(Edit2.Text); LabeledEdit6.Text:=FloatToStr(a) end;
+  2: begin a:=x*StrToInt(Edit3.Text); LabeledEdit9.Text:=FloatToStr(a) end;
+  3: begin a:=x*StrToInt(Edit4.Text); LabeledEdit12.Text:=FloatToStr(a) end;
+  4: begin a:=x*StrToInt(Edit5.Text); LabeledEdit15.Text:=FloatToStr(a) end;
+ end;
+
+end;
+
+
+procedure TForm1.LabeledEdit1Change(Sender: TObject);
+begin
+
+ case TLabeledEdit(Sender).Tag of
+  0: begin licz(StrToInt(LabeledEdit1.Text), StrToInt(LabeledEdit2.Text), StrToFloat(LabeledEdit3.Text), image1, 0) end;
+  1: begin licz(StrToInt(LabeledEdit4.Text), StrToInt(LabeledEdit5.Text), StrToFloat(LabeledEdit6.Text), image2, 1) end;
+  2: begin licz(StrToInt(LabeledEdit7.Text), StrToInt(LabeledEdit8.Text), StrToFloat(LabeledEdit9.Text), image3, 2) end;
+  3: begin licz(StrToInt(LabeledEdit10.Text), StrToInt(LabeledEdit11.Text), StrToFloat(LabeledEdit12.Text), image4, 3) end;
+  4: begin licz(StrToInt(LabeledEdit13.Text), StrToInt(LabeledEdit14.Text), StrToFloat(LabeledEdit15.Text), image5, 4) end;
+ end;
+
+end;
+
+
+procedure TForm1.Load1Click(Sender: TObject);
+var f: file;
+    t: array [0..14] of byte;
+    err: integer;
+begin
+
+ if OpenDialog1.Execute then begin
+
+  fillchar(t, sizeof(t), 1);
+
+  assignfile(f, OpenDialog1.FileName); reset(f,1);
+  blockread(f, t, 15, err);
+  closefile(f);
+
+  LabeledEdit1.Text:=IntToStr(t[0]);
+  LabeledEdit2.Text:=IntToStr(t[1]);
+  Edit1.Text:=IntToStr(t[2]);
+
+  LabeledEdit4.Text:=IntToStr(t[3]);
+  LabeledEdit5.Text:=IntToStr(t[4]);
+  Edit2.Text:=IntToStr(t[5]);
+
+  LabeledEdit7.Text:=IntToStr(t[6]);
+  LabeledEdit8.Text:=IntToStr(t[7]);
+  Edit3.Text:=IntToStr(t[8]);
+
+  LabeledEdit10.Text:=IntToStr(t[9]);
+  LabeledEdit11.Text:=IntToStr(t[10]);
+  Edit4.Text:=IntToStr(t[11]);
+
+  LabeledEdit13.Text:=IntToStr(t[12]);
+  LabeledEdit14.Text:=IntToStr(t[13]);
+  Edit5.Text:=IntToStr(t[14]);
+
+ end;
+
+end;
+
+
+procedure TForm1.Save1Click(Sender: TObject);
+var f: file;
+    t: array [0..14] of byte;
+    err: integer;
+begin
+
+ if SaveDialog1.Execute then begin
+
+  t[0]:=StrToInt(LabeledEdit1.Text);
+  t[1]:=StrToInt(LabeledEdit2.Text);
+  t[2]:=StrToInt(Edit1.Text);
+
+  t[3]:=StrToInt(LabeledEdit4.Text);
+  t[4]:=StrToInt(LabeledEdit5.Text);
+  t[5]:=StrToInt(Edit2.Text);
+
+  t[6]:=StrToInt(LabeledEdit7.Text);
+  t[7]:=StrToInt(LabeledEdit8.Text);
+  t[8]:=StrToInt(Edit3.Text);
+
+  t[9]:=StrToInt(LabeledEdit10.Text);
+  t[10]:=StrToInt(LabeledEdit11.Text);
+  t[11]:=StrToInt(Edit4.Text);
+
+  t[12]:=StrToInt(LabeledEdit13.Text);
+  t[13]:=StrToInt(LabeledEdit14.Text);
+  t[14]:=StrToInt(Edit5.Text);
+
+  assignfile(f, SaveDialog1.FileName); rewrite(f,1);
+  blockwrite(f, t, 15, err);
+  closefile(f);
+
+ end;
+
+end;
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+ OpenDialog1.InitialDir:=ExtractFilePath(Application.ExeName);
+ SaveDialog1.InitialDir:=ExtractFilePath(Application.ExeName);
+end;
+
+
+procedure TForm1.Generate1Click(Sender: TObject);
+var f: textfile;
+    i, j: integer;
+begin
+
+  if SaveDialog1.Execute then begin
+
+   assignfile(f, SaveDialog1.FileName); rewrite(f);
+
+   for j:=0 to 4 do begin
+    i:=0;
+    write(f, ' p',j,' dta ');
+    while tb[j,i]>=0 do begin
+     write(f, tb[j,i]);
+     if tb[j,i+1]>=0 then write(f, ',');
+     inc(i);
+    end;
+    writeln(f);
+   end;
+
+   closefile(f);
+
+  end;
+
+end;
+
+end.

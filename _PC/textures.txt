@@ -1,0 +1,13 @@
+texture1	ins '_PC/texture/g2f/PangLight_G2F_Powrooz.df7'
+texture2	ins '_PC/texture/g2f/PangAtlas_G2F_Powrooz.df7'
+texture3	ins '_PC/texture/g2f/PangJapanVers2.df7'
+texture4	ins '_PC/texture/g2f/PangCaves_G2F_Powrooz.df7'
+texture5	ins '_PC/texture/g2f/PangStreet_G2F_Powrooz.df7'
+texture6	ins '_PC/texture/g2f/PangShrine_G2F_Powrooz_2Final.df7'
+texture7	ins '_PC/texture/g2f/PangCityVers2AA.df7'
+texture8	ins '_PC/texture/g2f/PangMansion_G2F_Powrooz.df7'
+texture9	ins '_PC/texture/g2f/PangMostVer3Clean.df7'
+texture10	ins '_PC/texture/g2f/PangPark_Vers2.df7'
+texture11	ins '_PC/texture/g2f/PangWinter_G2F_Powrooz.df7'
+texture12	ins '_PC/texture/g2f/PangLions_G2F_Powrooz.df7'
+
