@@ -1,0 +1,336 @@
+
+---------------------------------------------------------------------------------------------------------------------------
+PANG XE/XL EDITOR V3.8 (03.05.2011)
+---------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------
+.Wstêp
+---------------------------------------------------------------------------------------------------------------------------
+
+Program do edycji poziomów w grze PANG (Atari XE/XL).
+
+Pole gry sk³ada siê z 19 wierszy (152 linie) i 40 kolumn (160 pixli).
+
+Mo¿liwe jest podkolorowanie tylko pierwszych 14 wierszy pola gry przy pomocy 3 graczy i 3 pocisków.
+
+Bohater ma mo¿liwoœæ poruszania siê w prawo/lewo. W pionie porusza siê tylko po drabinkach.
+
+Dostêpnych jest 5 kul ró¿nych rozmiarów, trafienie ka¿dej z kul powoduje pojawienie siê dwóch nowych kul
+o rozmiarze mniejszym. Nie ma mo¿liwoœci zwiêkszenia liczby dostêpnych kul ani zmiany ich wygl¹du.
+
+S¹ dwa typy murków/podestów (pojêcia "murek" i "podest" u¿ywane s¹ zamiennie, okreœlaj¹ ten sam typ
+elementów pola gry): "twardy" i "miêkki". Twardy murek/podest nie mo¿e zostaæ
+rozbity przez harpun, miêkki murek/podest zostaje rozbity (znika) po trafieniu harpunem.
+
+Murki/podesty ograniczaj¹ mo¿liwoœæ przemieszczania siê kul, kule odbijaj¹ siê od murków/podestów.
+
+Murki/podesty ograniczaj¹ tak¿e mo¿liwoœci przemieszczania siê bohatera. Bohater spada w dó³ jeœli zejdzie
+z murku/podestu. Podczas spadania bohater ma mo¿liwoœæ manewrowania, nie ma mo¿liwoœci wystrzelenia
+harpunu. Harpun wystrzeliwuje tylko jeœli stoi na jakimœ murku/podeœcie, konkretnej pozycji na drabince albo gruncie.
+
+Murki twarde mo¿na u¿yæ na ca³ej powierzchni pola gry, murki miêkkie bez 3 ostatnich wierszy pola gry.
+
+Elementy pola gry zapisane s¹ pliku PANG.MIC i PANG.INI, ich zmiana nie jest wskazana, mo¿e wi¹zaæ siê z potrzeb¹ poprawienia kodu gry.
+
+Kule maj¹ sta³y wygl¹d (nie s¹ przechowywane jako bitmapy tylko jako rozpêtlony kod 6502), pozosta³e
+elementy (murki/podesty, drabinki) mog¹ przyjmowaæ ró¿ne kszta³ty.
+
+
+Aktualnie mamy:
+
+OBJECT 0	kula o wysokoœci 40 linii (GROUP ID = 0)
+OBJECT 1	kula o wysokoœci 32 linii (GROUP ID = 0)
+OBJECT 2	kula o wysokoœci 24 linii (GROUP ID = 0)
+OBJECT 3	kula o wysokosci 16 linii (GROUP ID = 0)
+OBJECT 4	kula o wysokoœci 8 linii  (GROUP ID = 0)
+
+OBJECT 5	murek0 (GROUP ID = 1 dla murka twardego, 128..254 dla murka miêkkiego)
+OBJECT 6	murek1 (GROUP ID = 1 dla murka twardego, 128..254 dla murka miêkkiego)
+OBJECT 7	murek2 (GROUP ID = 1 dla murka twardego, 128..254 dla murka miêkkiego)
+
+OBJECT 8	drabinka (GROUP ID = 2..119)
+
+OBJECT 9..24	murki (GROUP ID = 1 dla murka twardego, 128..254 dla murka miêkkiego)
+
+OBJECT 25..31   czarna krawêdŸ murku (GROUP ID = 120..127), razem z PMG OVERLAY pozwala stworzyæ murek jednolitego koloru otoczony czarn¹ krawêdzi¹
+
+
+Aby rozpocz¹æ edycje nale¿y post¹piæ w nastêpuj¹cej kolejnoœci:
+
+- LOAD *.TEX	wczytujemy teksturê pola gry (np. TEX1.TEX), dziêki temu inicjujemy te¿ kolory
+- LOAD *.OBJ	wczytujemy obiekty (OBJECTS.OBJ), obiekty wycinane s¹ z pliku ..OBJ\OBJECTS.MIC
+- LOAD *.LEV	wczytujemy jakiœ level (*.LEV) lub zaczynamy edytowaæ nowy FILE -> NEW LEVEL
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++ !!!  U W A G A  !!! +++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+1. !!! Musi zostaæ ustawiona przynajmniej 1 kula aby level móg³ zadzia³aæ !!!
+---------------------------------------------------------------------------------------------------------------------------
+
+2. !!! GROUP ID dla murków twardych koniecznie = 1 !!!
+---------------------------------------------------------------------------------------------------------------------------
+
+3. !!! Level mo¿e zawieraæ maksymalnie 2 najwiêksze kule (maksymalna liczba ruchomych obiektów = 32) !!!
+---------------------------------------------------------------------------------------------------------------------------
+
+
+!!! Jeœli punkt 1 lub punkt 2 nie zostanie spe³niony wówczas na pewno gra siê zawiesi. !!!
+
++++++++++++++++++++++++++++++++++++++++++++++++++++ !!!  U W A G A  !!! +++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.INSERT MODE
+---------------------------------------------------------------------------------------------------------------------------
+
+Edytor umo¿liwia ustawienie ró¿nych obiektów na planszy pola gry. Obiekty wybieramy z dolnego menu,
+nastêpnie klikamy dwukrotnie lewym klawiszem myszki na obszarze pola gry aby ustawiæ wybrany obiekt
+lub klikamy prawym klawiszem myszki i wybieramy opcje PASTE z okienka "popup menu" które siê pojawi³o po
+klikniêciu prawym klawiszem myszki.
+
+Nie ma mo¿liwoœci ustawiania obiektu na obiekcie, np. kilka murków na tej samej pozycji X:Y. Edytor zignoruje
+próbê na³o¿enia murku na murek.
+
+Istnieje mo¿liwoœæ ustawienia kuli na kuli pod warunkiem ¿e ich lewe górne naro¿niki siê nie pokrywaj¹, tzn.
+¿e kula nie mo¿e przykryæ idealnie kuli pod spodem, musi byæ przesuniêta conajmniej o 1 znak.
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.EDIT MODE
+---------------------------------------------------------------------------------------------------------------------------
+
+Po ustawieniu obiektów na planszy pola gry mamy mo¿liwoœæ okreœlenia dodatkowych informacji dla obiektów.
+
+Na podstawie grupy (GROUP ID) rozró¿niane s¹ obiekty wystêpuj¹ce w grze, wykrywana jest kolizja z kulami, kolizja
+harpunu z murkiem/podestem "miêkkim" lub "twardym". GROUP ID przypisany mo¿e zostaæ pojedyñczemu lub wielu obiektom.
+
+Obiekt, który chcemy edytowaæ wskazujemy poprzez klikniêcie na nim lewym klawiszem myszki. Taki obiekt lub
+obiekty zostan¹ wówczas oznaczone ¿ó³t¹ przerywan¹ lini¹. Mamy mo¿liwoœæ wskazania pojedyñczego obiektu lub
+wiêkszej ich iloœci.
+
+Wiêksz¹ iloœæ obiektów zaznaczamy przytrzymuj¹c lewy klawisz myszki i przeci¹gaj¹c kursor myszki nad interesuj¹cymi
+nas obiektami.
+
+Mo¿emy okreœliæ który obiekt ma byæ na wierzchu a który pod spodem, oczywiœcie dotyczy to obiektów które
+nachodz¹ na siebie, np. kule.
+
+Po zaznaczeniu obiektu klikamy prawym klawiszem myszki w zaznaczony obszar, pojawia siê menu (popup menu),
+dostajemy mo¿liwoœæ zmiany (kiedy klikniemy prawym klawiszem myszki gdy nie ma zaznaczonego ¿adnego
+obiektu wówczas pojawi siê inne popup menu z jedn¹ mo¿liw¹ opcj¹ "PASTE"):
+
+
+BRING TO FRONT		wskazany obiekt bêdzie na wierzchu (przykryje inny obiekt jeœli takowy jest)
+
+SEND TO BACK		wskazany obiekt bêdzie pod spodem (inny obiekt go przykryje jeœli takowy jest)
+
+
+ADD PMG OVLERLAY	ustawia znaczniki podbarwiania przed duchy/pociski dla zaznaczonych elementów pola gry
+
+CLR PMG OVERLAY		usuwa znaczniki podbarwiania przez duchy/pociski dla zaznaczonych elementów pola gry
+
+
+PARAMETER		parametr obiektu, parametry interpretowane s¹ tylko dla KUL (GROUP ID=0),
+			dla pozosta³ych obiektów s¹ ignorowane, parametr okreœla wartoœc pocz¹tkow¹
+			kierunku poruszania siê kuli
+
+PARAMETER = 0		pozycja X kuli bêdzie zwiêkszana o 0, kula bêdzie poruszaæ siê tylko w pionie
+
+PARAMETER = 1		pozycja X kuli bêdzie zwiêkszana o 1, kula zacznie poruszaæ siê w prawo
+
+PARAMETER = 255		pozycja X kuli bêdzie zwiêkszana o 255 (-1), kula zacznie poruszaæ siê w lewo
+
+
+GROUP ID		grupa, okreœla rodzaj obiektu, b³edne przypisanie GROUP ID=0 do jakiegoœ murku
+			skoñczy siê zawieszeniem gry
+
+GROUP ID = 0		grupa zerowa (=0) zarezerwowana jest tylko dla ruchomych obiektów czyli dla KUL
+
+GROUP ID = 1		grupa = 1 zarezerwowana jest tylko dla murków "twardych"
+
+GROUP ID = 2..119	grupa z przedzia³u 2..119 zarezerwowana jest dla drabinek
+
+GROUP ID = 120..127	grupa z przedzia³u 120..127 zarezerwowana jest dla murków "twardych" bitmapowych
+
+GROUP ID = 128..254	grupa z przedzia³u 128..254 zarezerwowana jest dla murków "miêkkich"
+
+GROUP ID = 255		wartoœæ zarezerwowana do okreœlenia koñca pliku z danymi levelu
+
+
+COPY			kopiuje zaznaczone obiekty, mamy póŸniej mo¿liwoœæ ich wklejenia przez PASTE
+			(PASTE wybieramy z popup menu kiedy ¿aden obiekt nie jest zaznaczony)
+
+DELETE			usuniêcie zaznaczonych obiektów (mo¿emy je przywróciæ poprzez UNDO)
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.PMG MODE
+---------------------------------------------------------------------------------------------------------------------------
+
+W tym trybie edycji mamy mo¿liwoœæ ustawienia pozycji poziomej trzech duchów i trzech pocisków.
+
+W zale¿noœci od tego jak ustawimy duchy i pociski uzyskamy efekt pobarwienia wybranych elementów pola gry,
+ca³kowity lub czêœciowy.
+
+Ustawienie znaczników OVERLAY (EDIT MODE) sygnalizuje potrzebê zapalenia piksli ducha/pocisku jednak
+mo¿liwe jest to tylko gdy taki duch/pocisk znajduje siê nad obiektem.
+
+Duchy i pociski nie pokrywaj¹ ca³ej wysokoœci ekranu, ich maksymalna wysokoœæ musi zostaæ
+ustalona tak aby nie nachodzi³a na maksymaln¹ pozycjê pionow¹ gracza -1 wiersz.
+
+Maksymalnie mo¿na podkolorowaæ 14 wierszy, ustawienie mniejszej iloœci wierszy spowoduje
+skrócenie pliku *.lev
+
+
+---------------------------------------------------------------------------------------------------------------------------
+. BONUS
+---------------------------------------------------------------------------------------------------------------------------
+
+HEART		- dodaje punkty energii
+SHIELD		- czasowo chroni przed kulami (bohater b³yska kolorowo)
+CLOCK		- zatrzymuje wszystkie kule
+HARPON WITH HOOK- harpun z hakiem, który mo¿na wbiæ tylko w twrady murek, dzia³a czasowo, w ka¿dej chwili bohater mo¿e wypuœciæ nowy harpun
+HARPON		- zwyk³y harpun, bez haka
+DYNAMIT		- dynamit rozbija wszystkit kule na mniejsze, kul najmniejszych nie mo¿na rozbiæ dynamitem
+
+
+Zaznaczenie któregokolwiek bonusa z w/w wymienionych spowoduje ¿e podczas rozbijania kul bêd¹ losowane bonusy spoœród tych które zaznaczyliœmy.
+Stanowi to dodatkowe urozmaicenie gry.
+
+
+---------------------------------------------------------------------------------------------------------------------------
+. HERO
+---------------------------------------------------------------------------------------------------------------------------
+
+Pozwala okreœliæ pozycjê poziom¹ "POS X" bohatera na polu gry i jego pozycjê pionow¹ "POS Y".
+
+
+---------------------------------------------------------------------------------------------------------------------------
+. PMG OVERLAY
+---------------------------------------------------------------------------------------------------------------------------
+
+Pozwala ustawiæ pozycje 3-ech duchów i 3-ech pocisków na polu gry. Nie ma mo¿liwoœci zmieniaæ pozycji poziomej duchów/pocisków
+co wiersz, dlatego musimy odpowiednio przemyœleæ uk³ad który chcemy podkolorowaæ. Nale¿y pamiêtaæ aby nie by³o mo¿liwoœci wejœcia
+bohatera w obszar w którym wystêpuje podkolorowanie pola gry, zobaczymy wówczas œmieci na ekranie.
+
+P0_X, M0_X	- pozycja pozioma gracza/pocisku #0
+P1_X, M1_X	- pozycja pozioma gracza/pocisku #1
+P2_X, M2_X	- pozycja pozioma gracza/pocisku #2
+
+HEIGHT		- ile wierszy pola gry bêd¹ obejmowaæ duchy/pociski
+
+ENABLED		- w³¹czone/wy³¹czone podbarwianie pola gry duchami/pociskami (PMG OVERLAY)
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.KULE
+---------------------------------------------------------------------------------------------------------------------------
+
+GROUP ID = 0 jest przypisany tylko kulom.
+
+Kulom musimy dodatkowo przypisaæ jeszcze PARAMETER (0,1,255) okreœlaj¹cy pocz¹tkowy kierunek poruszania
+siê kuli. 
+
+PARAMETER = 0   kula odbija siê tylko w pionie, nie porusza siê ani w prawo ani w lewo
+PARAMETER = 1   kula zaczyna przemieszczaæ siê w prawo
+PARAMETER = 255 kula zaczyna przemieszczaæ siê w lewo
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.MUREK "MIÊKKI"
+---------------------------------------------------------------------------------------------------------------------------
+
+GROUP ID = 128..254 jest przypisany tylko murkowi "miêkkiemu"
+
+Murki miêkkie mog¹ wystêpowaæ tylko na wysokoœci pierwszych 16 wierszy licz¹c od góry ekranu, z ostatnich 3 wierszy pola gry murki miêkkie
+nie zostan¹ usuniête.
+
+Murki miêkkie przykrywaj¹ drabinki, ods³aniaj¹ drabinkê dopiero po trafieniu w taki murek harpunem.
+
+Bohater nie mo¿e przechodziæ przez murki, ani przez miêkkie ani przez twarde.
+
+Po trafieniu harpunem w taki murek zostaje on usuniêty zaczynaj¹c od znaku w który trafi³ harpun.
+Nastêpnie naprzemiennie (co klatke) murek taki zostaje usuniêty na prawo/na lewo od miejsca w które trafi³ harpun.
+
+Procedura usuwania murku przegl¹da kolumnê (16 znaków) w poszukiwaniu obiektów z GROUP ID, takim samym 
+jak to w które trafi³ harpun, przegl¹da tak d³ugo dopóki nie napotka kolumny w której nie wystêpuje ju¿ obiekt
+z poszukiwanym GROUP ID.
+
+Jeœli miêkki murek by³ kszta³tu pionowego wówczas zostanie usuniêty najszybciej (tak dzia³a procedura
+usuwaj¹ca murek), jeœli kszta³tu poziomego to gracz zd¹¿y zaobserwowaæ jak murek kasowany jest znak po znaku.
+
+Dlatego dobrze jest jeœli miêkkie murki nie s¹ zbyt szerokie, np. na ca³¹ szerokoœæ ekranu, poniewa¿ wtedy
+ich usuniêcie bêdzie trwa³o najd³u¿ej. Najlepiej gdyby mia³y max szerokoœæ 8 znaków w wierszu (mo¿na dobraæ
+t¹ wartoœæ doœwiadczalnie). 
+
+Mo¿emy ustawiæ jeden murek, przypisaæ mu wspólny GROUP ID, a potem poprzecinaæ go pustymi miejscami, w ten
+sposób stworzymy wiele miêkkich murków mniejszym nak³adem pracy. Trafienie takiego murku nie spowoduje 
+usuniêcia wszystkich murków, tylko tego który jest ograniczony pustymi miejscami.
+
+Jeœli chcemy aby by³o kilka murków miêkkich w kilku wierszach jeden pod drugim, wówczas bêdziemy musieli
+ka¿demu murkowi z danego wiersza przypisaæ osobny GROUP ID.
+
+Jeœli wszystkim murkom z ka¿dego wiersza (jeden nad drugim) przypiszemy ten sam GROUP ID wówczas
+po trafieniu w najbli¿szy murek znikn¹ wszystkie murki znajduj¹ce siê w tej samej kolumnie.
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.MUREK "TWARDY"
+---------------------------------------------------------------------------------------------------------------------------
+
+GROUP ID = 1 jest przypisany tylko murkowi "twardemu".
+
+GROUP ID = 120..127 jest przypisany murkom twardym dla OBJECT 25..31, takie murki s¹ rysowane bez udzia³y znaków bezpoœrednio na bitampie tekstury.
+
+Przez murek "twardy" nie przebije siê harpun.
+
+Bohater nie mo¿e przechodziæ przez murki.
+
+Murki twarde nie przes³aniaj¹ drabinek, drabinki rysowane s¹ na takich murkach.
+
+
+!!! UWAGA: Murki twarde otaczane s¹ dodatkowo czarn¹ ramk¹ w celu zwiêkszenia ich widocznoœci !!!
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.DRABINKA
+---------------------------------------------------------------------------------------------------------------------------
+
+GROUP ID = 2..119 jest przypisany tylko drabinkom.
+
+Drabinki dla kul s¹ niewidzialne.
+
+Drabinki mog¹ zostaæ przes³oniête przez murek miêkki ale nie przez twardy.
+
+Ka¿da drabinka musi posiadaæ oddzielny GROUP ID, dziêki temu unikniemy takiej sytuacji gdy bohater czêœciowo
+znajduje siê na dwóch drabinkach ustawionych obok siebie i mo¿e chodziæ po nich góra/dó³.
+
+Jeœli drabinki oddalone s¹ od siebie o conajmniej 2 znaki wówczas mo¿emy u¿yæ tej samej wartoœci GROUP ID,
+która zosta³a przypisana jakiejœ innej wczeœniejszej drabince. Odstêp 2 znaków pomiêdzy drabinkami
+gwarantuje nam ¿e nie wyst¹pi efekt jednoczesnego chodzenia po dwóch drabinkach opisany wy¿ej.
+
+Po drabince bohater chodzi góra/dó³, albo lewo/prawo. Bohater ma mo¿liwoœæ wczeœniejszego zejœcia z drabinki,
+mo¿e tak¿e spaœæ na inn¹ drabinkê i kontynuowaæ wchodzenie/schodzenie po niej lub spaœæ z drabinki.
+
+
+---------------------------------------------------------------------------------------------------------------------------
+.PLIK konfiguracyjny *.INI
+---------------------------------------------------------------------------------------------------------------------------
+
+[objects]		; globalne wartoœci dla wszystkich obiektów
+w=5			; maksymalna dopuszczalna szerokoœæ obiektów, w=5 oznacza 5 znaków
+h=5			; maksymalna dopuszczalna wysokoœæ obiektów, h=5 oznacza 5 znaków
+b=5			; numer obiektu reprezentuj¹cego murek, b=5 oznacza 5 obiekt
+
+[object20]		; kolejny obiekt, konkretnie numer #20, najlepiej numerowaæ kolejno
+o=1			; overlay dla obiektu, taki obiekt mo¿na nak³adaæ na inne obiekty (dotyczy drabinek)
+g=1			; domyœlna grupa do której bêdzie nale¿a³ klocek, wiêcej o grupach w instrukcji
+i=1			; czy klocek bêdzie w inwersie (i=1 tak, i=0 nie)
+w=1			; szerokoœæ w-idth, w=1 oznacza szerokoœæ 1 znaku
+h=1			; wysokoœæ h-eight, h=1 oznacza wysokoœæ 1 znaku
+v=1			; dodatkowa informacja przydatna tylko dla KUL
+tc=$ff			; TRANSPARENT COLOR, tc=$ff oznacza przeŸroczysty kolor $ff (%11) obiektu
+cut=13 15		; wspó³rzêdne wycinania bitmapy z pliku MIC, cut = KOLUMNA WIERSZ
+f=main_objects.mic	; plik MIC z klockami

@@ -1,0 +1,3 @@
+stripreloc levels.exe
+
+pause

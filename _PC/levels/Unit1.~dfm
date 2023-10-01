@@ -1,0 +1,712 @@
+object Form1: TForm1
+  Left = 115
+  Top = 166
+  BorderStyle = bsToolWindow
+  ClientHeight = 473
+  ClientWidth = 880
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  Menu = MainMenu1
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignSize = (
+    880
+    473)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Bevel1: TBevel
+    Left = 304
+    Top = 5
+    Width = 289
+    Height = 27
+  end
+  object Image1: TImage
+    Left = 84
+    Top = 34
+    Width = 640
+    Height = 304
+    Enabled = False
+    Stretch = True
+    OnClick = Image1Click
+    OnMouseDown = Image1MouseDown
+    OnMouseMove = Image1MouseMove
+    OnMouseUp = Image1MouseUp
+  end
+  object Image2: TImage
+    Left = 2
+    Top = 34
+    Width = 80
+    Height = 304
+    OnMouseMove = Image2MouseMove
+  end
+  object Image4: TImage
+    Left = 136
+    Top = 112
+    Width = 105
+    Height = 105
+    Stretch = True
+    Visible = False
+    OnDblClick = Image4DblClick
+    OnMouseDown = Image4MouseDown
+    OnMouseMove = Image4MouseMove
+  end
+  object Label1: TLabel
+    Left = 312
+    Top = 10
+    Width = 273
+    Height = 15
+    Alignment = taCenter
+    AutoSize = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Fixedsys'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 608
+    Top = 10
+    Width = 113
+    Height = 15
+    Alignment = taCenter
+    AutoSize = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Fixedsys'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Image5: TImage
+    Left = 727
+    Top = 34
+    Width = 16
+    Height = 304
+    Stretch = True
+    OnMouseMove = Image2MouseMove
+  end
+  object Image6: TImage
+    Left = 376
+    Top = 80
+    Width = 105
+    Height = 105
+    Visible = False
+  end
+  object Bevel2: TBevel
+    Left = 748
+    Top = 34
+    Width = 129
+    Height = 411
+  end
+  object Shape1: TShape
+    Left = 104
+    Top = 216
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object Shape2: TShape
+    Left = 112
+    Top = 224
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object Shape3: TShape
+    Left = 120
+    Top = 232
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object Shape4: TShape
+    Left = 128
+    Top = 240
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object Shape5: TShape
+    Left = 136
+    Top = 248
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object Shape6: TShape
+    Left = 144
+    Top = 256
+    Width = 65
+    Height = 65
+    Brush.Color = clRed
+    Enabled = False
+    Pen.Mode = pmMask
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Top = 454
+    Width = 880
+    Height = 19
+    Panels = <
+      item
+        Alignment = taCenter
+        Width = 100
+      end
+      item
+        Alignment = taCenter
+        Width = 100
+      end
+      item
+        Alignment = taCenter
+        Width = 100
+      end
+      item
+        Width = 50
+      end>
+  end
+  object ScrollBox1: TScrollBox
+    Left = 2
+    Top = 344
+    Width = 740
+    Height = 100
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Enabled = False
+    TabOrder = 1
+    object Image3: TImage
+      Left = 2
+      Top = 2
+      Width = 119
+      Height = 88
+      Stretch = True
+      OnClick = Image3Click
+      OnMouseMove = Image3MouseMove
+    end
+  end
+  object RadioGroup1: TRadioGroup
+    Left = 84
+    Top = 0
+    Width = 213
+    Height = 33
+    Caption = 'MODE'
+    Columns = 3
+    ItemIndex = 1
+    Items.Strings = (
+      'INSERT'
+      'EDIT'
+      'PMG')
+    TabOrder = 2
+    OnClick = RadioGroup1Click
+  end
+  object LabeledEdit1: TLabeledEdit
+    Left = 360
+    Top = 232
+    Width = 49
+    Height = 21
+    Color = clYellow
+    EditLabel.Width = 48
+    EditLabel.Height = 13
+    EditLabel.Caption = 'Parameter'
+    TabOrder = 3
+    Text = '0'
+    Visible = False
+    OnKeyPress = LabeledEdit1KeyPress
+  end
+  object LabeledEdit2: TLabeledEdit
+    Left = 416
+    Top = 232
+    Width = 42
+    Height = 21
+    Color = clYellow
+    EditLabel.Width = 43
+    EditLabel.Height = 13
+    EditLabel.Caption = 'Group ID'
+    TabOrder = 4
+    Text = '0'
+    Visible = False
+    OnKeyPress = LabeledEdit2KeyPress
+  end
+  object GroupBox1: TGroupBox
+    Left = 752
+    Top = 66
+    Width = 120
+    Height = 132
+    Caption = ' Bonus '
+    TabOrder = 5
+    object CheckBox7: TCheckBox
+      Left = 8
+      Top = 18
+      Width = 97
+      Height = 17
+      Caption = 'Heart'
+      TabOrder = 0
+    end
+    object CheckBox8: TCheckBox
+      Left = 8
+      Top = 36
+      Width = 97
+      Height = 17
+      Caption = 'Shield'
+      TabOrder = 1
+    end
+    object CheckBox9: TCheckBox
+      Left = 8
+      Top = 54
+      Width = 97
+      Height = 17
+      Caption = 'Clock'
+      TabOrder = 2
+    end
+    object CheckBox10: TCheckBox
+      Left = 8
+      Top = 72
+      Width = 105
+      Height = 17
+      Caption = 'Harpon with hook'
+      TabOrder = 3
+    end
+    object CheckBox11: TCheckBox
+      Left = 8
+      Top = 90
+      Width = 97
+      Height = 17
+      Caption = 'Harpoon'
+      TabOrder = 4
+    end
+    object CheckBox12: TCheckBox
+      Left = 8
+      Top = 108
+      Width = 97
+      Height = 17
+      Caption = 'Dynamit'
+      TabOrder = 5
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 752
+    Top = 200
+    Width = 120
+    Height = 70
+    Caption = ' Hero '
+    TabOrder = 6
+    object UpDown1: TUpDown
+      Left = 89
+      Top = 16
+      Width = 21
+      Height = 21
+      Associate = LabeledEdit4
+      Max = 37
+      Orientation = udHorizontal
+      TabOrder = 0
+    end
+    object UpDown2: TUpDown
+      Left = 89
+      Top = 42
+      Width = 21
+      Height = 21
+      Associate = LabeledEdit5
+      Min = 15
+      Max = 0
+      TabOrder = 1
+    end
+    object LabeledEdit4: TLabeledEdit
+      Left = 48
+      Top = 16
+      Width = 41
+      Height = 21
+      EditLabel.Width = 35
+      EditLabel.Height = 13
+      EditLabel.Caption = 'POS X '
+      LabelPosition = lpLeft
+      TabOrder = 2
+      Text = '0'
+      OnChange = LabeledEdit4Change
+      OnEnter = LabeledEdit4Change
+    end
+    object LabeledEdit5: TLabeledEdit
+      Left = 48
+      Top = 42
+      Width = 41
+      Height = 21
+      EditLabel.Width = 35
+      EditLabel.Height = 13
+      EditLabel.Caption = 'POS Y '
+      LabelPosition = lpLeft
+      TabOrder = 3
+      Text = '0'
+      OnChange = LabeledEdit4Change
+      OnEnter = LabeledEdit4Change
+    end
+  end
+  object LabeledEdit3: TLabeledEdit
+    Left = 802
+    Top = 42
+    Width = 41
+    Height = 21
+    EditLabel.Width = 43
+    EditLabel.Height = 13
+    EditLabel.Caption = 'Time limit'
+    LabelPosition = lpLeft
+    ReadOnly = True
+    TabOrder = 7
+    Text = '2'
+  end
+  object UpDown3: TUpDown
+    Left = 843
+    Top = 42
+    Width = 21
+    Height = 21
+    Associate = LabeledEdit3
+    Max = 5
+    Position = 2
+    TabOrder = 8
+  end
+  object GroupBox3: TGroupBox
+    Left = 752
+    Top = 272
+    Width = 121
+    Height = 169
+    Caption = 'PMG Overlay'
+    TabOrder = 9
+    object LabeledEdit6: TLabeledEdit
+      Left = 32
+      Top = 24
+      Width = 29
+      Height = 21
+      EditLabel.Width = 26
+      EditLabel.Height = 13
+      EditLabel.Caption = 'P0_X'
+      LabelPosition = lpLeft
+      TabOrder = 0
+      Text = '20'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object LabeledEdit8: TLabeledEdit
+      Left = 32
+      Top = 72
+      Width = 29
+      Height = 21
+      EditLabel.Width = 26
+      EditLabel.Height = 13
+      EditLabel.Caption = 'P1_X'
+      LabelPosition = lpLeft
+      TabOrder = 1
+      Text = '60'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object LabeledEdit9: TLabeledEdit
+      Left = 32
+      Top = 120
+      Width = 29
+      Height = 21
+      EditLabel.Width = 26
+      EditLabel.Height = 13
+      EditLabel.Caption = 'P2_X'
+      LabelPosition = lpLeft
+      TabOrder = 2
+      Text = '100'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object UpDown4: TUpDown
+      Left = 61
+      Top = 24
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit6
+      Max = 128
+      Orientation = udHorizontal
+      Position = 20
+      TabOrder = 3
+    end
+    object UpDown5: TUpDown
+      Left = 61
+      Top = 72
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit8
+      Max = 128
+      Orientation = udHorizontal
+      Position = 60
+      TabOrder = 4
+    end
+    object UpDown6: TUpDown
+      Left = 61
+      Top = 120
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit9
+      Max = 128
+      Orientation = udHorizontal
+      Position = 100
+      TabOrder = 5
+    end
+    object Panel1: TPanel
+      Tag = 28
+      Left = 92
+      Top = 24
+      Width = 21
+      Height = 41
+      Cursor = crHandPoint
+      TabOrder = 6
+      OnClick = Panel1Click
+    end
+    object Panel2: TPanel
+      Tag = 188
+      Left = 92
+      Top = 72
+      Width = 21
+      Height = 41
+      Cursor = crHandPoint
+      TabOrder = 7
+      OnClick = Panel2Click
+    end
+    object Panel3: TPanel
+      Tag = 248
+      Left = 92
+      Top = 120
+      Width = 21
+      Height = 41
+      Cursor = crHandPoint
+      TabOrder = 8
+      OnClick = Panel3Click
+    end
+    object LabeledEdit7: TLabeledEdit
+      Left = 32
+      Top = 44
+      Width = 29
+      Height = 21
+      EditLabel.Width = 28
+      EditLabel.Height = 13
+      EditLabel.Caption = 'M0_X'
+      LabelPosition = lpLeft
+      TabOrder = 9
+      Text = '52'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object LabeledEdit10: TLabeledEdit
+      Left = 32
+      Top = 92
+      Width = 29
+      Height = 21
+      EditLabel.Width = 28
+      EditLabel.Height = 13
+      EditLabel.Caption = 'M1_X'
+      LabelPosition = lpLeft
+      TabOrder = 10
+      Text = '92'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object LabeledEdit11: TLabeledEdit
+      Left = 32
+      Top = 140
+      Width = 29
+      Height = 21
+      EditLabel.Width = 28
+      EditLabel.Height = 13
+      EditLabel.Caption = 'M2_X'
+      LabelPosition = lpLeft
+      TabOrder = 11
+      Text = '132'
+      OnChange = LabeledEdit6Change
+      OnEnter = LabeledEdit6Change
+    end
+    object UpDown7: TUpDown
+      Left = 61
+      Top = 44
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit7
+      Max = 152
+      Orientation = udHorizontal
+      Position = 52
+      TabOrder = 12
+    end
+    object UpDown8: TUpDown
+      Left = 61
+      Top = 92
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit10
+      Max = 152
+      Orientation = udHorizontal
+      Position = 92
+      TabOrder = 13
+    end
+    object UpDown9: TUpDown
+      Left = 61
+      Top = 140
+      Width = 25
+      Height = 21
+      Associate = LabeledEdit11
+      Max = 152
+      Orientation = udHorizontal
+      Position = 132
+      TabOrder = 14
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = '*.*|*.*|*.tex|*.tex|*.obj|*.obj|*.lev|*.lev'
+    Left = 88
+    Top = 40
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '*.lev'
+    Filter = '*.*|*.*|*.lev|*.lev|*.tex|*.tex'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Left = 120
+    Top = 40
+  end
+  object MainMenu1: TMainMenu
+    Left = 56
+    Top = 40
+    object File1: TMenuItem
+      Caption = 'File'
+      object NewLEVEL1: TMenuItem
+        Caption = 'New LEVEL'
+        ShortCut = 16462
+        OnClick = NewLEVEL1Click
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object LoadTEX1: TMenuItem
+        Caption = 'Load *.TEX'
+        ShortCut = 16468
+        OnClick = LoadTEX1Click
+      end
+      object lOADlev1: TMenuItem
+        Caption = 'Load *.LEV'
+        ShortCut = 16460
+        OnClick = lOADlev1Click
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object SaveTEX1: TMenuItem
+        Caption = 'Save *.TEX'
+        Visible = False
+        OnClick = SaveTEX1Click
+      end
+      object N1: TMenuItem
+        Caption = 'Save *.LEV'
+        ShortCut = 16467
+        OnClick = N1Click
+      end
+    end
+    object Edit1: TMenuItem
+      Caption = 'Edit'
+      object Undo1: TMenuItem
+        Caption = 'Undo'
+        Enabled = False
+        ShortCut = 16474
+        OnClick = Undo1Click
+      end
+      object Redo1: TMenuItem
+        Caption = 'Redo'
+        Enabled = False
+        ShortCut = 24666
+        OnClick = Redo1Click
+      end
+    end
+    object View1: TMenuItem
+      Caption = 'View'
+      object Grid1: TMenuItem
+        Caption = 'Grid'
+        OnClick = Grid1Click
+      end
+    end
+    object PMGOverlay1: TMenuItem
+      Caption = 'PMG Overlay'
+      object Priority11: TMenuItem
+        Caption = 'Priority=1'
+        Checked = True
+        OnClick = Priority11Click
+      end
+      object Priority81: TMenuItem
+        Caption = 'Priority=8'
+        OnClick = Priority81Click
+      end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object Clear1: TMenuItem
+        Caption = 'Clear All'
+        OnClick = Clear1Click
+      end
+    end
+  end
+  object PopupMenu1: TPopupMenu
+    OwnerDraw = True
+    Left = 216
+    Top = 80
+    object Insert1: TMenuItem
+      Caption = 'Paste'
+      OnClick = Insert1Click
+    end
+  end
+  object PopupMenu2: TPopupMenu
+    Left = 256
+    Top = 80
+    object Er1: TMenuItem
+      Caption = 'Bring to Front'
+      OnClick = Er1Click
+    end
+    object SendtoBack1: TMenuItem
+      Caption = 'Send to Back'
+      OnClick = SendtoBack1Click
+    end
+    object N4: TMenuItem
+      Caption = '-'
+    end
+    object SetPMGOverlay1: TMenuItem
+      Caption = 'Add PMG Overlay'
+      OnClick = SetPMGOverlay1Click
+    end
+    object ClrPMGOverlay1: TMenuItem
+      Caption = 'Clr PMG Overlay'
+      OnClick = ClrPMGOverlay1Click
+    end
+    object Parameter1: TMenuItem
+      Caption = 'Parameter'
+      OnClick = Parameter1Click
+    end
+    object Group1: TMenuItem
+      Caption = 'Group ID'
+      OnClick = Group1Click
+    end
+    object Delete2: TMenuItem
+      Caption = '-'
+    end
+    object Copy1: TMenuItem
+      Caption = 'Copy'
+      OnClick = Copy1Click
+    end
+    object N5: TMenuItem
+      Caption = '-'
+    end
+    object Delete1: TMenuItem
+      Caption = 'Delete'
+      OnClick = Delete1Click
+    end
+  end
+end
