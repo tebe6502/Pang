@@ -1,0 +1,55 @@
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="0">
+            <File firstVisibleLine="3392" xOffset="0" scrollWidth="1462" startPos="53533" endPos="53533" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\pang_chars.asm" backupFilePath="C:\Users\tebe\AppData\Roaming\Notepad++\backup\pang_chars.asm@2016-12-13_130738" originalFileLastModifTimestamp="1480880606">
+                <Mark line="841" />
+                <Mark line="864" />
+                <Mark line="1406" />
+                <Mark line="2348" />
+                <Mark line="3112" />
+                <Mark line="3413" />
+                <Mark line="3471" />
+                <Mark line="3562" />
+                <Mark line="3586" />
+                <Mark line="4252" />
+                <Mark line="4350" />
+                <Mark line="4375" />
+                <Mark line="4392" />
+                <Mark line="4554" />
+                <Mark line="5952" />
+            </File>
+            <File firstVisibleLine="97" xOffset="0" scrollWidth="1309" startPos="4654" endPos="4654" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\pang.hea" backupFilePath="" originalFileLastModifTimestamp="1478541133" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1100" startPos="304" endPos="307" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\read_KeyJoy_playRMT.asm" backupFilePath="" originalFileLastModifTimestamp="1480240491">
+                <Mark line="200" />
+            </File>
+            <File firstVisibleLine="232" xOffset="0" scrollWidth="1000" startPos="3830" endPos="3830" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\tour_map\mapa_2.asm" backupFilePath="" originalFileLastModifTimestamp="1479429889" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="816" startPos="310" endPos="313" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\title_2\logo_2.asq" backupFilePath="" originalFileLastModifTimestamp="1479627251">
+                <Mark line="2735" />
+            </File>
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1144" startPos="886" endPos="889" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\init_2.asm" backupFilePath="" originalFileLastModifTimestamp="1459173958" />
+            <File firstVisibleLine="475" xOffset="0" scrollWidth="1120" startPos="7872" endPos="7876" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\collisions.asm" backupFilePath="" originalFileLastModifTimestamp="1481630692">
+                <Mark line="386" />
+            </File>
+            <File firstVisibleLine="48" xOffset="0" scrollWidth="1229" startPos="733" endPos="737" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\gwiazdki\stars_2.asm" backupFilePath="" originalFileLastModifTimestamp="1472578477" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1078" startPos="54" endPos="54" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\bonus.asm" backupFilePath="" originalFileLastModifTimestamp="1472725074" />
+            <File firstVisibleLine="112" xOffset="0" scrollWidth="1526" startPos="5936" endPos="5939" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\frm_left.asm" backupFilePath="" originalFileLastModifTimestamp="1478541281" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1110" startPos="759" endPos="759" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\frm_death.asm" backupFilePath="" originalFileLastModifTimestamp="1478733557" />
+            <File firstVisibleLine="316" xOffset="0" scrollWidth="1381" startPos="9672" endPos="9672" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\frm_right.asm" backupFilePath="" originalFileLastModifTimestamp="1478541292" />
+            <File firstVisibleLine="66" xOffset="0" scrollWidth="1399" startPos="4255" endPos="4255" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\frm_updw.asm" backupFilePath="" originalFileLastModifTimestamp="1478079047" />
+            <File firstVisibleLine="477" xOffset="0" scrollWidth="1177" startPos="8922" endPos="8926" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\harpuns.asm" backupFilePath="" originalFileLastModifTimestamp="1260283270" />
+            <File firstVisibleLine="52" xOffset="0" scrollWidth="924" startPos="1012" endPos="1012" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\mem_detect.asm" backupFilePath="" originalFileLastModifTimestamp="1478385250">
+                <Mark line="0" />
+            </File>
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1232" startPos="425" endPos="425" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\game_over_winner\GameOver.asm" backupFilePath="" originalFileLastModifTimestamp="1480870096">
+                <Mark line="43" />
+                <Mark line="601" />
+                <Mark line="753" />
+                <Mark line="893" />
+            </File>
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1000" startPos="43" endPos="43" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\game_over_winner\PangWinner.asm" backupFilePath="" originalFileLastModifTimestamp="1478031889" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1390" startPos="180" endPos="180" selMode="0" lang="Zwyk&#x0142;y tekst" encoding="-1" filename="D:\!Atari\Pang_2\README\UWAGI.txt" backupFilePath="" originalFileLastModifTimestamp="1481630618" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="328" startPos="0" endPos="0" selMode="0" lang="mads" encoding="-1" filename="D:\!Atari\Pang_2\datamatrix\example-atari.asx" backupFilePath="" originalFileLastModifTimestamp="1480879742" />
+        </mainView>
+        <subView activeIndex="0" />
+    </Session>
+</NotepadPlus>

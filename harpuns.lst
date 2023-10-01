@@ -1,0 +1,1966 @@
+mads 2.1.6 build 71 (9 Aug 23)
+Source: harpuns.asm
+     1
+     2 				/*******************************************************************************************
+     3
+     4 				  HARPUNS (08.12.2008)
+     5
+     6 				*******************************************************************************************/
+     6
+     7
+     8 					icl 'pang.hea'
+Source: pang.hea
+     1
+     2 				// tablica ze starszymi bajtami adresów zestawów znakowych (19 zestawów)
+     3
+     4  [0000] 10 14 18 1C C0 + .put = $10,$14,$18,$1c,$c0,$c4,$c8,$cc,$e0,$e4,$e8,$ec,$f0,$f4,$f8,$fc,$28,$2c,$30, $30
+     5
+     6 				//---------------------------------------------------------------------------------------------------------------------
+     7
+     8 = 000C			banks	= 12
+     9
+    10 = 0020			defaultPrior	= $20		; domyœlny piorytet duchów "Multicolor PMG + PRIOR $00"
+    11
+    12 = 0000			pmgB1	= $0000
+    13 = 2000			pmgB2	= $2000			; $2300..$27FF
+    14
+    15 = 0700			pmStar	= $700			; duch dla harpunu i gwiazdki
+    16
+    17 = 0400			pmHero0	= $400			; !!! pmHero0, pmHero1 !!! para - 4 kolorowy duch
+    18 = 0500			pmHero1	= $500
+    19 = 0600			pmHero2	= $600			; ten duch nie ma pary
+    20
+    21 = 0700			pmHero3 = pmStar
+    22
+    23 = 00C0			missile_mask = [3<<[(pmHero0-$400)/$75]+3<<[(pmHero1-$400)/$75]+3<<[(pmHero2-$400)/$75]]^$ff
+    24
+    25 = 000F			starsBright = $0f
+    26
+    27 = 00F0			sfx_default_volume	= $f0
+    28 = 00F0			msx_default_volume	= $f0
+    29
+    30
+    31 = 2000			inflate_data	= pmgB2		; 3 strony dla dekompresora
+    32
+    33 = 0800			clrWallIDX	= $0800		; tablica clrWallIDX[wallIDX]=$8x z indeksami do killWall
+    34 = 0880			clrWallPOS	= $0880
+    35 = 0900			killWall	= $0900
+    36
+    37 = 0A00			volume_slide	= $0a00		; tablica g³oœnoœci dla RMT
+    38
+    39 = 0B00			min52div4	= $0b00
+    40
+    41 = 0C00			drabin		= $0c00		; $0c00..$0fff, informacja o drabinkach
+    42
+    43 = 9B40			txture		= $9b40		; $9b40..$b6ff
+    44 = B300			invers		= txture+152*40	; mapa kolizji dla harpunu i kul, tymczasowo takze informacja o inversie znaków
+    45 = B700			colors		= invers+1024	; informacja o kolorach (5*19)
+    46
+    47 				// !!! ostatnie 48 bajtów INVERS zawsze wyzerowane !!!
+    48
+    49 = B800			fntPnl		= $b800		; $B800..$BFFF - dwa zestawy znaków dla panelu gry
+    50
+    51 				; znaki zajmuj¹ pamiêæ $1000..$1FFF, $C000..$CFFF i $E000..$FFFF
+    52 				; pierwsze 64 znaki to bufor #1, drugie 64 znaki to bufor #2
+    53 				; z ka¿dego bufora tylko pierwsze 40 znaków jest modyfikowane, reszta jest do wykorzystania
+    54
+    55 = FFE0			mainIntro	= $ffe0		; zmienne pomocnicze dla intra i gry
+    56 = FFE3			msxPlay		= $ffe3
+    57 = FFE6			msxStop		= $ffe6
+    58 = FFE9			select		= $ffe9
+    59
+    60 				//---------------------------------------------------------------------------------------------------------------------
+    61
+    62 = 00F0			dolnakrawedz	= 240		; dolna krawedz ekranu - wspó³rzedna Y
+    63
+    64 = 003D			pmg_overlay	= dolnakrawedz-19*8-23-4
+    65
+    66 = 0030			scrwid	= 48
+    67
+    68 = 0013			scrhig	= 19
+    69
+    70 = 000F			spacja		= 15
+    71
+    72 = 0028			pustak		= 40		; pierwszy wolny znak do wykorzystania '40'
+    73 = 00A9			murek0		= 41+$80
+    74 = 00E8			murek1		= 104+$80
+    75 = 00E9			murek2		= 105+$80
+    76
+    77 = 00AA			murL0		= 42+$80	; drugi rodzaj murku, w stylu Pang-a C64
+    78 = 00AB			murM0		= 43+$80
+    79 = 00AC			murR0		= 44+$80
+    80 = 00AD			mur0		= 45+$80
+    81
+    82 = 003A			bonus0		= 58		; znaki wykorzystywane przez bonus-y (wiersz 0)
+    83 = 003B			bonus1		= 59
+    84 = 003C			bonus2		= 60
+    85
+    86 = 003D			bonus3		= 61		; znaki wykorzystywane przez bonus-y (wiersz 1)
+    87 = 003E			bonus4		= 62
+    88 = 003F			bonus5		= 63
+    89
+    90 = 00A9			okalajacy	= murek0
+    91
+    92 				//---------------------------------------------------------------------------------------------------------------------
+    93 				/*
+    94 				dwukropek_u	= $46
+    95 				dwukropek_d	= $7e
+    96
+    97 				prawy_nawias0	= $29aa00
+    98 				prawy_nawias1	= $004d4e
+    99 				prawy_nawias2	= $00a3a4
+   100 				prawy_nawias3	= $626300
+   101
+   102 				lives_chr_00	= 44		; pierwszy wiersz z licznikiem zyc
+   103 				lives_chr_01	= 45
+   104 				lives_chr_02	= 46
+   105
+   106 				lives_chr_10	= 2		; drugi wiersz z licznikiem zyc
+   107 				lives_chr_11	= 3
+   108 				lives_chr_12	= 4
+   109 				*/
+   109
+   110 				//---------------------------------------------------------------------------------------------------------------------
+   111
+   112 = 0030			@end_delay	= 48		; czas wybrzmiewania muzyki dla smierci bohatera
+   113
+   114 = 0008			hook_delay	= 8		; <> [0..1]
+   115 = 0080			hook_time_limit = 128		; czas trwania harpunu z hakiem (=128 w celu wykorzystania BPL)
+   116
+   117 = 0078			shield_time_limit= 120		; czas trwania SHIELD
+   118 = 006E			clock_time_limit = 110		; czas trwania CLOCK
+   119
+   120 = 005C			hero_pmg_offset	= 120-16-8-4	; przesuniecie PMG przykrywaj¹cego bohatera
+   121
+   122 = 003D			harpun_pmg_offset = 89-16-8-4	; przesuniecie PMG podbarwiajace harpun
+   123
+   124 				;panel_pmg_offset= 21-4		; przesuniecie PMG podbarwiajacego panel
+   125
+   126 				//---------------------------------------------------------------------------------------------------------------------
+   127
+   128 = 0016			balls_limit		= 22	; maksymalna dopuszczalna liczba najmniejszych kul w trybie PANIC MODE
+   129
+   130 = 0002			max_bonus_counter	= 2	; maksymalna liczba wyst¹pieñ bonusu
+   131
+   132 				//---------------------------------------------------------------------------------------------------------------------
+   133
+   134 = 0010			sfxBum	= $10		; wybuch balonu
+   135 = 0011			sfxDie	= $11		; œmieræ bohatera
+   136 = 0012			sfxHrp	= $12		; wystrzelenie harpunu
+   137 = 0013			sfxHrpS = $13		; harpun trafia w twardy murek
+   138 = 0014			sfxHrpH = $14		; harpun trafia w miêkki murek
+   139 = 0015			sfxHrpX = $15		; harpun zostaje zaczepiony
+   140 = 0016			sfxBon	= $16		; zebranie bonusu
+   141
+   142 = 0024			ton_C4	= 36
+   143 = 0030			ton_C5	= 48
+   144 = 0011			ton_G2	= 17
+   145 = 001F			ton_G3	= 31
+   146 = 002B			ton_G4	= 43
+   147
+   148 				.enum	msxCode
+   149 					Title, GameOver, Congratulations ,Game0, Game1, Game2, Game3, jingle0, jingle1, jingle2
+   149 = 0000			TITLE
+   149 = 0001			GAMEOVER
+   149 = 0002			CONGRATULATIONS
+   149 = 0003			GAME0
+   149 = 0004			GAME1
+   149 = 0005			GAME2
+   149 = 0006			GAME3
+   149 = 0007			JINGLE0
+   149 = 0008			JINGLE1
+   149 = 0009			JINGLE2
+   150 				.ende
+   151
+   152 				//---------------------------------------------------------------------------------------------------------------------
+   153
+   154 				.enum	bonusCode
+   155 					heart = 1, shield, clock, harpun_h, harpun, tnt
+   155 = 0001			HEART
+   155 = 0002			SHIELD
+   155 = 0003			CLOCK
+   155 = 0004			HARPUN_H
+   155 = 0005			HARPUN
+   155 = 0006			TNT
+   156 				.ende
+   157
+   158 				.enum	deathCode
+   159 					no_power = 1, esc_key, no_time, panic_stop
+   159 = 0001			NO_POWER
+   159 = 0002			ESC_KEY
+   159 = 0003			NO_TIME
+   159 = 0004			PANIC_STOP
+   160 				.ende
+     9
+    10
+    11 = 0000				.extrn clrHrp.min clrHrp.max pmgB hr0 bufor .byte
+    12
+    13 = 0000				.extrn harp0.x harp0.y harp0.y_old hinv0 hinv1 wallIDX .byte
+    14 = 0000				.extrn harp0.cnt harp0.startDIV8 harp0.hook harpun hrpA hrpY .byte
+    15
+    16 = 0000				.extrn scr1 scr2 HERO.return HERO.quit CLRHARP.return CLRHARP.setPMClear __hposm3 .word
+    17 = 0000				.extrn nmi.sfx_effect nmi.note gtia clrWall.skip .word
+    18
+    19 = 0000				.extrn PlaySfx .proc (.byte PlaySfx.note, PlaySfx.fx) .var
+    20 = 0000				.extrn PlaySfx.note PlaySfx.fx .word
+    21
+    22 					.public HARPUNS clrHARP1 clrHARP2 min88div8 hak
+    23
+    24
+    25 FFFF> 01,0000-0C93> 4D + 	.RELOC
+    26
+    27 01,0000 F5 F6 F6 F6 F6 + min88div8	:256 dta b([#-88]/8)
+    28
+    29 01,0100				.pages
+    30
+    31 01,0100 7F 04 B5 04 EB + lhclrpm1	:scrhig dta a(clrHARP1.clrpmB1+#*pmLen)		; !!! koniecznie od pocz¹tku strony pamiêci
+    32
+    33 01,0126 30 34 38 3C 40 + hposp	:40 dta #*4+52-4
+    34
+    35 01,014E 00 04 08 0C 10 + mul4	:40 dta #*4
+    36
+    37 01,0176 10 14 18 1C C0 + tfonts	.sav scrhig
+    38
+    39 01,0189 04 04 04 A4 04 + tfontsAdd :scrhig dta b(.get[#+1]-.get[#])
+    40
+    41 01,019C 00 08 10 18 20 + mul8	:scrhig dta #*8
+    42
+    43 01,01AF 58 60 68 70 78 + tdolna	:scrhig dta [dolnakrawedz-[scrhig-#]*8]
+    44
+    45 01,01C2 04 34 64 94 C4 + ltest	:scrhig dta l(invers+#*scrwid+4)
+    46 01,01D5 B3 B3 B3 B3 B3 + htest	:scrhig dta h(invers+#*scrwid+4)
+    47
+    48 01,01E8				.endpg
+    49
+    50
+    51 01,01E8 00 00 00 00 00 + 	.align $100,0
+    52
+    53 01,0200 8F 08 C5 08 FB + lhclrpm2	:scrhig dta a(clrHARP2.clrpmB2+#*pmLen)
+    54
+    55
+    56 				* -----------------------------------------------------------------------------
+    57 				* -----------------------------------------------------------------------------
+    58
+    59
+    60 = 01,003D			?ofs = harpun_pmg_offset	; ofset dla zapisywanych danych PMG
+    61
+    62  [0100] 00			.put[$100] = %00000000		; kszta³t danych PMG dla grotu
+    63  [0101] 10			.put[$101] = %00010000
+    64  [0102] 18			.put[$102] = %00011000
+    65  [0103] 00			.put[$103] = %00000000
+    66  [0104] 00			.put[$104] = %00000000
+    67  [0105] 08			.put[$105] = %00001000
+    68  [0106] 04			.put[$106] = %00000100
+    69  [0107] 00			.put[$107] = %00000000
+    70
+    71  [0110] 00			.put[$110] = %00000000		; dla harpunu
+    72  [0111] 00			.put[$111] = %00000000
+    73  [0112] 20			.put[$112] = %00100000
+    74  [0113] 20			.put[$113] = %00100000
+    75  [0114] 20			.put[$114] = %00100000
+    76  [0115] 18			.put[$115] = %00011000
+    77  [0116] 04			.put[$116] = %00000100
+    78  [0117] 00			.put[$117] = %00000000
+    79
+    80 				* -----------------------------------------------------------------------------
+    81 				* -----------------------------------------------------------------------------
+    82
+    83 				* ----------------------------
+    84 				* ---	HARPUN #0
+    85 				* ----------------------------
+    86 01,0226			HARPUNS
+    87 01,0226 BE 00 0B			ldx min52div4,y		; HARPUN #0
+    88
+    89 01,0229 BD 26 01			lda hposp,x
+    90 01,022C 8D 00 00			sta __hposm3
+    91 				;	add #2
+    92 				;	sta hposm2
+    93
+    94 01,022F A4 00			ldy harp0.y
+    95 01,0231 B9 00 00			lda min88div8,y
+    96 01,0234 A8			tay
+    97 01,0235 88			dey
+    98
+    99 01,0236 8C D0 03			sty quit+1
+   100 01,0239 84 00			sty harp0.cnt
+   101
+   102 01,023B A9 FF			lda	#$ff	;defaultPrior
+   103 				;	sta	gtia+1		; przywróæ piorytet inaczej harpun bêdzie kiepsko wygl¹daæ
+   104
+   105 				//-----------------------------------------------------------------------------
+   106
+   107 01,023D D0 7E		hak	bne skip
+   108
+   109 01,023F E6 00			inc harp0.hook
+   110 				;	lda harp0.hook
+   111 				;	cmp #hook_time_limit
+   112 				;	bcc __s
+   113 01,0241 10 0B			bpl __s
+   114
+   115 01,0243 A9 D0 8D 3D 02		mva #{bne} hak
+   116
+   117 01,0248 A9 08 85 00		mva #hook_delay harp0.hook
+   118 01,024C D0 37			bne hookOff
+   119
+   120 01,024E BD 4E 01		__s	lda mul4,x
+   121 01,0251 0A			asl @		; tutaj dokonujemy sztuczki z bitem C
+   122 01,0252 85 00			sta hr0
+   123
+   124 01,0254 B9 76 01			lda tfonts,y
+   125 01,0257 65 00			adc bufor	; tutaj wykorzystujemy bit C
+   126 01,0259 85 01			sta hr0+1
+   127
+   128 01,025B 4C 6D 03			jmp cnt
+   129
+   130 				//-----------------------------------------------------------------------------
+   131
+   132 01,025E AA		killH0	tax
+   133 01,025F 10 2F			bpl killH0.clrPM
+   134
+   135 01,0261 AC 01 00			ldy clrWall.skip+1		; jeœli aktualnie usuwamy murek to nie dopiszemy nastêpnego
+   136 01,0264 D0 2A			bne killH0.clrPM
+   137
+   138 01,0266 9D 00 09			sta killWall,x			; HARPUN #0 trafi³ w miêkki murek
+   139
+   140 01,0269 A6 00			ldx wallIDX
+   141 01,026B 9D 00 08			sta clrWallIDX,x
+   142
+   143 					PlaySfx #ton_G3 #sfxHrpS	; odg³os harpunu trafiaj¹cego w miêkki murek
+   143 				 MVA #TON_G3 PLAYSFX.NOTE\ MVA #SFXHRPS PLAYSFX.FX\ JSR PLAYSFX
+   143 01,026E A9 1F 8D 00 00	 MVA #TON_G3 PLAYSFX.NOTE
+   143 01,0273 A9 13 8D 00 00	 MVA #SFXHRPS PLAYSFX.FX
+   143 01,0278 20 00 00		 JSR PLAYSFX
+   144
+   145 01,027B A4 00			ldy harp0.x
+   146 01,027D B9 00 0B			lda min52div4,y
+   147 01,0280 9D 80 08			sta clrWallPOS,x
+   148
+   149 01,0283 E6 00			inc wallIDX
+   150
+   151 01,0285 A5 00 85 00	hookOff	mva harp0.x harpun		; czyœcimy HARPUN #0 na ca³ej wysokoœci ekranu
+   152 01,0289 A9 00 85 00		mva #0 harp0.x			; blokujemy dalsze tworzenie tego harpunu
+   153 01,028D 4C 00 00			jmp HERO.quit
+   154
+   155 01,0290			killH0.clrPM
+   156
+   157 01,0290 A5 00			lda harp0.hook
+   158 01,0292 F0 19			beq hskp
+   159
+   160 					PlaySfx #ton_G2 #sfxHrpX	; odg³os harpunu z hakiem zaczepianego o twardy murek
+   160 				 MVA #TON_G2 PLAYSFX.NOTE\ MVA #SFXHRPX PLAYSFX.FX\ JSR PLAYSFX
+   160 01,0294 A9 11 8D 00 00	 MVA #TON_G2 PLAYSFX.NOTE
+   160 01,0299 A9 15 8D 00 00	 MVA #SFXHRPX PLAYSFX.FX
+   160 01,029E 20 00 00		 JSR PLAYSFX
+   161
+   162 01,02A1 A9 08 85 00		mva #hook_delay harp0.hook
+   163 01,02A5 A9 F0 8D 3D 02		mva #{beq} hak
+   164 01,02AA 4C 00 00			jmp HERO.quit
+   165
+   166 				hskp	PlaySfx #ton_G2 #sfxHrpH	; odg³os harpunu trafiaj¹cego w twardy murek
+   166 				 MVA #TON_G2 PLAYSFX.NOTE\ MVA #SFXHRPH PLAYSFX.FX\ JSR PLAYSFX
+   166 01,02AD A9 11 8D 00 00	 MVA #TON_G2 PLAYSFX.NOTE
+   166 01,02B2 A9 14 8D 00 00	 MVA #SFXHRPH PLAYSFX.FX
+   166 01,02B7 20 00 00		 JSR PLAYSFX
+   167
+   168 01,02BA 4C 00 00			jmp CLRHARP.setPMClear
+   169
+   170 				//-----------------------------------------------------------------------------
+   171
+   172 01,02BD B9 C2 01 8D CA + skip	mva ltest,y _test+1
+   173 01,02C3 B9 D5 01 8D CB + 	mva htest,y _test+2
+   174
+   175 01,02C9 BD FF FF		_test	lda $ffff,x
+   176 01,02CC D0 90			bne killH0
+   177
+   178 				//-----------------------------------------------------------------------------
+   179 				//	obs³uga GROTU harpunu #0
+   180 				//-----------------------------------------------------------------------------
+   181
+   182 01,02CE B9 9C 01			lda mul8,y
+   183 01,02D1 8D 24 03			sta pmgGROT1.py+1
+   184
+   185 01,02D4 BD 4E 01			lda mul4,x
+   186 01,02D7 0A			asl @		; tutaj dokonujemy sztuczki z bitem C
+   187 01,02D8 85 00			sta hr0
+   188
+   189 01,02DA B9 76 01			lda tfonts,y
+   190 01,02DD 65 00			adc bufor	; tutaj wykorzystujemy bit C
+   191
+   192 01,02DF 85 01			sta hr0+1
+   193
+   194 01,02E1 B9 AF 01			lda tdolna,y
+   195 01,02E4 85 00			sta harp0.y_old
+   196
+   197 				;	ldy bufor
+   198 				;	sne
+   199 01,02E6 85 00			sta harp0.y
+   200
+   201 01,02E8 A0 00			ldy #0
+   202
+   203 01,02EA				@@GROT
+Macro: @@GROT [Source: harpuns.asm]
+     1 01,02EA B1 00			lda (hr0),y
+     2 01,02EC 29 F3			and #%11110011
+     4 01,02EE 91 00			sta (hr0),y
+     6 01,02F0 C8			iny
+     7 01,02F1 B1 00			lda (hr0),y
+     8 01,02F3 29 F3			and #%11110011
+     9 01,02F5 09 08			ora #%00001000
+    10 01,02F7 91 00			sta (hr0),y
+    12 01,02F9 C8			iny
+    13 01,02FA B1 00			lda (hr0),y
+    14 01,02FC 29 C0			and #%11000000
+    15 01,02FE 09 02			ora #%00000010
+    16 01,0300 91 00			sta (hr0),y
+    18 01,0302 C8			iny
+    19 01,0303 B1 00			lda (hr0),y
+    20 01,0305 29 C0			and #%11000000
+    21 01,0307 09 26			ora #%00100110
+    22 01,0309 91 00			sta (hr0),y
+    24 01,030B C8			iny
+    25 01,030C A9 14			lda #%00010100
+    26 01,030E 91 00			sta (hr0),y
+    28 01,0310 C8			iny
+    29 01,0311 A9 91			lda #%10010001
+    30 01,0313 91 00			sta (hr0),y
+    32 01,0315 C8			iny
+    33 01,0316 A9 AA			lda #%10101010
+    34 01,0318 91 00			sta (hr0),y
+    36 01,031A C8			iny
+    37 01,031B B1 00			lda (hr0),y
+    38 01,031D 29 C3			and #%11000011
+    39 01,031F 09 20			ora #%00100000
+    40 01,0321 91 00			sta (hr0),y
+Source: harpuns.asm
+   204
+   205 01,0323			.local	pmgGROT1
+   206
+   207 01,0323 A0 00		py	ldy #0
+   208
+   209 01,0325 A5 00			lda pmgB
+   210 01,0327 C9 00			cmp >pmgB1
+   211 01,0329 F0 22			beq FILLB2
+   212
+   213 01,032B			FILLB1
+   214 01,032B				@@pmgGROT pmgB1
+Macro: @@PMGGROT [Source: harpuns.asm]
+     1 01,032B B9 3F 03			lda PMGB1+$300+2+?ofs,y
+     2 01,032E 09 40			ora #%01<<[(pmStar-$400)/$75]
+     3 01,0330 99 3F 03			sta PMGB1+$300+2+?ofs,y
+     5 01,0333 B9 40 03			lda PMGB1+$300+3+?ofs,y
+     6 01,0336 09 40			ora #%01<<[(pmStar-$400)/$75]
+     7 01,0338 99 40 03			sta PMGB1+$300+3+?ofs,y
+     9 01,033B B9 41 03			lda PMGB1+$300+4+?ofs,y
+    10 01,033E 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    11 01,0340 99 41 03			sta PMGB1+$300+4+?ofs,y
+    13 01,0343 B9 42 03			lda PMGB1+$300+5+?ofs,y
+    14 01,0346 09 40			ora #%01<<[(pmStar-$400)/$75]
+    15 01,0348 99 42 03			sta PMGB1+$300+5+?ofs,y
+Source: harpuns.asm
+   215
+   216 01,034B D0 20			bne cnt
+   217
+   218 01,034D			FILLB2
+   219 01,034D				@@pmgGROT pmgB2
+Macro: @@PMGGROT [Source: harpuns.asm]
+     1 01,034D B9 3F 23			lda PMGB2+$300+2+?ofs,y
+     2 01,0350 09 40			ora #%01<<[(pmStar-$400)/$75]
+     3 01,0352 99 3F 23			sta PMGB2+$300+2+?ofs,y
+     5 01,0355 B9 40 23			lda PMGB2+$300+3+?ofs,y
+     6 01,0358 09 40			ora #%01<<[(pmStar-$400)/$75]
+     7 01,035A 99 40 23			sta PMGB2+$300+3+?ofs,y
+     9 01,035D B9 41 23			lda PMGB2+$300+4+?ofs,y
+    10 01,0360 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    11 01,0362 99 41 23			sta PMGB2+$300+4+?ofs,y
+    13 01,0365 B9 42 23			lda PMGB2+$300+5+?ofs,y
+    14 01,0368 09 40			ora #%01<<[(pmStar-$400)/$75]
+    15 01,036A 99 42 23			sta PMGB2+$300+5+?ofs,y
+Source: harpuns.asm
+   220
+   221 				.endl
+   222
+   223
+   224 				//-----------------------------------------------------------------------------
+   225
+   226
+   227 01,036D E6 00		cnt	inc harp0.cnt
+   228 01,036F A4 00			ldy harp0.cnt
+   229 01,0371 C4 00			cpy harp0.startDIV8
+   230 01,0373 B0 5A			bcs quit
+   231
+   232 				//-----------------------------------------------------------------------------
+   233 				//	obs³uga harpunu #0
+   234 				//-----------------------------------------------------------------------------
+   235
+   236 01,0375 B9 9C 01		hloop	lda mul8,y
+   237 01,0378 8D F5 03			sta pmgHARP1.py+1
+   238
+   239 01,037B A5 01			lda hr0+1
+   240 01,037D 18 79 88 01		add tfontsADD-1,y
+   241 01,0381 85 01			sta hr0+1
+   242 				/*
+   243 					lda mul4,x
+   244 					asl @		; tutaj dokonujemy sztuczki z bitem C
+   245
+   246 					lda tfonts,y
+   247 					adc bufor	; tutaj wykorzystujemy bit C
+   248
+   249 					sta hr0+1
+   250 				*/
+   250
+   251
+   252 01,0383 A0 00			ldy #0
+   253
+   254 01,0385				@@HARP
+Macro: @@HARP [Source: harpuns.asm]
+     1 01,0385 B1 00			lda (hr0),y
+     2 01,0387 29 F0			and #%11110000
+     3 01,0389 09 0A			ora #%00001010
+     4 01,038B 91 00			sta (hr0),y
+     6 01,038D C8			iny
+     7 01,038E B1 00			lda (hr0),y
+     8 01,0390 29 C0			and #%11000000
+     9 01,0392 09 28			ora #%00101000
+    10 01,0394 91 00			sta (hr0),y
+    12 01,0396 C8			iny
+    13 01,0397 B1 00			lda (hr0),y
+    14 01,0399 29 03			and #%00000011
+    15 01,039B 09 98			ora #%10011000
+    16 01,039D 91 00			sta (hr0),y
+    18 01,039F C8			iny
+    19 01,03A0 A9 12			lda #%00010010
+    20 01,03A2 91 00			sta (hr0),y
+    22 01,03A4 C8			iny
+    23 01,03A5 A9 84			lda #%10000100
+    24 01,03A7 91 00			sta (hr0),y
+    26 01,03A9 C8			iny
+    27 01,03AA B1 00			lda (hr0),y
+    28 01,03AC 29 C0			and #%11000000
+    29 01,03AE 09 28			ora #%00101000
+    30 01,03B0 91 00			sta (hr0),y
+    32 01,03B2 C8			iny
+    33 01,03B3 B1 00			lda (hr0),y
+    34 01,03B5 29 F0			and #%11110000
+    35 01,03B7 09 02			ora #%00000010
+    36 01,03B9 91 00			sta (hr0),y
+    38 01,03BB C8			iny
+    39 01,03BC B1 00			lda (hr0),y
+    40 01,03BE 29 FC			and #%11111100
+    41 01,03C0 09 02			ora #%00000010
+    42 01,03C2 91 00			sta (hr0),y
+Source: harpuns.asm
+   255
+   256 01,03C4 20 F4 03			jsr pmgHARP1
+   257
+   258 01,03C7 E6 00			inc harp0.cnt
+   259 01,03C9 A4 00			ldy harp0.cnt
+   260 01,03CB C4 00			cpy harp0.startDIV8
+   261 01,03CD 90 A6			bcc hloop
+   262
+   263 				* -----------------------------------------------------------------------------
+   264
+   265 01,03CF A9 FF		quit	lda #$ff
+   266 01,03D1 D0 1E			bne skp
+   267
+   268 01,03D3 A5 00			lda harp0.y
+   269 01,03D5 C5 00			cmp harp0.y_old
+   270 01,03D7 D0 18			bne skp
+   271 				/*
+   272 					lda harp0.hook
+   273 					beq _hskp
+   274 					
+   275 					PlaySfx #ton_G2 #sfxHrpX	; odg³os harpunu z hakiem trafiaj¹cy w twardy murek
+   276
+   277 					mva #hook_delay harp0.hook
+   278 					mva #{beq} hak
+   279 					jmp HERO.quit
+   280
+   281 				_hskp
+   282 				*/
+   282
+   283 					PlaySfx #ton_G2 #sfxHrpH	; odg³os harpunu trafiaj¹cego w twardy murek
+   283 				 MVA #TON_G2 PLAYSFX.NOTE\ MVA #SFXHRPH PLAYSFX.FX\ JSR PLAYSFX
+   283 01,03D9 A9 11 8D 00 00	 MVA #TON_G2 PLAYSFX.NOTE
+   283 01,03DE A9 14 8D 00 00	 MVA #SFXHRPH PLAYSFX.FX
+   283 01,03E3 20 00 00		 JSR PLAYSFX
+   284
+   285 01,03E6 A5 00 85 00		mva harp0.x harpun	; czyœcimy HARPUN #0 na ca³ej wysokoœci ekranu
+   286 01,03EA A9 00 85 00		mva #0 harp0.x		; blokujemy dalsze tworzenie tego harpunu
+   287
+   288 				;	sta __hposm3
+   289 01,03EE 4C 00 00			jmp HERO.quit
+   290
+   291 01,03F1 4C 00 00		skp	jmp HERO.return
+   292
+   293
+   294 				* -----------------------------------------------------------------------------
+   295
+   296 01,03F4			.local	pmgHARP1
+   297
+   298 01,03F4 A0 00		py	ldy #0
+   299
+   300 01,03F6 A5 00			lda pmgB
+   301 01,03F8 C9 00			cmp >pmgB1
+   302 01,03FA F0 3C			beq FILLB2
+   303
+   304 01,03FC			FILLB1
+   305 01,03FC				@@pmgHARP pmgB1
+Macro: @@PMGHARP [Source: harpuns.asm]
+     1 01,03FC B9 3E 03			lda PMGB1+$300+1+?ofs,y
+     2 01,03FF 29 C0			and #missile_mask
+     3 01,0401 D0 34			bne skip
+     5 01,0403 B9 3E 03			lda PMGB1+$300+1+?ofs,y	
+     6 01,0406 09 40			ora #%01<<[(pmStar-$400)/$75]
+     7 01,0408 99 3E 03			sta PMGB1+$300+1+?ofs,y
+     9 01,040B B9 3F 03			lda PMGB1+$300+2+?ofs,y
+    10 01,040E 29 3F			and #missile_mask^$ff
+    11 01,0410 09 80			ora #%10<<[(pmStar-$400)/$75]
+    12 01,0412 99 3F 03			sta PMGB1+$300+2+?ofs,y
+    14 01,0415 B9 40 03			lda PMGB1+$300+3+?ofs,y
+    15 01,0418 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    16 01,041A 99 40 03			sta PMGB1+$300+3+?ofs,y
+    18 01,041D B9 41 03			lda PMGB1+$300+4+?ofs,y
+    19 01,0420 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    20 01,0422 99 41 03			sta PMGB1+$300+4+?ofs,y
+    22 01,0425 B9 42 03			lda PMGB1+$300+5+?ofs,y
+    23 01,0428 29 3F			and #missile_mask^$ff
+    24 01,042A 09 40			ora #%01<<[(pmStar-$400)/$75]
+    25 01,042C 99 42 03			sta PMGB1+$300+5+?ofs,y
+    27 01,042F B9 43 03			lda PMGB1+$300+6+?ofs,y
+    28 01,0432 09 40			ora #%01<<[(pmStar-$400)/$75]
+    29 01,0434 99 43 03			sta PMGB1+$300+6+?ofs,y
+    30 01,0437			skip
+Source: harpuns.asm
+   306 01,0437 60			rts
+   307
+   308 01,0438			FILLB2
+   309 01,0438				@@pmgHARP pmgB2
+Macro: @@PMGHARP [Source: harpuns.asm]
+     1 01,0438 B9 3E 23			lda PMGB2+$300+1+?ofs,y
+     2 01,043B 29 C0			and #missile_mask
+     3 01,043D D0 34			bne skip
+     5 01,043F B9 3E 23			lda PMGB2+$300+1+?ofs,y	
+     6 01,0442 09 40			ora #%01<<[(pmStar-$400)/$75]
+     7 01,0444 99 3E 23			sta PMGB2+$300+1+?ofs,y
+     9 01,0447 B9 3F 23			lda PMGB2+$300+2+?ofs,y
+    10 01,044A 29 3F			and #missile_mask^$ff
+    11 01,044C 09 80			ora #%10<<[(pmStar-$400)/$75]
+    12 01,044E 99 3F 23			sta PMGB2+$300+2+?ofs,y
+    14 01,0451 B9 40 23			lda PMGB2+$300+3+?ofs,y
+    15 01,0454 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    16 01,0456 99 40 23			sta PMGB2+$300+3+?ofs,y
+    18 01,0459 B9 41 23			lda PMGB2+$300+4+?ofs,y
+    19 01,045C 09 C0			ora #%11<<[(pmStar-$400)/$75]
+    20 01,045E 99 41 23			sta PMGB2+$300+4+?ofs,y
+    22 01,0461 B9 42 23			lda PMGB2+$300+5+?ofs,y
+    23 01,0464 29 3F			and #missile_mask^$ff
+    24 01,0466 09 40			ora #%01<<[(pmStar-$400)/$75]
+    25 01,0468 99 42 23			sta PMGB2+$300+5+?ofs,y
+    27 01,046B B9 43 23			lda PMGB2+$300+6+?ofs,y
+    28 01,046E 09 40			ora #%01<<[(pmStar-$400)/$75]
+    29 01,0470 99 43 23			sta PMGB2+$300+6+?ofs,y
+    30 01,0473			skip
+Source: harpuns.asm
+   310 01,0473 60			rts
+   311 				.endl
+   312
+   313
+   314 				* -----------------------------------------------------------------------------
+   315
+   316 				.macro	@@pmgGROT
+   317 					lda :1+$300+2+?ofs,y
+   318 					ora #%01<<[(pmStar-$400)/$75]
+   319 					sta :1+$300+2+?ofs,y
+   320 				
+   321 					lda :1+$300+3+?ofs,y
+   322 					ora #%01<<[(pmStar-$400)/$75]
+   323 					sta :1+$300+3+?ofs,y
+   324 				
+   325 					lda :1+$300+4+?ofs,y
+   326 					ora #%11<<[(pmStar-$400)/$75]
+   327 					sta :1+$300+4+?ofs,y
+   328 				
+   329 					lda :1+$300+5+?ofs,y
+   330 					ora #%01<<[(pmStar-$400)/$75]
+   331 					sta :1+$300+5+?ofs,y
+   332 				.endm
+   333
+   334
+   335 				@@GROT	.macro
+   336 					lda (hr0),y
+   337 					and #%11110011
+   338 				;	ora #%00001000
+   339 					sta (hr0),y
+   340 				
+   341 					iny
+   342 					lda (hr0),y
+   343 					and #%11110011
+   344 					ora #%00001000
+   345 					sta (hr0),y
+   346 				
+   347 					iny
+   348 					lda (hr0),y
+   349 					and #%11000000
+   350 					ora #%00000010
+   351 					sta (hr0),y
+   352 				
+   353 					iny
+   354 					lda (hr0),y
+   355 					and #%11000000
+   356 					ora #%00100110
+   357 					sta (hr0),y
+   358 				
+   359 					iny
+   360 					lda #%00010100
+   361 					sta (hr0),y
+   362 				
+   363 					iny
+   364 					lda #%10010001
+   365 					sta (hr0),y
+   366 				
+   367 					iny
+   368 					lda #%10101010
+   369 					sta (hr0),y
+   370 				
+   371 					iny
+   372 					lda (hr0),y
+   373 					and #%11000011
+   374 					ora #%00100000
+   375 					sta (hr0),y
+   376 					.endm
+   377
+   378 				* -----------------------------------------------------------------------------
+   379
+   380 				.macro	@@pmgHARP
+   381 					lda :1+$300+1+?ofs,y
+   382 					and #missile_mask
+   383 					bne skip
+   384 				
+   385 					lda :1+$300+1+?ofs,y	
+   386 					ora #%01<<[(pmStar-$400)/$75]
+   387 					sta :1+$300+1+?ofs,y
+   388 				
+   389 					lda :1+$300+2+?ofs,y
+   390 					and #missile_mask^$ff
+   391 					ora #%10<<[(pmStar-$400)/$75]
+   392 					sta :1+$300+2+?ofs,y
+   393 				
+   394 					lda :1+$300+3+?ofs,y
+   395 					ora #%11<<[(pmStar-$400)/$75]
+   396 					sta :1+$300+3+?ofs,y
+   397 				
+   398 					lda :1+$300+4+?ofs,y
+   399 					ora #%11<<[(pmStar-$400)/$75]
+   400 					sta :1+$300+4+?ofs,y
+   401 				
+   402 					lda :1+$300+5+?ofs,y
+   403 					and #missile_mask^$ff
+   404 					ora #%01<<[(pmStar-$400)/$75]
+   405 					sta :1+$300+5+?ofs,y
+   406 				
+   407 					lda :1+$300+6+?ofs,y
+   408 					ora #%01<<[(pmStar-$400)/$75]
+   409 					sta :1+$300+6+?ofs,y
+   410 				skip
+   411 				.endm
+   412
+   413
+   414 				@@HARP	.macro
+   415 					lda (hr0),y
+   416 					and #%11110000
+   417 					ora #%00001010
+   418 					sta (hr0),y
+   419 				
+   420 					iny
+   421 					lda (hr0),y
+   422 					and #%11000000
+   423 					ora #%00101000
+   424 					sta (hr0),y
+   425 				
+   426 					iny
+   427 					lda (hr0),y
+   428 					and #%00000011
+   429 					ora #%10011000
+   430 					sta (hr0),y
+   431 				
+   432 					iny
+   433 					lda #%00010010
+   434 					sta (hr0),y
+   435 				
+   436 					iny
+   437 					lda #%10000100
+   438 					sta (hr0),y
+   439 				
+   440 					iny
+   441 					lda (hr0),y
+   442 					and #%11000000
+   443 					ora #%00101000
+   444 					sta (hr0),y
+   445 				
+   446 					iny
+   447 					lda (hr0),y
+   448 					and #%11110000
+   449 					ora #%00000010
+   450 					sta (hr0),y
+   451 				
+   452 					iny
+   453 					lda (hr0),y
+   454 					and #%11111100
+   455 					ora #%00000010
+   456 					sta (hr0),y
+   457 					.endm
+   458
+   459 				* -----------------------------------------------------------------------------
+   460
+   461 = 01,0036		pmLen	= 6*8+6		; @@MIS=8
+   462
+   463 				@@mis1	.macro
+   464 					lda pmgB1+$300+#*8+?ofs+:1
+   465 					and #missile_mask^$ff
+   466 					sta pmgB1+$300+#*8+?ofs+:1
+   467 					.endm
+   468
+   469 				@@mis2	.macro
+   470 					lda pmgB2+$300+#*8+?ofs+:1
+   471 					and #missile_mask^$ff
+   472 					sta pmgB2+$300+#*8+?ofs+:1
+   473 					.endm
+   474
+   475
+   476 01,0474			.local	clrHARP1
+   477
+   478 01,0474 A4 00			ldy clrHrp.max
+   479
+   480 01,0476 A5 00			lda clrHrp.min
+   481 01,0478 0A			asl @
+   482 01,0479 8D 7D 04			sta jclrpm+1
+   483
+   484 01,047C 6C 00 01		jclrpm	jmp (lhclrpm1)
+   485
+   486
+   487 				clrpmB1	.rept scrhig
+   490 					@@MIS1 1
+   491 					@@MIS1 2
+   492 					@@MIS1 3
+   493 					@@MIS1 4
+   494 					@@MIS1 5
+   495 					@@MIS1 6
+   498 					DEY
+   499 					SPL
+   500 					JMP CLRHARP.RETURN
+   502 					.endr
+Source: REPT
+   488 01,047F				@@MIS1 1
+     1 01,047F AD 3E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0482 29 3F			and #missile_mask^$ff
+     3 01,0484 8D 3E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0487				@@MIS1 2
+     1 01,0487 AD 3F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,048A 29 3F			and #missile_mask^$ff
+     3 01,048C 8D 3F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,048F				@@MIS1 3
+     1 01,048F AD 40 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0492 29 3F			and #missile_mask^$ff
+     3 01,0494 8D 40 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0497				@@MIS1 4
+     1 01,0497 AD 41 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,049A 29 3F			and #missile_mask^$ff
+     3 01,049C 8D 41 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,049F				@@MIS1 5
+     1 01,049F AD 42 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,04A2 29 3F			and #missile_mask^$ff
+     3 01,04A4 8D 42 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,04A7				@@MIS1 6
+     1 01,04A7 AD 43 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,04AA 29 3F			and #missile_mask^$ff
+     3 01,04AC 8D 43 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,04AF 88			DEY
+   488 01,04B0 10 03			SPL
+   488 01,04B2 4C 00 00			JMP CLRHARP.RETURN
+   488 01,04B5				@@MIS1 1
+     1 01,04B5 AD 46 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,04B8 29 3F			and #missile_mask^$ff
+     3 01,04BA 8D 46 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,04BD				@@MIS1 2
+     1 01,04BD AD 47 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,04C0 29 3F			and #missile_mask^$ff
+     3 01,04C2 8D 47 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,04C5				@@MIS1 3
+     1 01,04C5 AD 48 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,04C8 29 3F			and #missile_mask^$ff
+     3 01,04CA 8D 48 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,04CD				@@MIS1 4
+     1 01,04CD AD 49 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,04D0 29 3F			and #missile_mask^$ff
+     3 01,04D2 8D 49 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,04D5				@@MIS1 5
+     1 01,04D5 AD 4A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,04D8 29 3F			and #missile_mask^$ff
+     3 01,04DA 8D 4A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,04DD				@@MIS1 6
+     1 01,04DD AD 4B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,04E0 29 3F			and #missile_mask^$ff
+     3 01,04E2 8D 4B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,04E5 88			DEY
+   488 01,04E6 10 03			SPL
+   488 01,04E8 4C 00 00			JMP CLRHARP.RETURN
+   488 01,04EB				@@MIS1 1
+     1 01,04EB AD 4E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,04EE 29 3F			and #missile_mask^$ff
+     3 01,04F0 8D 4E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,04F3				@@MIS1 2
+     1 01,04F3 AD 4F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,04F6 29 3F			and #missile_mask^$ff
+     3 01,04F8 8D 4F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,04FB				@@MIS1 3
+     1 01,04FB AD 50 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,04FE 29 3F			and #missile_mask^$ff
+     3 01,0500 8D 50 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0503				@@MIS1 4
+     1 01,0503 AD 51 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0506 29 3F			and #missile_mask^$ff
+     3 01,0508 8D 51 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,050B				@@MIS1 5
+     1 01,050B AD 52 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,050E 29 3F			and #missile_mask^$ff
+     3 01,0510 8D 52 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0513				@@MIS1 6
+     1 01,0513 AD 53 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0516 29 3F			and #missile_mask^$ff
+     3 01,0518 8D 53 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,051B 88			DEY
+   488 01,051C 10 03			SPL
+   488 01,051E 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0521				@@MIS1 1
+     1 01,0521 AD 56 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0524 29 3F			and #missile_mask^$ff
+     3 01,0526 8D 56 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0529				@@MIS1 2
+     1 01,0529 AD 57 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,052C 29 3F			and #missile_mask^$ff
+     3 01,052E 8D 57 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0531				@@MIS1 3
+     1 01,0531 AD 58 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0534 29 3F			and #missile_mask^$ff
+     3 01,0536 8D 58 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0539				@@MIS1 4
+     1 01,0539 AD 59 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,053C 29 3F			and #missile_mask^$ff
+     3 01,053E 8D 59 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0541				@@MIS1 5
+     1 01,0541 AD 5A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0544 29 3F			and #missile_mask^$ff
+     3 01,0546 8D 5A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0549				@@MIS1 6
+     1 01,0549 AD 5B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,054C 29 3F			and #missile_mask^$ff
+     3 01,054E 8D 5B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0551 88			DEY
+   488 01,0552 10 03			SPL
+   488 01,0554 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0557				@@MIS1 1
+     1 01,0557 AD 5E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,055A 29 3F			and #missile_mask^$ff
+     3 01,055C 8D 5E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,055F				@@MIS1 2
+     1 01,055F AD 5F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0562 29 3F			and #missile_mask^$ff
+     3 01,0564 8D 5F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0567				@@MIS1 3
+     1 01,0567 AD 60 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,056A 29 3F			and #missile_mask^$ff
+     3 01,056C 8D 60 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,056F				@@MIS1 4
+     1 01,056F AD 61 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0572 29 3F			and #missile_mask^$ff
+     3 01,0574 8D 61 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0577				@@MIS1 5
+     1 01,0577 AD 62 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,057A 29 3F			and #missile_mask^$ff
+     3 01,057C 8D 62 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,057F				@@MIS1 6
+     1 01,057F AD 63 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0582 29 3F			and #missile_mask^$ff
+     3 01,0584 8D 63 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0587 88			DEY
+   488 01,0588 10 03			SPL
+   488 01,058A 4C 00 00			JMP CLRHARP.RETURN
+   488 01,058D				@@MIS1 1
+     1 01,058D AD 66 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0590 29 3F			and #missile_mask^$ff
+     3 01,0592 8D 66 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0595				@@MIS1 2
+     1 01,0595 AD 67 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0598 29 3F			and #missile_mask^$ff
+     3 01,059A 8D 67 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,059D				@@MIS1 3
+     1 01,059D AD 68 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,05A0 29 3F			and #missile_mask^$ff
+     3 01,05A2 8D 68 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,05A5				@@MIS1 4
+     1 01,05A5 AD 69 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,05A8 29 3F			and #missile_mask^$ff
+     3 01,05AA 8D 69 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,05AD				@@MIS1 5
+     1 01,05AD AD 6A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,05B0 29 3F			and #missile_mask^$ff
+     3 01,05B2 8D 6A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,05B5				@@MIS1 6
+     1 01,05B5 AD 6B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,05B8 29 3F			and #missile_mask^$ff
+     3 01,05BA 8D 6B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,05BD 88			DEY
+   488 01,05BE 10 03			SPL
+   488 01,05C0 4C 00 00			JMP CLRHARP.RETURN
+   488 01,05C3				@@MIS1 1
+     1 01,05C3 AD 6E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,05C6 29 3F			and #missile_mask^$ff
+     3 01,05C8 8D 6E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,05CB				@@MIS1 2
+     1 01,05CB AD 6F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,05CE 29 3F			and #missile_mask^$ff
+     3 01,05D0 8D 6F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,05D3				@@MIS1 3
+     1 01,05D3 AD 70 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,05D6 29 3F			and #missile_mask^$ff
+     3 01,05D8 8D 70 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,05DB				@@MIS1 4
+     1 01,05DB AD 71 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,05DE 29 3F			and #missile_mask^$ff
+     3 01,05E0 8D 71 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,05E3				@@MIS1 5
+     1 01,05E3 AD 72 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,05E6 29 3F			and #missile_mask^$ff
+     3 01,05E8 8D 72 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,05EB				@@MIS1 6
+     1 01,05EB AD 73 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,05EE 29 3F			and #missile_mask^$ff
+     3 01,05F0 8D 73 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,05F3 88			DEY
+   488 01,05F4 10 03			SPL
+   488 01,05F6 4C 00 00			JMP CLRHARP.RETURN
+   488 01,05F9				@@MIS1 1
+     1 01,05F9 AD 76 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,05FC 29 3F			and #missile_mask^$ff
+     3 01,05FE 8D 76 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0601				@@MIS1 2
+     1 01,0601 AD 77 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0604 29 3F			and #missile_mask^$ff
+     3 01,0606 8D 77 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0609				@@MIS1 3
+     1 01,0609 AD 78 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,060C 29 3F			and #missile_mask^$ff
+     3 01,060E 8D 78 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0611				@@MIS1 4
+     1 01,0611 AD 79 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0614 29 3F			and #missile_mask^$ff
+     3 01,0616 8D 79 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0619				@@MIS1 5
+     1 01,0619 AD 7A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,061C 29 3F			and #missile_mask^$ff
+     3 01,061E 8D 7A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0621				@@MIS1 6
+     1 01,0621 AD 7B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0624 29 3F			and #missile_mask^$ff
+     3 01,0626 8D 7B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0629 88			DEY
+   488 01,062A 10 03			SPL
+   488 01,062C 4C 00 00			JMP CLRHARP.RETURN
+   488 01,062F				@@MIS1 1
+     1 01,062F AD 7E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0632 29 3F			and #missile_mask^$ff
+     3 01,0634 8D 7E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0637				@@MIS1 2
+     1 01,0637 AD 7F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,063A 29 3F			and #missile_mask^$ff
+     3 01,063C 8D 7F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,063F				@@MIS1 3
+     1 01,063F AD 80 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0642 29 3F			and #missile_mask^$ff
+     3 01,0644 8D 80 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0647				@@MIS1 4
+     1 01,0647 AD 81 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,064A 29 3F			and #missile_mask^$ff
+     3 01,064C 8D 81 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,064F				@@MIS1 5
+     1 01,064F AD 82 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0652 29 3F			and #missile_mask^$ff
+     3 01,0654 8D 82 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0657				@@MIS1 6
+     1 01,0657 AD 83 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,065A 29 3F			and #missile_mask^$ff
+     3 01,065C 8D 83 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,065F 88			DEY
+   488 01,0660 10 03			SPL
+   488 01,0662 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0665				@@MIS1 1
+     1 01,0665 AD 86 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0668 29 3F			and #missile_mask^$ff
+     3 01,066A 8D 86 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,066D				@@MIS1 2
+     1 01,066D AD 87 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0670 29 3F			and #missile_mask^$ff
+     3 01,0672 8D 87 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0675				@@MIS1 3
+     1 01,0675 AD 88 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0678 29 3F			and #missile_mask^$ff
+     3 01,067A 8D 88 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,067D				@@MIS1 4
+     1 01,067D AD 89 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0680 29 3F			and #missile_mask^$ff
+     3 01,0682 8D 89 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0685				@@MIS1 5
+     1 01,0685 AD 8A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0688 29 3F			and #missile_mask^$ff
+     3 01,068A 8D 8A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,068D				@@MIS1 6
+     1 01,068D AD 8B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0690 29 3F			and #missile_mask^$ff
+     3 01,0692 8D 8B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0695 88			DEY
+   488 01,0696 10 03			SPL
+   488 01,0698 4C 00 00			JMP CLRHARP.RETURN
+   488 01,069B				@@MIS1 1
+     1 01,069B AD 8E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,069E 29 3F			and #missile_mask^$ff
+     3 01,06A0 8D 8E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,06A3				@@MIS1 2
+     1 01,06A3 AD 8F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,06A6 29 3F			and #missile_mask^$ff
+     3 01,06A8 8D 8F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,06AB				@@MIS1 3
+     1 01,06AB AD 90 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,06AE 29 3F			and #missile_mask^$ff
+     3 01,06B0 8D 90 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,06B3				@@MIS1 4
+     1 01,06B3 AD 91 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,06B6 29 3F			and #missile_mask^$ff
+     3 01,06B8 8D 91 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,06BB				@@MIS1 5
+     1 01,06BB AD 92 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,06BE 29 3F			and #missile_mask^$ff
+     3 01,06C0 8D 92 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,06C3				@@MIS1 6
+     1 01,06C3 AD 93 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,06C6 29 3F			and #missile_mask^$ff
+     3 01,06C8 8D 93 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,06CB 88			DEY
+   488 01,06CC 10 03			SPL
+   488 01,06CE 4C 00 00			JMP CLRHARP.RETURN
+   488 01,06D1				@@MIS1 1
+     1 01,06D1 AD 96 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,06D4 29 3F			and #missile_mask^$ff
+     3 01,06D6 8D 96 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,06D9				@@MIS1 2
+     1 01,06D9 AD 97 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,06DC 29 3F			and #missile_mask^$ff
+     3 01,06DE 8D 97 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,06E1				@@MIS1 3
+     1 01,06E1 AD 98 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,06E4 29 3F			and #missile_mask^$ff
+     3 01,06E6 8D 98 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,06E9				@@MIS1 4
+     1 01,06E9 AD 99 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,06EC 29 3F			and #missile_mask^$ff
+     3 01,06EE 8D 99 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,06F1				@@MIS1 5
+     1 01,06F1 AD 9A 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,06F4 29 3F			and #missile_mask^$ff
+     3 01,06F6 8D 9A 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,06F9				@@MIS1 6
+     1 01,06F9 AD 9B 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,06FC 29 3F			and #missile_mask^$ff
+     3 01,06FE 8D 9B 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0701 88			DEY
+   488 01,0702 10 03			SPL
+   488 01,0704 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0707				@@MIS1 1
+     1 01,0707 AD 9E 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,070A 29 3F			and #missile_mask^$ff
+     3 01,070C 8D 9E 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,070F				@@MIS1 2
+     1 01,070F AD 9F 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0712 29 3F			and #missile_mask^$ff
+     3 01,0714 8D 9F 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0717				@@MIS1 3
+     1 01,0717 AD A0 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,071A 29 3F			and #missile_mask^$ff
+     3 01,071C 8D A0 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,071F				@@MIS1 4
+     1 01,071F AD A1 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0722 29 3F			and #missile_mask^$ff
+     3 01,0724 8D A1 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0727				@@MIS1 5
+     1 01,0727 AD A2 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,072A 29 3F			and #missile_mask^$ff
+     3 01,072C 8D A2 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,072F				@@MIS1 6
+     1 01,072F AD A3 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0732 29 3F			and #missile_mask^$ff
+     3 01,0734 8D A3 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0737 88			DEY
+   488 01,0738 10 03			SPL
+   488 01,073A 4C 00 00			JMP CLRHARP.RETURN
+   488 01,073D				@@MIS1 1
+     1 01,073D AD A6 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0740 29 3F			and #missile_mask^$ff
+     3 01,0742 8D A6 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0745				@@MIS1 2
+     1 01,0745 AD A7 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0748 29 3F			and #missile_mask^$ff
+     3 01,074A 8D A7 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,074D				@@MIS1 3
+     1 01,074D AD A8 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0750 29 3F			and #missile_mask^$ff
+     3 01,0752 8D A8 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0755				@@MIS1 4
+     1 01,0755 AD A9 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0758 29 3F			and #missile_mask^$ff
+     3 01,075A 8D A9 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,075D				@@MIS1 5
+     1 01,075D AD AA 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0760 29 3F			and #missile_mask^$ff
+     3 01,0762 8D AA 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0765				@@MIS1 6
+     1 01,0765 AD AB 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0768 29 3F			and #missile_mask^$ff
+     3 01,076A 8D AB 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,076D 88			DEY
+   488 01,076E 10 03			SPL
+   488 01,0770 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0773				@@MIS1 1
+     1 01,0773 AD AE 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0776 29 3F			and #missile_mask^$ff
+     3 01,0778 8D AE 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,077B				@@MIS1 2
+     1 01,077B AD AF 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,077E 29 3F			and #missile_mask^$ff
+     3 01,0780 8D AF 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0783				@@MIS1 3
+     1 01,0783 AD B0 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0786 29 3F			and #missile_mask^$ff
+     3 01,0788 8D B0 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,078B				@@MIS1 4
+     1 01,078B AD B1 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,078E 29 3F			and #missile_mask^$ff
+     3 01,0790 8D B1 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0793				@@MIS1 5
+     1 01,0793 AD B2 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0796 29 3F			and #missile_mask^$ff
+     3 01,0798 8D B2 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,079B				@@MIS1 6
+     1 01,079B AD B3 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,079E 29 3F			and #missile_mask^$ff
+     3 01,07A0 8D B3 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,07A3 88			DEY
+   488 01,07A4 10 03			SPL
+   488 01,07A6 4C 00 00			JMP CLRHARP.RETURN
+   488 01,07A9				@@MIS1 1
+     1 01,07A9 AD B6 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,07AC 29 3F			and #missile_mask^$ff
+     3 01,07AE 8D B6 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,07B1				@@MIS1 2
+     1 01,07B1 AD B7 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,07B4 29 3F			and #missile_mask^$ff
+     3 01,07B6 8D B7 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,07B9				@@MIS1 3
+     1 01,07B9 AD B8 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,07BC 29 3F			and #missile_mask^$ff
+     3 01,07BE 8D B8 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,07C1				@@MIS1 4
+     1 01,07C1 AD B9 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,07C4 29 3F			and #missile_mask^$ff
+     3 01,07C6 8D B9 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,07C9				@@MIS1 5
+     1 01,07C9 AD BA 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,07CC 29 3F			and #missile_mask^$ff
+     3 01,07CE 8D BA 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,07D1				@@MIS1 6
+     1 01,07D1 AD BB 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,07D4 29 3F			and #missile_mask^$ff
+     3 01,07D6 8D BB 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,07D9 88			DEY
+   488 01,07DA 10 03			SPL
+   488 01,07DC 4C 00 00			JMP CLRHARP.RETURN
+   488 01,07DF				@@MIS1 1
+     1 01,07DF AD BE 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,07E2 29 3F			and #missile_mask^$ff
+     3 01,07E4 8D BE 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,07E7				@@MIS1 2
+     1 01,07E7 AD BF 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,07EA 29 3F			and #missile_mask^$ff
+     3 01,07EC 8D BF 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,07EF				@@MIS1 3
+     1 01,07EF AD C0 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,07F2 29 3F			and #missile_mask^$ff
+     3 01,07F4 8D C0 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,07F7				@@MIS1 4
+     1 01,07F7 AD C1 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,07FA 29 3F			and #missile_mask^$ff
+     3 01,07FC 8D C1 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,07FF				@@MIS1 5
+     1 01,07FF AD C2 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0802 29 3F			and #missile_mask^$ff
+     3 01,0804 8D C2 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0807				@@MIS1 6
+     1 01,0807 AD C3 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,080A 29 3F			and #missile_mask^$ff
+     3 01,080C 8D C3 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,080F 88			DEY
+   488 01,0810 10 03			SPL
+   488 01,0812 4C 00 00			JMP CLRHARP.RETURN
+   488 01,0815				@@MIS1 1
+     1 01,0815 AD C6 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,0818 29 3F			and #missile_mask^$ff
+     3 01,081A 8D C6 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,081D				@@MIS1 2
+     1 01,081D AD C7 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0820 29 3F			and #missile_mask^$ff
+     3 01,0822 8D C7 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,0825				@@MIS1 3
+     1 01,0825 AD C8 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,0828 29 3F			and #missile_mask^$ff
+     3 01,082A 8D C8 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,082D				@@MIS1 4
+     1 01,082D AD C9 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0830 29 3F			and #missile_mask^$ff
+     3 01,0832 8D C9 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,0835				@@MIS1 5
+     1 01,0835 AD CA 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,0838 29 3F			and #missile_mask^$ff
+     3 01,083A 8D CA 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,083D				@@MIS1 6
+     1 01,083D AD CB 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0840 29 3F			and #missile_mask^$ff
+     3 01,0842 8D CB 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,0845 88			DEY
+   488 01,0846 10 03			SPL
+   488 01,0848 4C 00 00			JMP CLRHARP.RETURN
+   488 01,084B				@@MIS1 1
+     1 01,084B AD CE 03			lda pmgB1+$300+#*8+?ofs+1
+     2 01,084E 29 3F			and #missile_mask^$ff
+     3 01,0850 8D CE 03			sta pmgB1+$300+#*8+?ofs+1
+   488 01,0853				@@MIS1 2
+     1 01,0853 AD CF 03			lda pmgB1+$300+#*8+?ofs+2
+     2 01,0856 29 3F			and #missile_mask^$ff
+     3 01,0858 8D CF 03			sta pmgB1+$300+#*8+?ofs+2
+   488 01,085B				@@MIS1 3
+     1 01,085B AD D0 03			lda pmgB1+$300+#*8+?ofs+3
+     2 01,085E 29 3F			and #missile_mask^$ff
+     3 01,0860 8D D0 03			sta pmgB1+$300+#*8+?ofs+3
+   488 01,0863				@@MIS1 4
+     1 01,0863 AD D1 03			lda pmgB1+$300+#*8+?ofs+4
+     2 01,0866 29 3F			and #missile_mask^$ff
+     3 01,0868 8D D1 03			sta pmgB1+$300+#*8+?ofs+4
+   488 01,086B				@@MIS1 5
+     1 01,086B AD D2 03			lda pmgB1+$300+#*8+?ofs+5
+     2 01,086E 29 3F			and #missile_mask^$ff
+     3 01,0870 8D D2 03			sta pmgB1+$300+#*8+?ofs+5
+   488 01,0873				@@MIS1 6
+     1 01,0873 AD D3 03			lda pmgB1+$300+#*8+?ofs+6
+     2 01,0876 29 3F			and #missile_mask^$ff
+     3 01,0878 8D D3 03			sta pmgB1+$300+#*8+?ofs+6
+   488 01,087B 88			DEY
+   488 01,087C 10 03			SPL
+   488 01,087E 4C 00 00			JMP CLRHARP.RETURN
+Source: harpuns.asm
+   503
+   504 01,0881 4C 00 00			jmp CLRHARP.return
+   505 				.endl
+   506
+   507
+   508
+   509 01,0884			.local	clrHARP2
+   510
+   511 01,0884 A4 00			ldy clrHrp.max
+   512
+   513 01,0886 A5 00			lda clrHrp.min
+   514 01,0888 0A			asl @
+   515 01,0889 8D 8D 08			sta jclrpm+1
+   516
+   517 01,088C 6C 00 02		jclrpm	jmp (lhclrpm2)
+   518
+   519
+   520 				clrpmB2	.rept scrhig
+   523 					@@MIS2 1
+   524 					@@MIS2 2
+   525 					@@MIS2 3
+   526 					@@MIS2 4
+   527 					@@MIS2 5
+   528 					@@MIS2 6
+   531 					DEY
+   532 					SPL
+   533 					JMP CLRHARP.RETURN
+   535 					.endr
+Source: REPT
+   521 01,088F				@@MIS2 1
+     1 01,088F AD 3E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0892 29 3F			and #missile_mask^$ff
+     3 01,0894 8D 3E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0897				@@MIS2 2
+     1 01,0897 AD 3F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,089A 29 3F			and #missile_mask^$ff
+     3 01,089C 8D 3F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,089F				@@MIS2 3
+     1 01,089F AD 40 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,08A2 29 3F			and #missile_mask^$ff
+     3 01,08A4 8D 40 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,08A7				@@MIS2 4
+     1 01,08A7 AD 41 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,08AA 29 3F			and #missile_mask^$ff
+     3 01,08AC 8D 41 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,08AF				@@MIS2 5
+     1 01,08AF AD 42 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,08B2 29 3F			and #missile_mask^$ff
+     3 01,08B4 8D 42 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,08B7				@@MIS2 6
+     1 01,08B7 AD 43 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,08BA 29 3F			and #missile_mask^$ff
+     3 01,08BC 8D 43 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,08BF 88			DEY
+   521 01,08C0 10 03			SPL
+   521 01,08C2 4C 00 00			JMP CLRHARP.RETURN
+   521 01,08C5				@@MIS2 1
+     1 01,08C5 AD 46 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,08C8 29 3F			and #missile_mask^$ff
+     3 01,08CA 8D 46 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,08CD				@@MIS2 2
+     1 01,08CD AD 47 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,08D0 29 3F			and #missile_mask^$ff
+     3 01,08D2 8D 47 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,08D5				@@MIS2 3
+     1 01,08D5 AD 48 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,08D8 29 3F			and #missile_mask^$ff
+     3 01,08DA 8D 48 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,08DD				@@MIS2 4
+     1 01,08DD AD 49 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,08E0 29 3F			and #missile_mask^$ff
+     3 01,08E2 8D 49 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,08E5				@@MIS2 5
+     1 01,08E5 AD 4A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,08E8 29 3F			and #missile_mask^$ff
+     3 01,08EA 8D 4A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,08ED				@@MIS2 6
+     1 01,08ED AD 4B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,08F0 29 3F			and #missile_mask^$ff
+     3 01,08F2 8D 4B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,08F5 88			DEY
+   521 01,08F6 10 03			SPL
+   521 01,08F8 4C 00 00			JMP CLRHARP.RETURN
+   521 01,08FB				@@MIS2 1
+     1 01,08FB AD 4E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,08FE 29 3F			and #missile_mask^$ff
+     3 01,0900 8D 4E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0903				@@MIS2 2
+     1 01,0903 AD 4F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0906 29 3F			and #missile_mask^$ff
+     3 01,0908 8D 4F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,090B				@@MIS2 3
+     1 01,090B AD 50 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,090E 29 3F			and #missile_mask^$ff
+     3 01,0910 8D 50 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0913				@@MIS2 4
+     1 01,0913 AD 51 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0916 29 3F			and #missile_mask^$ff
+     3 01,0918 8D 51 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,091B				@@MIS2 5
+     1 01,091B AD 52 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,091E 29 3F			and #missile_mask^$ff
+     3 01,0920 8D 52 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0923				@@MIS2 6
+     1 01,0923 AD 53 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0926 29 3F			and #missile_mask^$ff
+     3 01,0928 8D 53 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,092B 88			DEY
+   521 01,092C 10 03			SPL
+   521 01,092E 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0931				@@MIS2 1
+     1 01,0931 AD 56 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0934 29 3F			and #missile_mask^$ff
+     3 01,0936 8D 56 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0939				@@MIS2 2
+     1 01,0939 AD 57 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,093C 29 3F			and #missile_mask^$ff
+     3 01,093E 8D 57 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0941				@@MIS2 3
+     1 01,0941 AD 58 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0944 29 3F			and #missile_mask^$ff
+     3 01,0946 8D 58 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0949				@@MIS2 4
+     1 01,0949 AD 59 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,094C 29 3F			and #missile_mask^$ff
+     3 01,094E 8D 59 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0951				@@MIS2 5
+     1 01,0951 AD 5A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0954 29 3F			and #missile_mask^$ff
+     3 01,0956 8D 5A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0959				@@MIS2 6
+     1 01,0959 AD 5B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,095C 29 3F			and #missile_mask^$ff
+     3 01,095E 8D 5B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0961 88			DEY
+   521 01,0962 10 03			SPL
+   521 01,0964 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0967				@@MIS2 1
+     1 01,0967 AD 5E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,096A 29 3F			and #missile_mask^$ff
+     3 01,096C 8D 5E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,096F				@@MIS2 2
+     1 01,096F AD 5F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0972 29 3F			and #missile_mask^$ff
+     3 01,0974 8D 5F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0977				@@MIS2 3
+     1 01,0977 AD 60 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,097A 29 3F			and #missile_mask^$ff
+     3 01,097C 8D 60 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,097F				@@MIS2 4
+     1 01,097F AD 61 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0982 29 3F			and #missile_mask^$ff
+     3 01,0984 8D 61 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0987				@@MIS2 5
+     1 01,0987 AD 62 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,098A 29 3F			and #missile_mask^$ff
+     3 01,098C 8D 62 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,098F				@@MIS2 6
+     1 01,098F AD 63 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0992 29 3F			and #missile_mask^$ff
+     3 01,0994 8D 63 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0997 88			DEY
+   521 01,0998 10 03			SPL
+   521 01,099A 4C 00 00			JMP CLRHARP.RETURN
+   521 01,099D				@@MIS2 1
+     1 01,099D AD 66 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,09A0 29 3F			and #missile_mask^$ff
+     3 01,09A2 8D 66 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,09A5				@@MIS2 2
+     1 01,09A5 AD 67 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,09A8 29 3F			and #missile_mask^$ff
+     3 01,09AA 8D 67 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,09AD				@@MIS2 3
+     1 01,09AD AD 68 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,09B0 29 3F			and #missile_mask^$ff
+     3 01,09B2 8D 68 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,09B5				@@MIS2 4
+     1 01,09B5 AD 69 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,09B8 29 3F			and #missile_mask^$ff
+     3 01,09BA 8D 69 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,09BD				@@MIS2 5
+     1 01,09BD AD 6A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,09C0 29 3F			and #missile_mask^$ff
+     3 01,09C2 8D 6A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,09C5				@@MIS2 6
+     1 01,09C5 AD 6B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,09C8 29 3F			and #missile_mask^$ff
+     3 01,09CA 8D 6B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,09CD 88			DEY
+   521 01,09CE 10 03			SPL
+   521 01,09D0 4C 00 00			JMP CLRHARP.RETURN
+   521 01,09D3				@@MIS2 1
+     1 01,09D3 AD 6E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,09D6 29 3F			and #missile_mask^$ff
+     3 01,09D8 8D 6E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,09DB				@@MIS2 2
+     1 01,09DB AD 6F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,09DE 29 3F			and #missile_mask^$ff
+     3 01,09E0 8D 6F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,09E3				@@MIS2 3
+     1 01,09E3 AD 70 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,09E6 29 3F			and #missile_mask^$ff
+     3 01,09E8 8D 70 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,09EB				@@MIS2 4
+     1 01,09EB AD 71 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,09EE 29 3F			and #missile_mask^$ff
+     3 01,09F0 8D 71 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,09F3				@@MIS2 5
+     1 01,09F3 AD 72 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,09F6 29 3F			and #missile_mask^$ff
+     3 01,09F8 8D 72 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,09FB				@@MIS2 6
+     1 01,09FB AD 73 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,09FE 29 3F			and #missile_mask^$ff
+     3 01,0A00 8D 73 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0A03 88			DEY
+   521 01,0A04 10 03			SPL
+   521 01,0A06 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0A09				@@MIS2 1
+     1 01,0A09 AD 76 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0A0C 29 3F			and #missile_mask^$ff
+     3 01,0A0E 8D 76 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0A11				@@MIS2 2
+     1 01,0A11 AD 77 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0A14 29 3F			and #missile_mask^$ff
+     3 01,0A16 8D 77 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0A19				@@MIS2 3
+     1 01,0A19 AD 78 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0A1C 29 3F			and #missile_mask^$ff
+     3 01,0A1E 8D 78 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0A21				@@MIS2 4
+     1 01,0A21 AD 79 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0A24 29 3F			and #missile_mask^$ff
+     3 01,0A26 8D 79 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0A29				@@MIS2 5
+     1 01,0A29 AD 7A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0A2C 29 3F			and #missile_mask^$ff
+     3 01,0A2E 8D 7A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0A31				@@MIS2 6
+     1 01,0A31 AD 7B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0A34 29 3F			and #missile_mask^$ff
+     3 01,0A36 8D 7B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0A39 88			DEY
+   521 01,0A3A 10 03			SPL
+   521 01,0A3C 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0A3F				@@MIS2 1
+     1 01,0A3F AD 7E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0A42 29 3F			and #missile_mask^$ff
+     3 01,0A44 8D 7E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0A47				@@MIS2 2
+     1 01,0A47 AD 7F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0A4A 29 3F			and #missile_mask^$ff
+     3 01,0A4C 8D 7F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0A4F				@@MIS2 3
+     1 01,0A4F AD 80 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0A52 29 3F			and #missile_mask^$ff
+     3 01,0A54 8D 80 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0A57				@@MIS2 4
+     1 01,0A57 AD 81 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0A5A 29 3F			and #missile_mask^$ff
+     3 01,0A5C 8D 81 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0A5F				@@MIS2 5
+     1 01,0A5F AD 82 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0A62 29 3F			and #missile_mask^$ff
+     3 01,0A64 8D 82 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0A67				@@MIS2 6
+     1 01,0A67 AD 83 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0A6A 29 3F			and #missile_mask^$ff
+     3 01,0A6C 8D 83 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0A6F 88			DEY
+   521 01,0A70 10 03			SPL
+   521 01,0A72 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0A75				@@MIS2 1
+     1 01,0A75 AD 86 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0A78 29 3F			and #missile_mask^$ff
+     3 01,0A7A 8D 86 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0A7D				@@MIS2 2
+     1 01,0A7D AD 87 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0A80 29 3F			and #missile_mask^$ff
+     3 01,0A82 8D 87 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0A85				@@MIS2 3
+     1 01,0A85 AD 88 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0A88 29 3F			and #missile_mask^$ff
+     3 01,0A8A 8D 88 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0A8D				@@MIS2 4
+     1 01,0A8D AD 89 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0A90 29 3F			and #missile_mask^$ff
+     3 01,0A92 8D 89 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0A95				@@MIS2 5
+     1 01,0A95 AD 8A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0A98 29 3F			and #missile_mask^$ff
+     3 01,0A9A 8D 8A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0A9D				@@MIS2 6
+     1 01,0A9D AD 8B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0AA0 29 3F			and #missile_mask^$ff
+     3 01,0AA2 8D 8B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0AA5 88			DEY
+   521 01,0AA6 10 03			SPL
+   521 01,0AA8 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0AAB				@@MIS2 1
+     1 01,0AAB AD 8E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0AAE 29 3F			and #missile_mask^$ff
+     3 01,0AB0 8D 8E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0AB3				@@MIS2 2
+     1 01,0AB3 AD 8F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0AB6 29 3F			and #missile_mask^$ff
+     3 01,0AB8 8D 8F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0ABB				@@MIS2 3
+     1 01,0ABB AD 90 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0ABE 29 3F			and #missile_mask^$ff
+     3 01,0AC0 8D 90 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0AC3				@@MIS2 4
+     1 01,0AC3 AD 91 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0AC6 29 3F			and #missile_mask^$ff
+     3 01,0AC8 8D 91 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0ACB				@@MIS2 5
+     1 01,0ACB AD 92 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0ACE 29 3F			and #missile_mask^$ff
+     3 01,0AD0 8D 92 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0AD3				@@MIS2 6
+     1 01,0AD3 AD 93 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0AD6 29 3F			and #missile_mask^$ff
+     3 01,0AD8 8D 93 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0ADB 88			DEY
+   521 01,0ADC 10 03			SPL
+   521 01,0ADE 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0AE1				@@MIS2 1
+     1 01,0AE1 AD 96 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0AE4 29 3F			and #missile_mask^$ff
+     3 01,0AE6 8D 96 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0AE9				@@MIS2 2
+     1 01,0AE9 AD 97 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0AEC 29 3F			and #missile_mask^$ff
+     3 01,0AEE 8D 97 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0AF1				@@MIS2 3
+     1 01,0AF1 AD 98 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0AF4 29 3F			and #missile_mask^$ff
+     3 01,0AF6 8D 98 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0AF9				@@MIS2 4
+     1 01,0AF9 AD 99 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0AFC 29 3F			and #missile_mask^$ff
+     3 01,0AFE 8D 99 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0B01				@@MIS2 5
+     1 01,0B01 AD 9A 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0B04 29 3F			and #missile_mask^$ff
+     3 01,0B06 8D 9A 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0B09				@@MIS2 6
+     1 01,0B09 AD 9B 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0B0C 29 3F			and #missile_mask^$ff
+     3 01,0B0E 8D 9B 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0B11 88			DEY
+   521 01,0B12 10 03			SPL
+   521 01,0B14 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0B17				@@MIS2 1
+     1 01,0B17 AD 9E 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0B1A 29 3F			and #missile_mask^$ff
+     3 01,0B1C 8D 9E 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0B1F				@@MIS2 2
+     1 01,0B1F AD 9F 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0B22 29 3F			and #missile_mask^$ff
+     3 01,0B24 8D 9F 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0B27				@@MIS2 3
+     1 01,0B27 AD A0 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0B2A 29 3F			and #missile_mask^$ff
+     3 01,0B2C 8D A0 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0B2F				@@MIS2 4
+     1 01,0B2F AD A1 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0B32 29 3F			and #missile_mask^$ff
+     3 01,0B34 8D A1 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0B37				@@MIS2 5
+     1 01,0B37 AD A2 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0B3A 29 3F			and #missile_mask^$ff
+     3 01,0B3C 8D A2 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0B3F				@@MIS2 6
+     1 01,0B3F AD A3 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0B42 29 3F			and #missile_mask^$ff
+     3 01,0B44 8D A3 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0B47 88			DEY
+   521 01,0B48 10 03			SPL
+   521 01,0B4A 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0B4D				@@MIS2 1
+     1 01,0B4D AD A6 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0B50 29 3F			and #missile_mask^$ff
+     3 01,0B52 8D A6 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0B55				@@MIS2 2
+     1 01,0B55 AD A7 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0B58 29 3F			and #missile_mask^$ff
+     3 01,0B5A 8D A7 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0B5D				@@MIS2 3
+     1 01,0B5D AD A8 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0B60 29 3F			and #missile_mask^$ff
+     3 01,0B62 8D A8 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0B65				@@MIS2 4
+     1 01,0B65 AD A9 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0B68 29 3F			and #missile_mask^$ff
+     3 01,0B6A 8D A9 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0B6D				@@MIS2 5
+     1 01,0B6D AD AA 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0B70 29 3F			and #missile_mask^$ff
+     3 01,0B72 8D AA 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0B75				@@MIS2 6
+     1 01,0B75 AD AB 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0B78 29 3F			and #missile_mask^$ff
+     3 01,0B7A 8D AB 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0B7D 88			DEY
+   521 01,0B7E 10 03			SPL
+   521 01,0B80 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0B83				@@MIS2 1
+     1 01,0B83 AD AE 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0B86 29 3F			and #missile_mask^$ff
+     3 01,0B88 8D AE 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0B8B				@@MIS2 2
+     1 01,0B8B AD AF 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0B8E 29 3F			and #missile_mask^$ff
+     3 01,0B90 8D AF 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0B93				@@MIS2 3
+     1 01,0B93 AD B0 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0B96 29 3F			and #missile_mask^$ff
+     3 01,0B98 8D B0 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0B9B				@@MIS2 4
+     1 01,0B9B AD B1 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0B9E 29 3F			and #missile_mask^$ff
+     3 01,0BA0 8D B1 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0BA3				@@MIS2 5
+     1 01,0BA3 AD B2 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0BA6 29 3F			and #missile_mask^$ff
+     3 01,0BA8 8D B2 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0BAB				@@MIS2 6
+     1 01,0BAB AD B3 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0BAE 29 3F			and #missile_mask^$ff
+     3 01,0BB0 8D B3 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0BB3 88			DEY
+   521 01,0BB4 10 03			SPL
+   521 01,0BB6 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0BB9				@@MIS2 1
+     1 01,0BB9 AD B6 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0BBC 29 3F			and #missile_mask^$ff
+     3 01,0BBE 8D B6 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0BC1				@@MIS2 2
+     1 01,0BC1 AD B7 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0BC4 29 3F			and #missile_mask^$ff
+     3 01,0BC6 8D B7 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0BC9				@@MIS2 3
+     1 01,0BC9 AD B8 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0BCC 29 3F			and #missile_mask^$ff
+     3 01,0BCE 8D B8 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0BD1				@@MIS2 4
+     1 01,0BD1 AD B9 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0BD4 29 3F			and #missile_mask^$ff
+     3 01,0BD6 8D B9 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0BD9				@@MIS2 5
+     1 01,0BD9 AD BA 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0BDC 29 3F			and #missile_mask^$ff
+     3 01,0BDE 8D BA 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0BE1				@@MIS2 6
+     1 01,0BE1 AD BB 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0BE4 29 3F			and #missile_mask^$ff
+     3 01,0BE6 8D BB 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0BE9 88			DEY
+   521 01,0BEA 10 03			SPL
+   521 01,0BEC 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0BEF				@@MIS2 1
+     1 01,0BEF AD BE 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0BF2 29 3F			and #missile_mask^$ff
+     3 01,0BF4 8D BE 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0BF7				@@MIS2 2
+     1 01,0BF7 AD BF 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0BFA 29 3F			and #missile_mask^$ff
+     3 01,0BFC 8D BF 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0BFF				@@MIS2 3
+     1 01,0BFF AD C0 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0C02 29 3F			and #missile_mask^$ff
+     3 01,0C04 8D C0 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0C07				@@MIS2 4
+     1 01,0C07 AD C1 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0C0A 29 3F			and #missile_mask^$ff
+     3 01,0C0C 8D C1 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0C0F				@@MIS2 5
+     1 01,0C0F AD C2 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0C12 29 3F			and #missile_mask^$ff
+     3 01,0C14 8D C2 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0C17				@@MIS2 6
+     1 01,0C17 AD C3 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0C1A 29 3F			and #missile_mask^$ff
+     3 01,0C1C 8D C3 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0C1F 88			DEY
+   521 01,0C20 10 03			SPL
+   521 01,0C22 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0C25				@@MIS2 1
+     1 01,0C25 AD C6 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0C28 29 3F			and #missile_mask^$ff
+     3 01,0C2A 8D C6 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0C2D				@@MIS2 2
+     1 01,0C2D AD C7 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0C30 29 3F			and #missile_mask^$ff
+     3 01,0C32 8D C7 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0C35				@@MIS2 3
+     1 01,0C35 AD C8 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0C38 29 3F			and #missile_mask^$ff
+     3 01,0C3A 8D C8 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0C3D				@@MIS2 4
+     1 01,0C3D AD C9 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0C40 29 3F			and #missile_mask^$ff
+     3 01,0C42 8D C9 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0C45				@@MIS2 5
+     1 01,0C45 AD CA 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0C48 29 3F			and #missile_mask^$ff
+     3 01,0C4A 8D CA 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0C4D				@@MIS2 6
+     1 01,0C4D AD CB 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0C50 29 3F			and #missile_mask^$ff
+     3 01,0C52 8D CB 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0C55 88			DEY
+   521 01,0C56 10 03			SPL
+   521 01,0C58 4C 00 00			JMP CLRHARP.RETURN
+   521 01,0C5B				@@MIS2 1
+     1 01,0C5B AD CE 23			lda pmgB2+$300+#*8+?ofs+1
+     2 01,0C5E 29 3F			and #missile_mask^$ff
+     3 01,0C60 8D CE 23			sta pmgB2+$300+#*8+?ofs+1
+   521 01,0C63				@@MIS2 2
+     1 01,0C63 AD CF 23			lda pmgB2+$300+#*8+?ofs+2
+     2 01,0C66 29 3F			and #missile_mask^$ff
+     3 01,0C68 8D CF 23			sta pmgB2+$300+#*8+?ofs+2
+   521 01,0C6B				@@MIS2 3
+     1 01,0C6B AD D0 23			lda pmgB2+$300+#*8+?ofs+3
+     2 01,0C6E 29 3F			and #missile_mask^$ff
+     3 01,0C70 8D D0 23			sta pmgB2+$300+#*8+?ofs+3
+   521 01,0C73				@@MIS2 4
+     1 01,0C73 AD D1 23			lda pmgB2+$300+#*8+?ofs+4
+     2 01,0C76 29 3F			and #missile_mask^$ff
+     3 01,0C78 8D D1 23			sta pmgB2+$300+#*8+?ofs+4
+   521 01,0C7B				@@MIS2 5
+     1 01,0C7B AD D2 23			lda pmgB2+$300+#*8+?ofs+5
+     2 01,0C7E 29 3F			and #missile_mask^$ff
+     3 01,0C80 8D D2 23			sta pmgB2+$300+#*8+?ofs+5
+   521 01,0C83				@@MIS2 6
+     1 01,0C83 AD D3 23			lda pmgB2+$300+#*8+?ofs+6
+     2 01,0C86 29 3F			and #missile_mask^$ff
+     3 01,0C88 8D D3 23			sta pmgB2+$300+#*8+?ofs+6
+   521 01,0C8B 88			DEY
+   521 01,0C8C 10 03			SPL
+   521 01,0C8E 4C 00 00			JMP CLRHARP.RETURN
+Source: harpuns.asm
+   536
+   537 01,0C91 4C 00 00			jmp CLRHARP.return
+   538 				.endl
+   538 01,0C94			BLK UPDATE ADDRESS
+   538 01,0C94 EF FF 57		
+   538 01,0C94 3F 00 00 01 02 + 
+   538 01,0C94			BLK UPDATE EXTERNAL
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 05 00 42 + BUFOR
+   538 01,0C94 EE FF 42		
+   538 01,0C94 21 00 03 00 48 + HR0
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 04 00 50 + PMGB
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 0A 00 43 + CLRHRP.MAX
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 0A 00 43 + CLRHRP.MIN
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 07 00 57 + WALLIDX
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 0B 00 48 + HARP0.Y_OLD
+   538 01,0C94 EE FF 42		
+   538 01,0C94 03 00 07 00 48 + HARP0.Y
+   538 01,0C94 EE FF 42		
+   538 01,0C94 05 00 07 00 48 + HARP0.X
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 06 00 48 + HARPUN
+   538 01,0C94 EE FF 42		
+   538 01,0C94 04 00 0A 00 48 + HARP0.HOOK
+   538 01,0C94 EE FF 42		
+   538 01,0C94 02 00 0F 00 48 + HARP0.STARTDIV8
+   538 01,0C94 EE FF 42		
+   538 01,0C94 05 00 09 00 48 + HARP0.CNT
+   538 01,0C94 EE FF 57		
+   538 01,0C94 01 00 08 00 5F + __HPOSM3
+   538 01,0C94 EE FF 57		
+   538 01,0C94 01 00 12 00 43 + CLRHARP.SETPMCLEAR
+   538 01,0C94 EE FF 57		
+   538 01,0C94 28 00 0E 00 43 + CLRHARP.RETURN
+   538 01,0C94 EE FF 57		
+   538 01,0C94 03 00 09 00 48 + HERO.QUIT
+   538 01,0C94 EE FF 57		
+   538 01,0C94 01 00 0B 00 48 + HERO.RETURN
+   538 01,0C94 EE FF 57		
+   538 01,0C94 01 00 0C 00 43 + CLRWALL.SKIP
+   538 01,0C94 EE FF 57		
+   538 01,0C94 04 00 07 00 50 + PLAYSFX
+   538 01,0C94 EE FF 57		
+   538 01,0C94 04 00 0A 00 50 + PLAYSFX.FX
+   538 01,0C94 EE FF 57		
+   538 01,0C94 04 00 0C 00 50 + PLAYSFX.NOTE
+   538 01,0C94			BLK UPDATE PUBLIC
+   538 01,0C94 57 56 07 00 48 + HARPUNS
+   538 01,0C94 57 56 08 00 43 + CLRHARP1
+   538 01,0C94 57 56 08 00 43 + CLRHARP2
+   538 01,0C94 57 56 09 00 4D + MIN88DIV8
+   538 01,0C94 57 56 03 00 48 + HAK

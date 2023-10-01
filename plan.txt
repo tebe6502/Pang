@@ -1,0 +1,14 @@
+1. panglight - wyspa		PangLight_G2F_Powrooz			texture1
+2. winter - antarktyda		PangWinter_G2F_Powrooz			texture11
+3. park - brazylia		PangPark_Vers2				texture10
+4. shrine -panama, yucatan	PangShrine_G2F_Powrooz_2Final		texture6
+5. most v3 - hiszpania		PangMostVer3Clean			texture9
+6. lions - afryka		PangLions2011ooz_G2F_Powrooz		texture12
+7. atlas - grecja		PangAtlas_G2F_Powrooz			texture2
+8. mansion - pn anglia		PangMansion_G2F_Powrooz			texture8
+9. street - rosja		PangStreet_G2F_Powrooz			texture5
+10. caves - indie		PangCaves_G2F_Powrooz			texture4
+11. japan - japonia		PangJapanVers2				texture3
+12. city - australia		PangCityVers2AA				texture7
+
+

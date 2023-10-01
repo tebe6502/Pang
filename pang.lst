@@ -1,0 +1,164 @@
+mads 1.9.3 build 6 (3 Apr 11)
+Source: D:\!Atari\Pang_2/pang.hea
+     1
+     2 				// tablica ze starszymi bajtami adresów zestawów znakowych (19 zestawów)
+     3
+     4  [0000] 10 14 18 1C C0 + .put = $10,$14,$18,$1c,$c0,$c4,$c8,$cc,$e0,$e4,$e8,$ec,$f0,$f4,$f8,$fc,$28,$2c,$30, $30
+     5
+     6 				//---------------------------------------------------------------------------------------------------------------------
+     7
+     8 = 000A			banks	= 10
+     9
+    10 = 0020			defaultPrior	= $20		; domyœlny piorytet duchów "Multicolor PMG + PRIOR $00"
+    11
+    12 = 0000			pmgB1	= $0000
+    13 = 2000			pmgB2	= $2000			; $2300..$27FF
+    14
+    15 = 0700			pmStar	= $700			; duch dla harpunu i gwiazdki
+    16
+    17 = 0400			pmHero0	= $400			; !!! pmHero0, pmHero1 !!! para - 4 kolorowy duch
+    18 = 0500			pmHero1	= $500
+    19 = 0600			pmHero2	= $600			; ten duch nie ma pary
+    20
+    21 = 00C0			missile_mask = [3<<[(pmHero0-$400)/$75]+3<<[(pmHero1-$400)/$75]+3<<[(pmHero2-$400)/$75]]^$ff
+    22
+    23 = 000F			starsBright = $0f
+    24
+    25
+    26 = 00F0			sfx_default_volume	= $f0
+    27 = 00F0			msx_default_volume	= $f0
+    28
+    29
+    30 = 2000			inflate_data	= pmgB2		; 3 strony dla dekompresora
+    31
+    32 = 0800			clrWallIDX	= $0800		; tablica clrWallIDX[wallIDX]=$8x z indeksami do killWall
+    33 = 0880			clrWallPOS	= $0880
+    34 = 0900			killWall	= $0900
+    35
+    36 = 0A00			volume_slide	= $0a00		; tablica g³oœnoœci dla RMT
+    37
+    38 = 0B00			min52div4	= $0b00
+    39
+    40 = 0C00			drabin		= $0c00		; $0c00..$0fff, informacja o drabinkach
+    41
+    42 = 9B40			txture		= $9b40		; $9F40..$BBFF
+    43 = B300			invers		= txture+152*40	; mapa kolizji dla harpunu i kul, tymczasowo takze informacja o inversie znaków
+    44 = B700			colors		= invers+1024	; informacja o kolorach (5*19)
+    45
+    46 				// !!! ostatnie 48 bajtów INVERS zawsze wyzerowane !!!
+    47
+    48 = B800			fntPnl		= $b800		; $B800..$BFFF - dwa zestawy znaków dla panelu gry
+    49
+    50 				; znaki zajmuj¹ pamiêæ $1000..$1FFF, $C000..$CFFF i $E000..$FFFF
+    51 				; pierwsze 64 znaki to bufor #1, drugie 64 znaki to bufor #2
+    52 				; z ka¿dego bufora tylko pierwsze 40 znaków jest modyfikowane, reszta jest do wykorzystania
+    53
+    54 = FFE0			mainIntro	= $ffe0		; zmienne pomocnicze dla intra i gry
+    55 = FFE3			msxPlay		= $ffe3
+    56 = FFE6			msxStop		= $ffe6
+    57 = FFE9			select		= $ffe9
+    58
+    59 				//---------------------------------------------------------------------------------------------------------------------
+    60
+    61 = 00F0			dolnakrawedz	= 240		; dolna krawedz ekranu - wspó³rzedna Y
+    62
+    63 = 0030			scrwid	= 48
+    64
+    65 = 0013			scrhig	= 19
+    66
+    67 = 0028			pustak		= 40		; pierwszy wolny znak do wykorzystania '40'
+    68 = 00A9			murek0		= 41+$80
+    69 = 00E8			murek1		= 104+$80
+    70 = 00E9			murek2		= 105+$80
+    71
+    72 = 00AA			murL0		= 42+$80	; drugi rodzaj murku, w stylu Pang-a C64
+    73 = 00AB			murM0		= 43+$80
+    74 = 00AC			murR0		= 44+$80
+    75 = 00AD			mur0		= 45+$80
+    76
+    77 = 003A			bonus0		= 58		; znaki wykorzystywane przez bonus-y (wiersz 0)
+    78 = 003B			bonus1		= 59
+    79 = 003C			bonus2		= 60
+    80
+    81 = 003D			bonus3		= 61		; znaki wykorzystywane przez bonus-y (wiersz 1)
+    82 = 003E			bonus4		= 62
+    83 = 003F			bonus5		= 63
+    84
+    85 = 00A9			okalajacy	= murek0
+    86
+    87 				//---------------------------------------------------------------------------------------------------------------------
+    88
+    89 = 0046			dwukropek_u	= $46
+    90 = 007E			dwukropek_d	= $7e
+    91
+    92 = 29AA00			prawy_nawias0	= $29aa00
+    93 = 4D4E			prawy_nawias1	= $004d4e
+    94 = A3A4			prawy_nawias2	= $00a3a4
+    95 = 626300			prawy_nawias3	= $626300
+    96
+    97 = 002C			lives_chr_00	= 44		; pierwszy wiersz z licznikiem zyc
+    98 = 002D			lives_chr_01	= 45
+    99 = 002E			lives_chr_02	= 46
+   100
+   101 = 0002			lives_chr_10	= 2		; drugi wiersz z licznikiem zyc
+   102 = 0003			lives_chr_11	= 3
+   103 = 0004			lives_chr_12	= 4
+   104
+   105 				//---------------------------------------------------------------------------------------------------------------------
+   106
+   107 = 0008			hook_delay	= 8		; <> [0..1]
+   108 = 0080			hook_time_limit = 128		; czas trwania harpunu z hakiem (=128 w celu wykorzystania BPL)
+   109
+   110 = 0078			shield_time_limit= 120		; czas trwania SHIELD
+   111 = 006E			clock_time_limit = 110		; czas trwania CLOCK
+   112
+   113 = 0060			hero_pmg_offset	= 120-16-8	; przesuniecie PMG przykrywaj¹cego bohatera
+   114
+   115 = 0041			harpun_pmg_offset = 89-16-8	; przesuniecie PMG podbarwiajace harpun
+   116
+   117 = 0011			panel_pmg_offset= 21-4		; przesuniecie PMG podbarwiajacego panel
+   118
+   119 				//---------------------------------------------------------------------------------------------------------------------
+   120
+   121 = 0016			balls_limit		= 22	; maksymalna dopuszczalna liczba najmniejszych kul w trybie PANIC MODE
+   122
+   123 = 0002			max_bonus_counter	= 2	; maksymalna liczba wyst¹pieñ bonusu		
+   124
+   125 				//---------------------------------------------------------------------------------------------------------------------
+   126
+   127 = 0010			sfxBum	= $10		; wybuch balonu
+   128 = 0011			sfxDie	= $11		; œmieræ bohatera
+   129 = 0012			sfxHrp	= $12		; wystrzelenie harpunu
+   130 = 0013			sfxHrpS = $13		; harpun trafia w twardy murek
+   131 = 0014			sfxHrpH = $14		; harpun trafia w miêkki murek
+   132 = 0015			sfxHrpX = $15		; harpun zostaje zaczepiony
+   133 = 0016			sfxBon	= $16		; zebranie bonusu
+   134
+   135 = 0024			ton_C4	= 36
+   136 = 0030			ton_C5	= 48
+   137 = 0011			ton_G2	= 17
+   138 = 001F			ton_G3	= 31
+   139 = 002B			ton_G4	= 43
+   140
+   141 				.enum	msxCode
+   142 					Title, GameOver, Congratulations ,Game0, Game1, Game2, Game3
+   142 = 0000			TITLE
+   142 = 0001			GAMEOVER
+   142 = 0002			CONGRATULATIONS
+   142 = 0003			GAME0
+   142 = 0004			GAME1
+   142 = 0005			GAME2
+   142 = 0006			GAME3
+   143 				.ende
+   144
+   145 				//---------------------------------------------------------------------------------------------------------------------
+   146
+   147 				.enum	bonusCode
+   148 					heart = 1, shield, clock, harpun_h, harpun, tnt
+   148 = 0001			HEART
+   148 = 0002			SHIELD
+   148 = 0003			CLOCK
+   148 = 0004			HARPUN_H
+   148 = 0005			HARPUN
+   148 = 0006			TNT
+   149 				.ende

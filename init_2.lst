@@ -1,0 +1,358 @@
+mads 2.0.4 build 4 (28 Mar 16)
+Source: D:\!Atari\Pang_2\init_2.asm
+     1
+     2 				; ------------------------------------------------------------------------------------------------------
+     3 				; ---	tutaj kod inicjalizuj¹cy który nie wymaga dostêpu do obszaru $4000..$7FFF pamiêci podstawowej
+     4 				; ------------------------------------------------------------------------------------------------------
+     5
+     6 					icl 'pang.hea'
+Source: D:\!Atari\Pang_2\pang.hea
+     1
+     2 				// tablica ze starszymi bajtami adresów zestawów znakowych (19 zestawów)
+     3
+     4  [0000] 10 14 18 1C C0 + .put = $10,$14,$18,$1c,$c0,$c4,$c8,$cc,$e0,$e4,$e8,$ec,$f0,$f4,$f8,$fc,$28,$2c,$30, $30
+     5
+     6 				//---------------------------------------------------------------------------------------------------------------------
+     7
+     8 = 000A			banks	= 10
+     9
+    10 = 0020			defaultPrior	= $20		; domyœlny piorytet duchów "Multicolor PMG + PRIOR $00"
+    11
+    12 = 0000			pmgB1	= $0000
+    13 = 2000			pmgB2	= $2000			; $2300..$27FF
+    14
+    15 = 0700			pmStar	= $700			; duch dla harpunu i gwiazdki
+    16
+    17 = 0400			pmHero0	= $400			; !!! pmHero0, pmHero1 !!! para - 4 kolorowy duch
+    18 = 0500			pmHero1	= $500
+    19 = 0600			pmHero2	= $600			; ten duch nie ma pary
+    20
+    21 = 00C0			missile_mask = [3<<[(pmHero0-$400)/$75]+3<<[(pmHero1-$400)/$75]+3<<[(pmHero2-$400)/$75]]^$ff
+    22
+    23 = 000F			starsBright = $0f
+    24
+    25
+    26 = 00F0			sfx_default_volume	= $f0
+    27 = 00F0			msx_default_volume	= $f0
+    28
+    29
+    30 = 2000			inflate_data	= pmgB2		; 3 strony dla dekompresora
+    31
+    32 = 0800			clrWallIDX	= $0800		; tablica clrWallIDX[wallIDX]=$8x z indeksami do killWall
+    33 = 0880			clrWallPOS	= $0880
+    34 = 0900			killWall	= $0900
+    35
+    36 = 0A00			volume_slide	= $0a00		; tablica g³oœnoœci dla RMT
+    37
+    38 = 0B00			min52div4	= $0b00
+    39
+    40 = 0C00			drabin		= $0c00		; $0c00..$0fff, informacja o drabinkach
+    41
+    42 = 9B40			txture		= $9b40		; $9b40..$b6ff
+    43 = B300			invers		= txture+152*40	; mapa kolizji dla harpunu i kul, tymczasowo takze informacja o inversie znaków
+    44 = B700			colors		= invers+1024	; informacja o kolorach (5*19)
+    45
+    46 				// !!! ostatnie 48 bajtów INVERS zawsze wyzerowane !!!
+    47
+    48 = B800			fntPnl		= $b800		; $B800..$BFFF - dwa zestawy znaków dla panelu gry
+    49
+    50 				; znaki zajmuj¹ pamiêæ $1000..$1FFF, $C000..$CFFF i $E000..$FFFF
+    51 				; pierwsze 64 znaki to bufor #1, drugie 64 znaki to bufor #2
+    52 				; z ka¿dego bufora tylko pierwsze 40 znaków jest modyfikowane, reszta jest do wykorzystania
+    53
+    54 = FFE0			mainIntro	= $ffe0		; zmienne pomocnicze dla intra i gry
+    55 = FFE3			msxPlay		= $ffe3
+    56 = FFE6			msxStop		= $ffe6
+    57 = FFE9			select		= $ffe9
+    58
+    59 				//---------------------------------------------------------------------------------------------------------------------
+    60
+    61 = 00F0			dolnakrawedz	= 240		; dolna krawedz ekranu - wspó³rzedna Y
+    62
+    63 = 003D			pmg_overlay	= dolnakrawedz-19*8-23-4
+    64
+    65 = 0030			scrwid	= 48
+    66
+    67 = 0013			scrhig	= 19
+    68
+    69 = 0028			pustak		= 40		; pierwszy wolny znak do wykorzystania '40'
+    70 = 00A9			murek0		= 41+$80
+    71 = 00E8			murek1		= 104+$80
+    72 = 00E9			murek2		= 105+$80
+    73
+    74 = 00AA			murL0		= 42+$80	; drugi rodzaj murku, w stylu Pang-a C64
+    75 = 00AB			murM0		= 43+$80
+    76 = 00AC			murR0		= 44+$80
+    77 = 00AD			mur0		= 45+$80
+    78
+    79 = 003A			bonus0		= 58		; znaki wykorzystywane przez bonus-y (wiersz 0)
+    80 = 003B			bonus1		= 59
+    81 = 003C			bonus2		= 60
+    82
+    83 = 003D			bonus3		= 61		; znaki wykorzystywane przez bonus-y (wiersz 1)
+    84 = 003E			bonus4		= 62
+    85 = 003F			bonus5		= 63
+    86
+    87 = 00A9			okalajacy	= murek0
+    88
+    89 				//---------------------------------------------------------------------------------------------------------------------
+    90 				/*
+    91 				dwukropek_u	= $46
+    92 				dwukropek_d	= $7e
+    93
+    94 				prawy_nawias0	= $29aa00
+    95 				prawy_nawias1	= $004d4e
+    96 				prawy_nawias2	= $00a3a4
+    97 				prawy_nawias3	= $626300
+    98
+    99 				lives_chr_00	= 44		; pierwszy wiersz z licznikiem zyc
+   100 				lives_chr_01	= 45
+   101 				lives_chr_02	= 46
+   102
+   103 				lives_chr_10	= 2		; drugi wiersz z licznikiem zyc
+   104 				lives_chr_11	= 3
+   105 				lives_chr_12	= 4
+   106 				*/
+   106
+   107 				//---------------------------------------------------------------------------------------------------------------------
+   108
+   109 = 0008			hook_delay	= 8		; <> [0..1]
+   110 = 0080			hook_time_limit = 128		; czas trwania harpunu z hakiem (=128 w celu wykorzystania BPL)
+   111
+   112 = 0078			shield_time_limit= 120		; czas trwania SHIELD
+   113 = 006E			clock_time_limit = 110		; czas trwania CLOCK
+   114
+   115 = 005C			hero_pmg_offset	= 120-16-8-4	; przesuniecie PMG przykrywaj¹cego bohatera
+   116
+   117 = 003D			harpun_pmg_offset = 89-16-8-4	; przesuniecie PMG podbarwiajace harpun
+   118
+   119 				;panel_pmg_offset= 21-4		; przesuniecie PMG podbarwiajacego panel
+   120
+   121 				//---------------------------------------------------------------------------------------------------------------------
+   122
+   123 = 0016			balls_limit		= 22	; maksymalna dopuszczalna liczba najmniejszych kul w trybie PANIC MODE
+   124
+   125 = 0002			max_bonus_counter	= 2	; maksymalna liczba wyst¹pieñ bonusu		
+   126
+   127 				//---------------------------------------------------------------------------------------------------------------------
+   128
+   129 = 0010			sfxBum	= $10		; wybuch balonu
+   130 = 0011			sfxDie	= $11		; œmieræ bohatera
+   131 = 0012			sfxHrp	= $12		; wystrzelenie harpunu
+   132 = 0013			sfxHrpS = $13		; harpun trafia w twardy murek
+   133 = 0014			sfxHrpH = $14		; harpun trafia w miêkki murek
+   134 = 0015			sfxHrpX = $15		; harpun zostaje zaczepiony
+   135 = 0016			sfxBon	= $16		; zebranie bonusu
+   136
+   137 = 0024			ton_C4	= 36
+   138 = 0030			ton_C5	= 48
+   139 = 0011			ton_G2	= 17
+   140 = 001F			ton_G3	= 31
+   141 = 002B			ton_G4	= 43
+   142
+   143 				.enum	msxCode
+   144 					Title, GameOver, Congratulations ,Game0, Game1, Game2, Game3
+   144 = 0000			TITLE
+   144 = 0001			GAMEOVER
+   144 = 0002			CONGRATULATIONS
+   144 = 0003			GAME0
+   144 = 0004			GAME1
+   144 = 0005			GAME2
+   144 = 0006			GAME3
+   145 				.ende
+   146
+   147 				//---------------------------------------------------------------------------------------------------------------------
+   148
+   149 				.enum	bonusCode
+   150 					heart = 1, shield, clock, harpun_h, harpun, tnt
+   150 = 0001			HEART
+   150 = 0002			SHIELD
+   150 = 0003			CLOCK
+   150 = 0004			HARPUN_H
+   150 = 0005			HARPUN
+   150 = 0006			TNT
+   151 				.ende
+   152
+   153 				.enum	deathCode
+   154 					no_power = 1, no_time, esc_key
+   154 = 0001			NO_POWER
+   154 = 0002			NO_TIME
+   154 = 0003			ESC_KEY
+   155 				.ende
+     7
+     8 = 0000				.extrn tmpINVERS, inflate .word
+     9 = 0000				.extrn inputPointer, outputPointer .byte
+    10
+    11 					.public init_2
+    12
+    13 FFFF> 01,0000-0230> 4D + 	.RELOC
+    14
+    15 01,0000 A9 D1 85 00 A9 + init_2	mwa #volume inputPointer
+    16 01,0008 A9 00 85 00 A9 + 	mwa #volume_slide outputPointer
+    17 01,0010 20 00 00			jsr inflate
+    18
+    19 				// przepisanie danych PMG dla panelu
+    20 				/*
+    21 					mva >pmgB1+$700 p0+2
+    22 					mva >pmgB2+$700 p1+2
+    23
+    24 					ldx #5*32-1
+    25 				cp_lp	ldy #$1f
+    26 				cp	lda pmgPan,x
+    27 				p0	sta pmgB1+$700+panel_pmg_offset,y
+    28 				p1	sta pmgB2+$700+panel_pmg_offset,y
+    29 					dex
+    30 					dey
+    31 					bpl cp
+    32
+    33 					dec p0+2
+    34 					dec p1+2
+    35
+    36 					cpx #$ff
+    37 					bne cp_lp
+    38 				*/	
+    38 					
+    39 					
+    40 				/*
+    41 					ldy #$1f
+    42 				pmgP	.rept 5
+    43 					lda pmgPan+#*32,y
+    44 					sta pmgB1+$300+#*$100+panel_pmg_offset,y
+    45 					sta pmgB2+$300+#*$100+panel_pmg_offset,y
+    46 					.endr
+    47 					dey
+    48 					bpl pmgP
+    49 				*/
+    49
+    50
+    51
+    52 				// do pierwszego zestawów znaków dodajemy sta³e definicje elementów pola gry
+    53 				// nastepnie tworzymy 19-e pozosta³ych zestawów jako kopie pierwszego zestawu
+    54
+    55 01,0013 A2 07			ldx #7
+    56 01,0015 BD 31 01 9D 40 + copy	mva	dpustak,x	.get[0]<<8+(pustak&$7f)*8,x
+    57 01,001B BD 39 01 9D 48 + 	mva	dmurek,x	.get[0]<<8+(murek0&$7f)*8,x
+    58 01,0021 BD 41 01 9D 40 + 	mva	dmurek+8,x	.get[0]<<8+(murek1&$7f)*8,x
+    59 01,0027 BD 49 01 9D 48 + 	mva	dmurek+16,x	.get[0]<<8+(murek2&$7f)*8,x
+    60
+    61 01,002D BD 51 01 9D 50 + 	:16 mva	dmurek2+#*8,x	.get[0]<<8+(murL0&$7f)*8+#*8,x
+    62
+    63 01,008D CA			dex
+    64 01,008E 10 85			bpl copy
+    65
+    66
+    67 = 01,0140		?idx	= (pustak&$7f)*8
+    68 = 01,02C0		?idx2	= $2c0			; ?2c0 + $100 obejmie znaki 'murek1' (104) i 'murek2' (105)
+    69
+    70 01,0090 A0 00			ldy #0
+    71
+    72 01,0092 20 BD 00		cp0	jsr first
+    73 01,0095 20 F7 00			jsr second
+    74
+    75 01,0098 98			tya
+    76 01,0099 38 E9 30			sub #52-4
+    77 01,009C 4A 4A			:2 lsr @
+    78 01,009E 99 00 0B			sta min52div4,y
+    79
+    80 01,00A1 B9 00 B3 99 00 + 	mva invers+$000,y	tmpINVERS+$000,y	; przepiszemy invers do tmpINVERS
+    81 01,00A7 B9 00 B4 99 00 + 	mva invers+$100,y	tmpINVERS+$100,y	; tmpINVERS dla detekcji murków miêkkich
+    82 01,00AD B9 00 B5 99 00 + 	mva invers+$200,y	tmpINVERS+$200,y
+    83 01,00B3 B9 00 B6 99 00 + 	mva invers+$300,y	tmpINVERS+$300,y
+    84
+    85 				;	mva volume,y	volume_slide,y
+    86
+    87 01,00B9 C8			iny
+    88 01,00BA D0 D6			bne cp0
+    89
+    90 01,00BC 60			rts
+    91
+    92 01,00BD B9 40 11		first	lda .get[0]<<8+?idx,y
+    93 01,00C0 99 40 15			sta .get[1]<<8+?idx,y
+    94 01,00C3 99 40 19			sta .get[2]<<8+?idx,y
+    95 01,00C6 99 40 1D			sta .get[3]<<8+?idx,y
+    96 01,00C9 99 40 C1			sta .get[4]<<8+?idx,y
+    97 01,00CC 99 40 C5			sta .get[5]<<8+?idx,y
+    98 01,00CF 99 40 C9			sta .get[6]<<8+?idx,y
+    99 01,00D2 99 40 CD			sta .get[7]<<8+?idx,y
+   100 01,00D5 99 40 E1			sta .get[8]<<8+?idx,y
+   101 01,00D8 99 40 E5			sta .get[9]<<8+?idx,y
+   102 01,00DB 99 40 E9			sta .get[10]<<8+?idx,y
+   103 01,00DE 99 40 ED			sta .get[11]<<8+?idx,y
+   104 01,00E1 99 40 F1			sta .get[12]<<8+?idx,y
+   105 01,00E4 99 40 F5			sta .get[13]<<8+?idx,y
+   106 01,00E7 99 40 F9			sta .get[14]<<8+?idx,y
+   107 01,00EA 99 40 FD			sta .get[15]<<8+?idx,y
+   108 01,00ED 99 40 29			sta .get[16]<<8+?idx,y
+   109 01,00F0 99 40 2D			sta .get[17]<<8+?idx,y
+   110 01,00F3 99 40 31			sta .get[18]<<8+?idx,y
+   111 01,00F6 60			rts
+   112
+   113 01,00F7 B9 C0 12		second	lda .get[0]<<8+?idx2,y
+   114 01,00FA 99 C0 16			sta .get[1]<<8+?idx2,y
+   115 01,00FD 99 C0 1A			sta .get[2]<<8+?idx2,y
+   116 01,0100 99 C0 1E			sta .get[3]<<8+?idx2,y
+   117 01,0103 99 C0 C2			sta .get[4]<<8+?idx2,y
+   118 01,0106 99 C0 C6			sta .get[5]<<8+?idx2,y
+   119 01,0109 99 C0 CA			sta .get[6]<<8+?idx2,y
+   120 01,010C 99 C0 CE			sta .get[7]<<8+?idx2,y
+   121 01,010F 99 C0 E2			sta .get[8]<<8+?idx2,y
+   122 01,0112 99 C0 E6			sta .get[9]<<8+?idx2,y
+   123 01,0115 99 C0 EA			sta .get[10]<<8+?idx2,y
+   124 01,0118 99 C0 EE			sta .get[11]<<8+?idx2,y
+   125 01,011B 99 C0 F2			sta .get[12]<<8+?idx2,y
+   126 01,011E 99 C0 F6			sta .get[13]<<8+?idx2,y
+   127 01,0121 99 C0 FA			sta .get[14]<<8+?idx2,y
+   128 01,0124 99 C0 FE			sta .get[15]<<8+?idx2,y
+   129 01,0127 99 C0 2A			sta .get[16]<<8+?idx2,y
+   130 01,012A 99 C0 2E			sta .get[17]<<8+?idx2,y
+   131 01,012D 99 C0 32			sta .get[18]<<8+?idx2,y
+   132 01,0130 60			rts
+   133
+   134 01,0131 AA AA AA AA AA + dpustak	:8 dta $aa
+   135 01,0139 24 FF 42 FF 24 + dmurek	ins 'objects.fnt',48*8,8*3	; 3x klocek murku #1
+   136 01,0151 15 C1 C4 10 C1 + dmurek2	ins 'objects.fnt',58*8,8*16	; klocki murku poziomego i pionowego
+   137
+   138 				/*
+   139 				pmgPan	dta $00,$00,$00,$40,$00,$40,$00,$40,$00,$00,$00,$02
+   140 					dta $00,$02,$42,$00,$00,$00,$00,$00,$00,$80,$00,$40,$00,$00,$00,$00
+   141 					dta $00,$00,$00,$00
+   142
+   143 					dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$3E,$41,$80
+   144 					dta $00,$00,$00,$00,$00,$00,$00,$06,$00,$00,$00,$00,$00,$00,$00,$00
+   145 					dta $00,$00,$00,$00
+   146
+   147 					dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$28,$3C
+   148 					dta $24,$60,$7C,$76,$42,$81,$80,$00,$18,$1E,$0C,$2C,$18,$5C,$5C,$3C
+   149 					dta $0C,$38,$38,$00
+   150
+   151 					dta $00,$00,$00,$00,$00,$30,$00,$00,$30,$10,$F8,$78
+   152 					dta $30,$FC,$FC,$FC,$F8,$FC,$F8,$78,$FC,$FC,$FC,$7C,$78,$78,$30,$38
+   153 					dta $60,$10,$00,$00
+   154
+   155 					dta $08,$7C,$F4,$BC,$FC,$FC,$FC,$FC,$FC,$FC,$FC,$7C
+   156 					dta $7C,$78,$78,$78,$38,$30,$38,$30,$10,$10,$10,$00,$00,$00,$00,$00
+   157 					dta $00,$00,$00,$00
+   158 				*/
+   158
+   159 				;	.get [$100] 'volume.dat'
+   160 				;volume	:256 dta .get[$100+#]<<4
+   161
+   162 01,01D1 75 CA 51 0D C0 + volume	ins 'volume.df7'
+   162 01,0231			BLK UPDATE ADDRESS
+   162 01,0231 EF FF 57		
+   162 01,0231 16 00 16 00 1C + 
+   162 01,0231 EF FF 3C		
+   162 01,0231 01 00 01 00	
+   162 01,0231 EF FF 3E		
+   162 01,0231 01 00 05 00 D1	
+   162 01,0231			BLK UPDATE EXTERNAL
+   162 01,0231 EE FF 57		
+   162 01,0231 01 00 07 00 49 + INFLATE
+   162 01,0231 EE FF 57		
+   162 01,0231 04 00 09 00 54 + TMPINVERS
+   162 01,0231 EE FF 42		
+   162 01,0231 02 00 0D 00 4F + OUTPUTPOINTER
+   162 01,0231 EE FF 42		
+   162 01,0231 02 00 0C 00 49 + INPUTPOINTER
+   162 01,0231			BLK UPDATE PUBLIC
+   162 01,0231 57 56 06 00 49 + INIT_2
