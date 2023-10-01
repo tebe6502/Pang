@@ -1,0 +1,34 @@
+byte	.macro
+	?v = .get[?adres]
+
+	ift ?v<>0
+
+	 ?p0 = ?v&$c0
+	 ?p1 = ?v&$30
+	 ?p2 = ?v&$0c
+	 ?p3 = ?v&$03
+ 
+	 ift ?p0<>0 .and ?p1<>0 .and ?p2<>0 .and ?p3<>0
+	  ift ?old<>?v
+	   lda #?v
+	   ?cycle += 2
+	  eif
+	  sta ?mem+?adres,x
+	  ?cycle += 4
+	  ?old=?v	 
+	 eli ?p0=0 .and ?p1=0 .and ?p2=0 .and ?p3=0
+	 
+	 els
+	  lda ?mem+?adres,x
+	  and #.get[$f000+?v]^$ff
+	  ora #?v
+	  sta ?mem+?adres,x
+	  ?cycle += 12
+	  ?old=$ffff
+	 eif
+	
+	eif
+
+	?adres += 32
+	.endm
+

@@ -1,0 +1,101 @@
+Mad-Assembler v1.7.4 by Tebe/Madteam
+Source: D:\!Atari\Pang\kule\kula1.asm
+     1
+     2 					org $2000
+     3
+     4 = A000			mem	= $a000
+     5
+     6 FFFF> 2000-2052> 70 70 + ant	dta d'ppp',$4e,a(mem)
+     7 2006 0E 0E 0E 0E 0E 0E + 	dta d'..............................................'
+     8 2034 41 00 20			dta $41,a(ant)
+     9
+    10
+    11
+    12 2037				.get 'kula1.mic'
+    13
+    14 2037				.get [$f000] 'maska.dat'
+    15
+    16
+    17 = 0005			ile	= 5
+    18
+    19 2037			main
+    20 2037 A9 00 8D 30 02 A9 + 	mwa #ant 560
+    21 2041 A9 3D 8D 2F 02		mva #%00111101 559
+    22
+    23 2046 A2 00			ldx #0
+    24 2048 20 00 40			jsr $4000
+    25
+    26 204B A2 03			ldx #3
+    27 204D 20 00 40			jsr $4000
+    28
+    29 2050 4C 50 20			jmp *
+    30
+    31
+    32
+    33 2053				org $4000
+    34
+    35
+    36 = 0000				?line	= 0
+    37 = FFFF				?old	= $ffff
+    38 = 0000				?cycle	= 0
+    39
+    40 4000-4450> BD 01 A0 29 + 	:5*8 read
+    41
+    42
+    43 				read	.macro
+    44 					?adres=?line*32
+    45
+    46 					byte
+    47 					byte
+    48 					byte
+    49 					byte
+    50 					byte
+    51 				 
+    52 					?line++
+    52 				?LINE=?LINE+1
+    53 					.endm
+    54
+    55
+    56 				byte	.macro
+    57 					?v = .get[?adres]
+    58
+    59 					ift ?v<>0
+    60
+    61 					 ?p0 = ?v&$c0
+    62 					 ?p1 = ?v&$30
+    63 					 ?p2 = ?v&$0c
+    64 					 ?p3 = ?v&$03
+    65 				 
+    66 					 ift ?p0<>0 .and ?p1<>0 .and ?p2<>0 .and ?p3<>0
+    67 					  ift ?old<>?v
+    68 					   lda #?v
+    69 					   ?cycle += 2
+    69 					   ?cycle =?CYCLE+ 2
+    70 					  eif
+    71 					  sta mem+?adres,x
+    72 					  ?cycle += 4
+    72 					  ?cycle =?CYCLE+ 4
+    73 					  ?old=?v	 
+    74 					 eli ?p0=0 .and ?p1=0 .and ?p2=0 .and ?p3=0
+    75 				 
+    76 					 els
+    77 					  lda $a000+?adres,x
+    78 					  and #.get[$f000+?v]^$ff
+    79 					  ora #?v
+    80 					  sta mem+?adres,x
+    81 					  ?cycle += 12
+    81 					  ?cycle =?CYCLE+ 12
+    82 					  ?old=$ffff
+    83 					 eif
+    84 				 
+    85 					eif
+    86
+    87 					?adres++
+    87 				?ADRES=?ADRES+1
+    88 					.endm
+    89
+    90 4450 60				rts
+    91
+    92 					.print 'kula1: ',*-$4000 ,' bytes, ',?cycle,' cycles'
+    93
+    94 02E0-02E1> 37 20			run main

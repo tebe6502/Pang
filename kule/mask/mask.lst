@@ -1,0 +1,40 @@
+Mad-Assembler v1.7.4 by Tebe/Madteam
+Source: D:\!Atari\Pang\kule\mask.asm
+     1
+     2  00 03 03 03 0C 0F 0F +  	:256 maska #
+     3
+     4 				maska	.macro
+     5 					?v = :1
+     6
+     7 					?p0 = ?v&$c0
+     8 					?p1 = ?v&$30
+     9 					?p2 = ?v&$0c
+    10 					?p3 = ?v&$03
+    11 				 
+    12 					?w = 0
+    13
+    14 					ift ?p0<>0
+    15 					 ?w=$c0
+    16 					eif
+    17
+    18 					ift ?p1<>0
+    19 					 ?w += $30
+    19 					 ?w =?W+ $30
+    20 					eif
+    21
+    22 					ift ?p2<>0
+    23 					 ?w += $0c
+    23 					 ?w =?W+ $0c
+    24 					eif
+    25
+    26 					ift ?p3<>0
+    27 					 ?w += $03
+    27 					 ?w =?W+ $03
+    28 					eif
+    29
+    30 					.put[:1] = ?w
+    31 				 
+    32 					.endm
+    33
+    34
+    35 					.sav 'maska.dat',256

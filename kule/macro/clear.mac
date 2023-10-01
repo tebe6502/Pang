@@ -1,0 +1,13 @@
+byte	.macro
+	?v = .get[?adres]
+
+	ift ?v<>0
+
+	 lda txt+?adres,x
+	 sta ?mem+?adres,x
+	 ?cycle += 8
+
+	eif
+
+	?adres += 32
+	.endm
