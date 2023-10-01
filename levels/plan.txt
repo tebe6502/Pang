@@ -1,0 +1,14 @@
+1. panglight - wyspa		PangLight_G2F_Powrooz
+2. winter - antarktyda		PangWinter_G2F_Powrooz
+3. park - brazylia		PangPark_Vers2
+4. shrine -panama, yucatan	PangShrine_G2F_Powrooz_2Final
+5. most v3 - hiszpania		PangMostVer3Clean
+6. lions - afryka		PangLions_G2F_Powrooz
+7. atlas - grecja		PangAtlas_G2F_Powrooz
+8. mansion - pn anglia		PangMansion_G2F_Powrooz
+9. street - rosja		PangStreet_G2F_Powrooz
+10. caves - indie		PangCaves_G2F_Powrooz
+11. japan - japonia		PangJapanVers2
+12. city - australia		PangCityVers2AA
+
+
