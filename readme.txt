@@ -1,58 +1,60 @@
+https://www.pouet.net/prod.php?which=68501
+
 Silly Venture 2016 GAME COMPO
 -----------------------------
 
-tytu³:		PANG
+tytuÅ‚:		PANG
 wersja:		4.5 build 38
 
 wymagania:	Atari XE/XL
 		GTIA PAL
-		192 kB dodatkowej pamiêci
+		192 kB dodatkowej pamiÄ™ci
 		POKEY Stereo (opcjonalnie)
 
-		pozosta³e potencjalnie wykryte rozszerzenia VBXE, 65816, MapRam
-		nie s¹ wykorzystywane przez grê
-		(kod Ÿród³owy programu detekcji do³¹czony jest do MadPascal-a)
+		pozostaÅ‚e potencjalnie wykryte rozszerzenia VBXE, 65816, MapRam
+		nie sÄ… wykorzystywane przez grÄ™
+		(kod ÅºrÃ³dÅ‚owy programu detekcji doÅ‚Ä…czony jest do MadPascal-a)
 
 Program:	Tomasz Biela (Tebe / Madteam)
 
 Grafika: 	Kamil Walaszek (Vidol)
-		ekran ATASCII, ekran tytu³owy
-		postaæ bohatera
+		ekran ATASCII, ekran tytuÅ‚owy
+		postaÄ‡ bohatera
 		elementy pola gry
 
-		Adam PowroŸnik (Ooz / Agenda)
+		Adam PowroÅºnik (Ooz / Agenda)
 		tekstury pola gry (12)
 
 		Maciej Hauke (Rocky / Madteam)
-		mapa œwiata
+		mapa Å›wiata
 		konwersja postaci bohatera kiedy ginie
 
-Muzyka:		Micha³ Radecki (String / Agenda)
-		muzyka, efekty dŸwiêkowe
+Muzyka:		MichaÅ‚ Radecki (String / Agenda)
+		muzyka, efekty dÅºwiÄ™kowe
 
 Sterowanie:	Joystick w porcie 1
 
 		klawisze:
 		A	ruch w lewo
 		D	ruch w prawo
-		W	ruch w górê
-		S	ruch w dó³
+		W	ruch w gÃ³rÄ™
+		S	ruch w dÃ³Å‚
 		Shift	fire
-		ESC	restart poziomu, tracimy jedno ¿ycie
+		ESC	restart poziomu, tracimy jedno Å¼ycie
 		SPACE	pauza gry
-		V, B	g³oœnoœæ efektów dŸwiêkowych w grze
-		N, M	g³oœnoœæ œcie¿ki dŸwiêkowej w grze
-		O, P	w³¹czenie / wy³¹czenie muzyki w grze
-		HELP	podgl¹d ekranu z najlepszymi wynikami (TOUR, PANIC)
+		V, B	gÅ‚oÅ›noÅ›Ä‡ efektÃ³w dÅºwiÄ™kowych w grze
+		N, M	gÅ‚oÅ›noÅ›Ä‡ Å›cieÅ¼ki dÅºwiÄ™kowej w grze
+		O, P	wÅ‚Ä…czenie / wyÅ‚Ä…czenie muzyki w grze
+		HELP	podglÄ…d ekranu z najlepszymi wynikami (TOUR, PANIC)
 		
 
 
-Prawie 10 lat zajê³o ukoñczenie PANG-a dla 8-bit Atari XE/XL.
-Dziesiêæ lat z du¿ymi przerwami, 02.07.2007 - 15.12.2016 :)
+Prawie 10 lat zajÄ™Å‚o ukoÅ„czenie PANG-a dla 8-bit Atari XE/XL.
+DziesiÄ™Ä‡ lat z duÅ¼ymi przerwami, 02.07.2007 - 15.12.2016 :)
 
 Poziomy gry projektowali: String, Xeen, Urborg, Ja-reck, Ediman, Pajero, Emilka
 
-Linki do stron z konkursem na projekt poziomów do gry Pang:
+Linki do stron z konkursem na projekt poziomÃ³w do gry Pang:
 
 http://atarionline.pl/v01/index.php?ct=nowinki&ucat=1&subaction=showfull&id=1313789007
 http://atarionline.pl/forum/comments.php?DiscussionID=1500
@@ -60,13 +62,13 @@ http://atarionline.pl/v01/index.php?subaction=showfull&id=1321903963&ucat=1&ct=n
 http://www.atari.org.pl/forum/viewtopic.php?id=9160
 
 
-zmiany w porównaniu do wersji zaprezentowanej na Silly Venture 2016:
+zmiany w porÃ³wnaniu do wersji zaprezentowanej na Silly Venture 2016:
 
-- tryb PANIC na pocz¹tku charakteryzuje siê wiêksz¹ liczb¹ bonusów (serduszko, tarcza), potem jest tych bonusów coraz mniej
-- po przejœciu 9 poziomu trybu PANIC zobaczymy ekran z gratulacjami
-- dodany datamatrix, mo¿na zapisywaæ wyniki high_score na stronie XXL-a
-- mo¿liwoœæ podejrzenia najlepszych wyników, klawisz HELP (potem trzeba wybraæ TOUR, PANIC)
-- obs³uga ruchów joysticka "na ukos", teraz nie bêdzie blokowany ruch postaci
-- mo¿liwoœæ wy³¹czenia muzyki podczas gry, to dla tych z NTSC
-- gra sprawdzona pod Rapidusem, wszystko dzia³a oprócz tytu³owego obrazka, gdzie wykorzystane s¹ zmiany rastra
-- ró¿ne inne poprawki zauwa¿onych b³êdów, testowa³ do oporu TDC :)
+- tryb PANIC na poczÄ…tku charakteryzuje siÄ™ wiÄ™kszÄ… liczbÄ… bonusÃ³w (serduszko, tarcza), potem jest tych bonusÃ³w coraz mniej
+- po przejÅ›ciu 9 poziomu trybu PANIC zobaczymy ekran z gratulacjami
+- dodany datamatrix, moÅ¼na zapisywaÄ‡ wyniki high_score na stronie XXL-a
+- moÅ¼liwoÅ›Ä‡ podejrzenia najlepszych wynikÃ³w, klawisz HELP (potem trzeba wybraÄ‡ TOUR, PANIC)
+- obsÅ‚uga ruchÃ³w joysticka "na ukos", teraz nie bÄ™dzie blokowany ruch postaci
+- moÅ¼liwoÅ›Ä‡ wyÅ‚Ä…czenia muzyki podczas gry, to dla tych z NTSC
+- gra sprawdzona pod Rapidusem, wszystko dziaÅ‚a oprÃ³cz tytuÅ‚owego obrazka, gdzie wykorzystane sÄ… zmiany rastra
+- rÃ³Å¼ne inne poprawki zauwaÅ¼onych bÅ‚Ä™dÃ³w, testowaÅ‚ do oporu TDC :)
