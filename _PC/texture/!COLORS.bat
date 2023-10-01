@@ -1,0 +1,3 @@
+mads @texColorsCount.asm
+
+pause
