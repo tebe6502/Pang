@@ -1,0 +1,3125 @@
+Mad-Assembler v1.7.6 by Tebe/Madteam
+Source: F:\!Atari\Pang\_PC\asm\test.asm
+     1
+     2 					org $2000
+     3
+     4 = A000			invers = $a000
+     5
+     6 					icl 'ckula0.asm'
+Source: F:\!Atari\Pang\_PC\asm\ckula0.asm
+     1 				.local	ck0
+     2 				* ---------------------------------------------------
+     3 				r0	.local				; ROW = 0
+     4 FFFF> 2000-3367> BD 68 + left	lda addx,x
+     5 2003 F0 29			beq up
+     6 2005 10 13			bpl right
+     7
+     8 2007 B9 FF 9F			lda invers-1+48*0+0,y
+     9 200A 19 2F A0			ora invers-1+48*1+0,y
+    10 200D 19 5F A0			ora invers-1+48*2+0,y
+    11 2010 19 8F A0			ora invers-1+48*3+0,y
+    12 2013 19 BF A0			ora invers-1+48*4+0,y
+    13 2016 F0 16			beq up
+    14 2018 D0 11			bne eox
+    15
+    16 201A B9 05 A0		right	lda invers+48*0+5+0,y
+    17 201D 19 35 A0			ora invers+48*1+5+0,y
+    18 2020 19 65 A0			ora invers+48*2+5+0,y
+    19 2023 19 95 A0			ora invers+48*3+5+0,y
+    20 2026 19 C5 A0			ora invers+48*4+5+0,y
+    21 2029 F0 03			beq up
+    22
+    23 202B 20 56 33		eox	jsr eorX
+    24
+    25 202E BD 68 33		up	lda addcnt,x
+    26 2031 10 01			bpl down
+    27
+    28 2033 60			_rts	rts
+    29
+    30 2034 B9 F0 A0		down	lda invers+240+0,y
+    31 2037 19 F1 A0			ora invers+1+240+0,y
+    32 203A 19 F2 A0			ora invers+2+240+0,y
+    33 203D 19 F3 A0			ora invers+3+240+0,y
+    34 2040 19 F4 A0			ora invers+4+240+0,y
+    35 2043 F0 EE			beq _rts
+    36 2045 4C 5F 33		eoy	jmp eorY
+    37 					.endl
+    38
+    39 				* ---------------------------------------------------
+    40 2048			r1	.local				; ROW = 1
+    41 2048 BD 68 33		left	lda addx,x
+    42 204B F0 29			beq up
+    43 204D 10 13			bpl right
+    44
+    45 204F B9 2F A0			lda invers-1+48*0+48,y
+    46 2052 19 5F A0			ora invers-1+48*1+48,y
+    47 2055 19 8F A0			ora invers-1+48*2+48,y
+    48 2058 19 BF A0			ora invers-1+48*3+48,y
+    49 205B 19 EF A0			ora invers-1+48*4+48,y
+    50 205E F0 16			beq up
+    51 2060 D0 11			bne eox
+    52
+    53 2062 B9 35 A0		right	lda invers+48*0+5+48,y
+    54 2065 19 65 A0			ora invers+48*1+5+48,y
+    55 2068 19 95 A0			ora invers+48*2+5+48,y
+    56 206B 19 C5 A0			ora invers+48*3+5+48,y
+    57 206E 19 F5 A0			ora invers+48*4+5+48,y
+    58 2071 F0 03			beq up
+    59
+    60 2073 20 56 33		eox	jsr eorX
+    61
+    62 2076 BD 68 33		up	lda addcnt,x
+    63 2079 10 12			bpl down
+    64
+    65 207B B9 00 A0			lda invers-48+48,y
+    66 207E 19 01 A0			ora invers-48+1+48,y
+    67 2081 19 02 A0			ora invers-48+2+48,y
+    68 2084 19 03 A0			ora invers-48+3+48,y
+    69 2087 19 04 A0			ora invers-48+4+48,y
+    70 					ift .def eoy
+    71 208A D0 12			bne eoy
+    72 					els
+    73 					seq
+    74 					jmp eorY
+    75 					eif
+    76 208C 60			_rts	rts
+    77
+    78 208D B9 20 A1		down	lda invers+240+48,y
+    79 2090 19 21 A1			ora invers+1+240+48,y
+    80 2093 19 22 A1			ora invers+2+240+48,y
+    81 2096 19 23 A1			ora invers+3+240+48,y
+    82 2099 19 24 A1			ora invers+4+240+48,y
+    83 209C F0 EE			beq _rts
+    84 209E 4C 5F 33		eoy	jmp eorY
+    85 					.endl
+    86
+    87 				* ---------------------------------------------------
+    88 20A1			r2	.local				; ROW = 2
+    89 20A1 BD 68 33		left	lda addx,x
+    90 20A4 F0 29			beq up
+    91 20A6 10 13			bpl right
+    92
+    93 20A8 B9 5F A0			lda invers-1+48*0+96,y
+    94 20AB 19 8F A0			ora invers-1+48*1+96,y
+    95 20AE 19 BF A0			ora invers-1+48*2+96,y
+    96 20B1 19 EF A0			ora invers-1+48*3+96,y
+    97 20B4 19 1F A1			ora invers-1+48*4+96,y
+    98 20B7 F0 16			beq up
+    99 20B9 D0 11			bne eox
+   100
+   101 20BB B9 65 A0		right	lda invers+48*0+5+96,y
+   102 20BE 19 95 A0			ora invers+48*1+5+96,y
+   103 20C1 19 C5 A0			ora invers+48*2+5+96,y
+   104 20C4 19 F5 A0			ora invers+48*3+5+96,y
+   105 20C7 19 25 A1			ora invers+48*4+5+96,y
+   106 20CA F0 03			beq up
+   107
+   108 20CC 20 56 33		eox	jsr eorX
+   109
+   110 20CF BD 68 33		up	lda addcnt,x
+   111 20D2 10 12			bpl down
+   112
+   113 20D4 B9 30 A0			lda invers-48+96,y
+   114 20D7 19 31 A0			ora invers-48+1+96,y
+   115 20DA 19 32 A0			ora invers-48+2+96,y
+   116 20DD 19 33 A0			ora invers-48+3+96,y
+   117 20E0 19 34 A0			ora invers-48+4+96,y
+   118 					ift .def eoy
+   119 20E3 D0 12			bne eoy
+   120 					els
+   121 					seq
+   122 					jmp eorY
+   123 					eif
+   124 20E5 60			_rts	rts
+   125
+   126 20E6 B9 50 A1		down	lda invers+240+96,y
+   127 20E9 19 51 A1			ora invers+1+240+96,y
+   128 20EC 19 52 A1			ora invers+2+240+96,y
+   129 20EF 19 53 A1			ora invers+3+240+96,y
+   130 20F2 19 54 A1			ora invers+4+240+96,y
+   131 20F5 F0 EE			beq _rts
+   132 20F7 4C 5F 33		eoy	jmp eorY
+   133 					.endl
+   134
+   135 				* ---------------------------------------------------
+   136 20FA			r3	.local				; ROW = 3
+   137 20FA BD 68 33		left	lda addx,x
+   138 20FD F0 29			beq up
+   139 20FF 10 13			bpl right
+   140
+   141 2101 B9 8F A0			lda invers-1+48*0+144,y
+   142 2104 19 BF A0			ora invers-1+48*1+144,y
+   143 2107 19 EF A0			ora invers-1+48*2+144,y
+   144 210A 19 1F A1			ora invers-1+48*3+144,y
+   145 210D 19 4F A1			ora invers-1+48*4+144,y
+   146 2110 F0 16			beq up
+   147 2112 D0 11			bne eox
+   148
+   149 2114 B9 95 A0		right	lda invers+48*0+5+144,y
+   150 2117 19 C5 A0			ora invers+48*1+5+144,y
+   151 211A 19 F5 A0			ora invers+48*2+5+144,y
+   152 211D 19 25 A1			ora invers+48*3+5+144,y
+   153 2120 19 55 A1			ora invers+48*4+5+144,y
+   154 2123 F0 03			beq up
+   155
+   156 2125 20 56 33		eox	jsr eorX
+   157
+   158 2128 BD 68 33		up	lda addcnt,x
+   159 212B 10 12			bpl down
+   160
+   161 212D B9 60 A0			lda invers-48+144,y
+   162 2130 19 61 A0			ora invers-48+1+144,y
+   163 2133 19 62 A0			ora invers-48+2+144,y
+   164 2136 19 63 A0			ora invers-48+3+144,y
+   165 2139 19 64 A0			ora invers-48+4+144,y
+   166 					ift .def eoy
+   167 213C D0 12			bne eoy
+   168 					els
+   169 					seq
+   170 					jmp eorY
+   171 					eif
+   172 213E 60			_rts	rts
+   173
+   174 213F B9 80 A1		down	lda invers+240+144,y
+   175 2142 19 81 A1			ora invers+1+240+144,y
+   176 2145 19 82 A1			ora invers+2+240+144,y
+   177 2148 19 83 A1			ora invers+3+240+144,y
+   178 214B 19 84 A1			ora invers+4+240+144,y
+   179 214E F0 EE			beq _rts
+   180 2150 4C 5F 33		eoy	jmp eorY
+   181 					.endl
+   182
+   183 				* ---------------------------------------------------
+   184 2153			r4	.local				; ROW = 4
+   185 2153 BD 68 33		left	lda addx,x
+   186 2156 F0 29			beq up
+   187 2158 10 13			bpl right
+   188
+   189 215A B9 BF A0			lda invers-1+48*0+192,y
+   190 215D 19 EF A0			ora invers-1+48*1+192,y
+   191 2160 19 1F A1			ora invers-1+48*2+192,y
+   192 2163 19 4F A1			ora invers-1+48*3+192,y
+   193 2166 19 7F A1			ora invers-1+48*4+192,y
+   194 2169 F0 16			beq up
+   195 216B D0 11			bne eox
+   196
+   197 216D B9 C5 A0		right	lda invers+48*0+5+192,y
+   198 2170 19 F5 A0			ora invers+48*1+5+192,y
+   199 2173 19 25 A1			ora invers+48*2+5+192,y
+   200 2176 19 55 A1			ora invers+48*3+5+192,y
+   201 2179 19 85 A1			ora invers+48*4+5+192,y
+   202 217C F0 03			beq up
+   203
+   204 217E 20 56 33		eox	jsr eorX
+   205
+   206 2181 BD 68 33		up	lda addcnt,x
+   207 2184 10 12			bpl down
+   208
+   209 2186 B9 90 A0			lda invers-48+192,y
+   210 2189 19 91 A0			ora invers-48+1+192,y
+   211 218C 19 92 A0			ora invers-48+2+192,y
+   212 218F 19 93 A0			ora invers-48+3+192,y
+   213 2192 19 94 A0			ora invers-48+4+192,y
+   214 					ift .def eoy
+   215 2195 D0 12			bne eoy
+   216 					els
+   217 					seq
+   218 					jmp eorY
+   219 					eif
+   220 2197 60			_rts	rts
+   221
+   222 2198 B9 B0 A1		down	lda invers+240+192,y
+   223 219B 19 B1 A1			ora invers+1+240+192,y
+   224 219E 19 B2 A1			ora invers+2+240+192,y
+   225 21A1 19 B3 A1			ora invers+3+240+192,y
+   226 21A4 19 B4 A1			ora invers+4+240+192,y
+   227 21A7 F0 EE			beq _rts
+   228 21A9 4C 5F 33		eoy	jmp eorY
+   229 					.endl
+   230
+   231 				* ---------------------------------------------------
+   232 21AC			r5	.local				; ROW = 5
+   233 21AC BD 68 33		left	lda addx,x
+   234 21AF F0 29			beq up
+   235 21B1 10 13			bpl right
+   236
+   237 21B3 B9 EF A0			lda invers-1+48*0+240,y
+   238 21B6 19 1F A1			ora invers-1+48*1+240,y
+   239 21B9 19 4F A1			ora invers-1+48*2+240,y
+   240 21BC 19 7F A1			ora invers-1+48*3+240,y
+   241 21BF 19 AF A1			ora invers-1+48*4+240,y
+   242 21C2 F0 16			beq up
+   243 21C4 D0 11			bne eox
+   244
+   245 21C6 B9 F5 A0		right	lda invers+48*0+5+240,y
+   246 21C9 19 25 A1			ora invers+48*1+5+240,y
+   247 21CC 19 55 A1			ora invers+48*2+5+240,y
+   248 21CF 19 85 A1			ora invers+48*3+5+240,y
+   249 21D2 19 B5 A1			ora invers+48*4+5+240,y
+   250 21D5 F0 03			beq up
+   251
+   252 21D7 20 56 33		eox	jsr eorX
+   253
+   254 21DA BD 68 33		up	lda addcnt,x
+   255 21DD 10 12			bpl down
+   256
+   257 21DF B9 C0 A0			lda invers-48+240,y
+   258 21E2 19 C1 A0			ora invers-48+1+240,y
+   259 21E5 19 C2 A0			ora invers-48+2+240,y
+   260 21E8 19 C3 A0			ora invers-48+3+240,y
+   261 21EB 19 C4 A0			ora invers-48+4+240,y
+   262 					ift .def eoy
+   263 21EE D0 12			bne eoy
+   264 					els
+   265 					seq
+   266 					jmp eorY
+   267 					eif
+   268 21F0 60			_rts	rts
+   269
+   270 21F1 B9 E0 A1		down	lda invers+240+240,y
+   271 21F4 19 E1 A1			ora invers+1+240+240,y
+   272 21F7 19 E2 A1			ora invers+2+240+240,y
+   273 21FA 19 E3 A1			ora invers+3+240+240,y
+   274 21FD 19 E4 A1			ora invers+4+240+240,y
+   275 2200 F0 EE			beq _rts
+   276 2202 4C 5F 33		eoy	jmp eorY
+   277 					.endl
+   278
+   279 				* ---------------------------------------------------
+   280 2205			r6	.local				; ROW = 6
+   281 2205 BD 68 33		left	lda addx,x
+   282 2208 F0 29			beq up
+   283 220A 10 13			bpl right
+   284
+   285 220C B9 1F A1			lda invers-1+48*0+288,y
+   286 220F 19 4F A1			ora invers-1+48*1+288,y
+   287 2212 19 7F A1			ora invers-1+48*2+288,y
+   288 2215 19 AF A1			ora invers-1+48*3+288,y
+   289 2218 19 DF A1			ora invers-1+48*4+288,y
+   290 221B F0 16			beq up
+   291 221D D0 11			bne eox
+   292
+   293 221F B9 25 A1		right	lda invers+48*0+5+288,y
+   294 2222 19 55 A1			ora invers+48*1+5+288,y
+   295 2225 19 85 A1			ora invers+48*2+5+288,y
+   296 2228 19 B5 A1			ora invers+48*3+5+288,y
+   297 222B 19 E5 A1			ora invers+48*4+5+288,y
+   298 222E F0 03			beq up
+   299
+   300 2230 20 56 33		eox	jsr eorX
+   301
+   302 2233 BD 68 33		up	lda addcnt,x
+   303 2236 10 12			bpl down
+   304
+   305 2238 B9 F0 A0			lda invers-48+288,y
+   306 223B 19 F1 A0			ora invers-48+1+288,y
+   307 223E 19 F2 A0			ora invers-48+2+288,y
+   308 2241 19 F3 A0			ora invers-48+3+288,y
+   309 2244 19 F4 A0			ora invers-48+4+288,y
+   310 					ift .def eoy
+   311 2247 D0 12			bne eoy
+   312 					els
+   313 					seq
+   314 					jmp eorY
+   315 					eif
+   316 2249 60			_rts	rts
+   317
+   318 224A B9 10 A2		down	lda invers+240+288,y
+   319 224D 19 11 A2			ora invers+1+240+288,y
+   320 2250 19 12 A2			ora invers+2+240+288,y
+   321 2253 19 13 A2			ora invers+3+240+288,y
+   322 2256 19 14 A2			ora invers+4+240+288,y
+   323 2259 F0 EE			beq _rts
+   324 225B 4C 5F 33		eoy	jmp eorY
+   325 					.endl
+   326
+   327 				* ---------------------------------------------------
+   328 225E			r7	.local				; ROW = 7
+   329 225E BD 68 33		left	lda addx,x
+   330 2261 F0 29			beq up
+   331 2263 10 13			bpl right
+   332
+   333 2265 B9 4F A1			lda invers-1+48*0+336,y
+   334 2268 19 7F A1			ora invers-1+48*1+336,y
+   335 226B 19 AF A1			ora invers-1+48*2+336,y
+   336 226E 19 DF A1			ora invers-1+48*3+336,y
+   337 2271 19 0F A2			ora invers-1+48*4+336,y
+   338 2274 F0 16			beq up
+   339 2276 D0 11			bne eox
+   340
+   341 2278 B9 55 A1		right	lda invers+48*0+5+336,y
+   342 227B 19 85 A1			ora invers+48*1+5+336,y
+   343 227E 19 B5 A1			ora invers+48*2+5+336,y
+   344 2281 19 E5 A1			ora invers+48*3+5+336,y
+   345 2284 19 15 A2			ora invers+48*4+5+336,y
+   346 2287 F0 03			beq up
+   347
+   348 2289 20 56 33		eox	jsr eorX
+   349
+   350 228C BD 68 33		up	lda addcnt,x
+   351 228F 10 12			bpl down
+   352
+   353 2291 B9 20 A1			lda invers-48+336,y
+   354 2294 19 21 A1			ora invers-48+1+336,y
+   355 2297 19 22 A1			ora invers-48+2+336,y
+   356 229A 19 23 A1			ora invers-48+3+336,y
+   357 229D 19 24 A1			ora invers-48+4+336,y
+   358 					ift .def eoy
+   359 22A0 D0 12			bne eoy
+   360 					els
+   361 					seq
+   362 					jmp eorY
+   363 					eif
+   364 22A2 60			_rts	rts
+   365
+   366 22A3 B9 40 A2		down	lda invers+240+336,y
+   367 22A6 19 41 A2			ora invers+1+240+336,y
+   368 22A9 19 42 A2			ora invers+2+240+336,y
+   369 22AC 19 43 A2			ora invers+3+240+336,y
+   370 22AF 19 44 A2			ora invers+4+240+336,y
+   371 22B2 F0 EE			beq _rts
+   372 22B4 4C 5F 33		eoy	jmp eorY
+   373 					.endl
+   374
+   375 				* ---------------------------------------------------
+   376 22B7			r8	.local				; ROW = 8
+   377 22B7 BD 68 33		left	lda addx,x
+   378 22BA F0 29			beq up
+   379 22BC 10 13			bpl right
+   380
+   381 22BE B9 7F A1			lda invers-1+48*0+384,y
+   382 22C1 19 AF A1			ora invers-1+48*1+384,y
+   383 22C4 19 DF A1			ora invers-1+48*2+384,y
+   384 22C7 19 0F A2			ora invers-1+48*3+384,y
+   385 22CA 19 3F A2			ora invers-1+48*4+384,y
+   386 22CD F0 16			beq up
+   387 22CF D0 11			bne eox
+   388
+   389 22D1 B9 85 A1		right	lda invers+48*0+5+384,y
+   390 22D4 19 B5 A1			ora invers+48*1+5+384,y
+   391 22D7 19 E5 A1			ora invers+48*2+5+384,y
+   392 22DA 19 15 A2			ora invers+48*3+5+384,y
+   393 22DD 19 45 A2			ora invers+48*4+5+384,y
+   394 22E0 F0 03			beq up
+   395
+   396 22E2 20 56 33		eox	jsr eorX
+   397
+   398 22E5 BD 68 33		up	lda addcnt,x
+   399 22E8 10 12			bpl down
+   400
+   401 22EA B9 50 A1			lda invers-48+384,y
+   402 22ED 19 51 A1			ora invers-48+1+384,y
+   403 22F0 19 52 A1			ora invers-48+2+384,y
+   404 22F3 19 53 A1			ora invers-48+3+384,y
+   405 22F6 19 54 A1			ora invers-48+4+384,y
+   406 					ift .def eoy
+   407 22F9 D0 12			bne eoy
+   408 					els
+   409 					seq
+   410 					jmp eorY
+   411 					eif
+   412 22FB 60			_rts	rts
+   413
+   414 22FC B9 70 A2		down	lda invers+240+384,y
+   415 22FF 19 71 A2			ora invers+1+240+384,y
+   416 2302 19 72 A2			ora invers+2+240+384,y
+   417 2305 19 73 A2			ora invers+3+240+384,y
+   418 2308 19 74 A2			ora invers+4+240+384,y
+   419 230B F0 EE			beq _rts
+   420 230D 4C 5F 33		eoy	jmp eorY
+   421 					.endl
+   422
+   423 				* ---------------------------------------------------
+   424 2310			r9	.local				; ROW = 9
+   425 2310 BD 68 33		left	lda addx,x
+   426 2313 F0 29			beq up
+   427 2315 10 13			bpl right
+   428
+   429 2317 B9 AF A1			lda invers-1+48*0+432,y
+   430 231A 19 DF A1			ora invers-1+48*1+432,y
+   431 231D 19 0F A2			ora invers-1+48*2+432,y
+   432 2320 19 3F A2			ora invers-1+48*3+432,y
+   433 2323 19 6F A2			ora invers-1+48*4+432,y
+   434 2326 F0 16			beq up
+   435 2328 D0 11			bne eox
+   436
+   437 232A B9 B5 A1		right	lda invers+48*0+5+432,y
+   438 232D 19 E5 A1			ora invers+48*1+5+432,y
+   439 2330 19 15 A2			ora invers+48*2+5+432,y
+   440 2333 19 45 A2			ora invers+48*3+5+432,y
+   441 2336 19 75 A2			ora invers+48*4+5+432,y
+   442 2339 F0 03			beq up
+   443
+   444 233B 20 56 33		eox	jsr eorX
+   445
+   446 233E BD 68 33		up	lda addcnt,x
+   447 2341 10 12			bpl down
+   448
+   449 2343 B9 80 A1			lda invers-48+432,y
+   450 2346 19 81 A1			ora invers-48+1+432,y
+   451 2349 19 82 A1			ora invers-48+2+432,y
+   452 234C 19 83 A1			ora invers-48+3+432,y
+   453 234F 19 84 A1			ora invers-48+4+432,y
+   454 					ift .def eoy
+   455 2352 D0 12			bne eoy
+   456 					els
+   457 					seq
+   458 					jmp eorY
+   459 					eif
+   460 2354 60			_rts	rts
+   461
+   462 2355 B9 A0 A2		down	lda invers+240+432,y
+   463 2358 19 A1 A2			ora invers+1+240+432,y
+   464 235B 19 A2 A2			ora invers+2+240+432,y
+   465 235E 19 A3 A2			ora invers+3+240+432,y
+   466 2361 19 A4 A2			ora invers+4+240+432,y
+   467 2364 F0 EE			beq _rts
+   468 2366 4C 5F 33		eoy	jmp eorY
+   469 					.endl
+   470
+   471 				* ---------------------------------------------------
+   472 2369			r10	.local				; ROW = 10
+   473 2369 BD 68 33		left	lda addx,x
+   474 236C F0 29			beq up
+   475 236E 10 13			bpl right
+   476
+   477 2370 B9 DF A1			lda invers-1+48*0+480,y
+   478 2373 19 0F A2			ora invers-1+48*1+480,y
+   479 2376 19 3F A2			ora invers-1+48*2+480,y
+   480 2379 19 6F A2			ora invers-1+48*3+480,y
+   481 237C 19 9F A2			ora invers-1+48*4+480,y
+   482 237F F0 16			beq up
+   483 2381 D0 11			bne eox
+   484
+   485 2383 B9 E5 A1		right	lda invers+48*0+5+480,y
+   486 2386 19 15 A2			ora invers+48*1+5+480,y
+   487 2389 19 45 A2			ora invers+48*2+5+480,y
+   488 238C 19 75 A2			ora invers+48*3+5+480,y
+   489 238F 19 A5 A2			ora invers+48*4+5+480,y
+   490 2392 F0 03			beq up
+   491
+   492 2394 20 56 33		eox	jsr eorX
+   493
+   494 2397 BD 68 33		up	lda addcnt,x
+   495 239A 10 12			bpl down
+   496
+   497 239C B9 B0 A1			lda invers-48+480,y
+   498 239F 19 B1 A1			ora invers-48+1+480,y
+   499 23A2 19 B2 A1			ora invers-48+2+480,y
+   500 23A5 19 B3 A1			ora invers-48+3+480,y
+   501 23A8 19 B4 A1			ora invers-48+4+480,y
+   502 					ift .def eoy
+   503 23AB D0 12			bne eoy
+   504 					els
+   505 					seq
+   506 					jmp eorY
+   507 					eif
+   508 23AD 60			_rts	rts
+   509
+   510 23AE B9 D0 A2		down	lda invers+240+480,y
+   511 23B1 19 D1 A2			ora invers+1+240+480,y
+   512 23B4 19 D2 A2			ora invers+2+240+480,y
+   513 23B7 19 D3 A2			ora invers+3+240+480,y
+   514 23BA 19 D4 A2			ora invers+4+240+480,y
+   515 23BD F0 EE			beq _rts
+   516 23BF 4C 5F 33		eoy	jmp eorY
+   517 					.endl
+   518
+   519 				* ---------------------------------------------------
+   520 23C2			r11	.local				; ROW = 11
+   521 23C2 BD 68 33		left	lda addx,x
+   522 23C5 F0 29			beq up
+   523 23C7 10 13			bpl right
+   524
+   525 23C9 B9 0F A2			lda invers-1+48*0+528,y
+   526 23CC 19 3F A2			ora invers-1+48*1+528,y
+   527 23CF 19 6F A2			ora invers-1+48*2+528,y
+   528 23D2 19 9F A2			ora invers-1+48*3+528,y
+   529 23D5 19 CF A2			ora invers-1+48*4+528,y
+   530 23D8 F0 16			beq up
+   531 23DA D0 11			bne eox
+   532
+   533 23DC B9 15 A2		right	lda invers+48*0+5+528,y
+   534 23DF 19 45 A2			ora invers+48*1+5+528,y
+   535 23E2 19 75 A2			ora invers+48*2+5+528,y
+   536 23E5 19 A5 A2			ora invers+48*3+5+528,y
+   537 23E8 19 D5 A2			ora invers+48*4+5+528,y
+   538 23EB F0 03			beq up
+   539
+   540 23ED 20 56 33		eox	jsr eorX
+   541
+   542 23F0 BD 68 33		up	lda addcnt,x
+   543 23F3 10 14			bpl down
+   544
+   545 23F5 B9 E0 A1			lda invers-48+528,y
+   546 23F8 19 E1 A1			ora invers-48+1+528,y
+   547 23FB 19 E2 A1			ora invers-48+2+528,y
+   548 23FE 19 E3 A1			ora invers-48+3+528,y
+   549 2401 19 E4 A1			ora invers-48+4+528,y
+   550 					ift .def eoy
+   551 					bne eoy
+   552 					els
+   553 2404 F0 03			seq
+   554 2406 4C 5F 33			jmp eorY
+   555 					eif
+   556 2409 60			_rts	rts
+   557
+   558 = 2409			down	= _rts
+   559 					.endl
+   560
+   561 				* ---------------------------------------------------
+   562 240A			r12	.local				; ROW = 12
+   563 240A BD 68 33		left	lda addx,x
+   564 240D F0 29			beq up
+   565 240F 10 13			bpl right
+   566
+   567 2411 B9 3F A2			lda invers-1+48*0+576,y
+   568 2414 19 6F A2			ora invers-1+48*1+576,y
+   569 2417 19 9F A2			ora invers-1+48*2+576,y
+   570 241A 19 CF A2			ora invers-1+48*3+576,y
+   571 241D 19 FF A2			ora invers-1+48*4+576,y
+   572 2420 F0 16			beq up
+   573 2422 D0 11			bne eox
+   574
+   575 2424 B9 45 A2		right	lda invers+48*0+5+576,y
+   576 2427 19 75 A2			ora invers+48*1+5+576,y
+   577 242A 19 A5 A2			ora invers+48*2+5+576,y
+   578 242D 19 D5 A2			ora invers+48*3+5+576,y
+   579 2430 19 05 A3			ora invers+48*4+5+576,y
+   580 2433 F0 03			beq up
+   581
+   582 2435 20 56 33		eox	jsr eorX
+   583
+   584 2438 BD 68 33		up	lda addcnt,x
+   585 243B 10 14			bpl down
+   586
+   587 243D B9 10 A2			lda invers-48+576,y
+   588 2440 19 11 A2			ora invers-48+1+576,y
+   589 2443 19 12 A2			ora invers-48+2+576,y
+   590 2446 19 13 A2			ora invers-48+3+576,y
+   591 2449 19 14 A2			ora invers-48+4+576,y
+   592 					ift .def eoy
+   593 					bne eoy
+   594 					els
+   595 244C F0 03			seq
+   596 244E 4C 5F 33			jmp eorY
+   597 					eif
+   598 2451 60			_rts	rts
+   599
+   600 = 2451			down	= _rts
+   601 					.endl
+   602
+   603 				* ---------------------------------------------------
+   604 2452			r13	.local				; ROW = 13
+   605 2452 BD 68 33		left	lda addx,x
+   606 2455 F0 29			beq up
+   607 2457 10 13			bpl right
+   608
+   609 2459 B9 6F A2			lda invers-1+48*0+624,y
+   610 245C 19 9F A2			ora invers-1+48*1+624,y
+   611 245F 19 CF A2			ora invers-1+48*2+624,y
+   612 2462 19 FF A2			ora invers-1+48*3+624,y
+   613 2465 19 2F A3			ora invers-1+48*4+624,y
+   614 2468 F0 16			beq up
+   615 246A D0 11			bne eox
+   616
+   617 246C B9 75 A2		right	lda invers+48*0+5+624,y
+   618 246F 19 A5 A2			ora invers+48*1+5+624,y
+   619 2472 19 D5 A2			ora invers+48*2+5+624,y
+   620 2475 19 05 A3			ora invers+48*3+5+624,y
+   621 2478 19 35 A3			ora invers+48*4+5+624,y
+   622 247B F0 03			beq up
+   623
+   624 247D 20 56 33		eox	jsr eorX
+   625
+   626 2480 BD 68 33		up	lda addcnt,x
+   627 2483 10 14			bpl down
+   628
+   629 2485 B9 40 A2			lda invers-48+624,y
+   630 2488 19 41 A2			ora invers-48+1+624,y
+   631 248B 19 42 A2			ora invers-48+2+624,y
+   632 248E 19 43 A2			ora invers-48+3+624,y
+   633 2491 19 44 A2			ora invers-48+4+624,y
+   634 					ift .def eoy
+   635 					bne eoy
+   636 					els
+   637 2494 F0 03			seq
+   638 2496 4C 5F 33			jmp eorY
+   639 					eif
+   640 2499 60			_rts	rts
+   641
+   642 = 2499			down	= _rts
+   643 					.endl
+   644
+   645 				* ---------------------------------------------------
+   646 249A			r14	.local				; ROW = 14
+   647 249A BD 68 33		left	lda addx,x
+   648 249D F0 29			beq up
+   649 249F 10 13			bpl right
+   650
+   651 24A1 B9 9F A2			lda invers-1+48*0+672,y
+   652 24A4 19 CF A2			ora invers-1+48*1+672,y
+   653 24A7 19 FF A2			ora invers-1+48*2+672,y
+   654 24AA 19 2F A3			ora invers-1+48*3+672,y
+   655 24AD 19 5F A3			ora invers-1+48*4+672,y
+   656 24B0 F0 16			beq up
+   657 24B2 D0 11			bne eox
+   658
+   659 24B4 B9 A5 A2		right	lda invers+48*0+5+672,y
+   660 24B7 19 D5 A2			ora invers+48*1+5+672,y
+   661 24BA 19 05 A3			ora invers+48*2+5+672,y
+   662 24BD 19 35 A3			ora invers+48*3+5+672,y
+   663 24C0 19 65 A3			ora invers+48*4+5+672,y
+   664 24C3 F0 03			beq up
+   665
+   666 24C5 20 56 33		eox	jsr eorX
+   667
+   668 24C8 BD 68 33		up	lda addcnt,x
+   669 24CB 10 14			bpl down
+   670
+   671 24CD B9 70 A2			lda invers-48+672,y
+   672 24D0 19 71 A2			ora invers-48+1+672,y
+   673 24D3 19 72 A2			ora invers-48+2+672,y
+   674 24D6 19 73 A2			ora invers-48+3+672,y
+   675 24D9 19 74 A2			ora invers-48+4+672,y
+   676 					ift .def eoy
+   677 					bne eoy
+   678 					els
+   679 24DC F0 03			seq
+   680 24DE 4C 5F 33			jmp eorY
+   681 					eif
+   682 24E1 60			_rts	rts
+   683
+   684 = 24E1			down	= _rts
+   685 					.endl
+   686
+   687 				* ---------------------------------------------------
+   688 24E2			r15	.local				; ROW = 15
+   689 24E2 BD 68 33		left	lda addx,x
+   690 24E5 F0 29			beq up
+   691 24E7 10 13			bpl right
+   692
+   693 24E9 B9 CF A2			lda invers-1+48*0+720,y
+   694 24EC 19 FF A2			ora invers-1+48*1+720,y
+   695 24EF 19 2F A3			ora invers-1+48*2+720,y
+   696 24F2 19 5F A3			ora invers-1+48*3+720,y
+   697 24F5 19 8F A3			ora invers-1+48*4+720,y
+   698 24F8 F0 16			beq up
+   699 24FA D0 11			bne eox
+   700
+   701 24FC B9 D5 A2		right	lda invers+48*0+5+720,y
+   702 24FF 19 05 A3			ora invers+48*1+5+720,y
+   703 2502 19 35 A3			ora invers+48*2+5+720,y
+   704 2505 19 65 A3			ora invers+48*3+5+720,y
+   705 2508 19 95 A3			ora invers+48*4+5+720,y
+   706 250B F0 03			beq up
+   707
+   708 250D 20 56 33		eox	jsr eorX
+   709
+   710 2510 BD 68 33		up	lda addcnt,x
+   711 2513 10 14			bpl down
+   712
+   713 2515 B9 A0 A2			lda invers-48+720,y
+   714 2518 19 A1 A2			ora invers-48+1+720,y
+   715 251B 19 A2 A2			ora invers-48+2+720,y
+   716 251E 19 A3 A2			ora invers-48+3+720,y
+   717 2521 19 A4 A2			ora invers-48+4+720,y
+   718 					ift .def eoy
+   719 					bne eoy
+   720 					els
+   721 2524 F0 03			seq
+   722 2526 4C 5F 33			jmp eorY
+   723 					eif
+   724 2529 60			_rts	rts
+   725
+   726 = 2529			down	= _rts
+   727 					.endl
+   728
+   729 				.endl
+     7 252A				icl 'ckula1.asm'
+Source: F:\!Atari\Pang\_PC\asm\ckula1.asm
+     1 252A			.local	ck1
+     2 				* ---------------------------------------------------
+     3 252A			r0	.local				; ROW = 0
+     4 252A BD 68 33		left	lda addx,x
+     5 252D F0 23			beq up
+     6 252F 10 10			bpl right
+     7
+     8 2531 B9 FF 9F			lda invers-1+48*0+0,y
+     9 2534 19 2F A0			ora invers-1+48*1+0,y
+    10 2537 19 5F A0			ora invers-1+48*2+0,y
+    11 253A 19 8F A0			ora invers-1+48*3+0,y
+    12 253D F0 13			beq up
+    13 253F D0 0E			bne eox
+    14
+    15 2541 B9 04 A0		right	lda invers+48*0+4+0,y
+    16 2544 19 34 A0			ora invers+48*1+4+0,y
+    17 2547 19 64 A0			ora invers+48*2+4+0,y
+    18 254A 19 94 A0			ora invers+48*3+4+0,y
+    19 254D F0 03			beq up
+    20
+    21 254F 20 56 33		eox	jsr eorX
+    22
+    23 2552 BD 68 33		up	lda addcnt,x
+    24 2555 10 01			bpl down
+    25
+    26 2557 60			_rts	rts
+    27
+    28 2558 B9 C0 A0		down	lda invers+192+0,y
+    29 255B 19 C1 A0			ora invers+1+192+0,y
+    30 255E 19 C2 A0			ora invers+2+192+0,y
+    31 2561 19 C3 A0			ora invers+3+192+0,y
+    32 2564 F0 F1			beq _rts
+    33 2566 4C 5F 33		eoy	jmp eorY
+    34 					.endl
+    35
+    36 				* ---------------------------------------------------
+    37 2569			r1	.local				; ROW = 1
+    38 2569 BD 68 33		left	lda addx,x
+    39 256C F0 23			beq up
+    40 256E 10 10			bpl right
+    41
+    42 2570 B9 2F A0			lda invers-1+48*0+48,y
+    43 2573 19 5F A0			ora invers-1+48*1+48,y
+    44 2576 19 8F A0			ora invers-1+48*2+48,y
+    45 2579 19 BF A0			ora invers-1+48*3+48,y
+    46 257C F0 13			beq up
+    47 257E D0 0E			bne eox
+    48
+    49 2580 B9 34 A0		right	lda invers+48*0+4+48,y
+    50 2583 19 64 A0			ora invers+48*1+4+48,y
+    51 2586 19 94 A0			ora invers+48*2+4+48,y
+    52 2589 19 C4 A0			ora invers+48*3+4+48,y
+    53 258C F0 03			beq up
+    54
+    55 258E 20 56 33		eox	jsr eorX
+    56
+    57 2591 BD 68 33		up	lda addcnt,x
+    58 2594 10 0F			bpl down
+    59
+    60 2596 B9 00 A0			lda invers-48+48,y
+    61 2599 19 01 A0			ora invers-48+1+48,y
+    62 259C 19 02 A0			ora invers-48+2+48,y
+    63 259F 19 03 A0			ora invers-48+3+48,y
+    64 					ift .def eoy
+    65 25A2 D0 0F			bne eoy
+    66 					els
+    67 					seq
+    68 					jmp eorY
+    69 					eif
+    70 25A4 60			_rts	rts
+    71
+    72 25A5 B9 F0 A0		down	lda invers+192+48,y
+    73 25A8 19 F1 A0			ora invers+1+192+48,y
+    74 25AB 19 F2 A0			ora invers+2+192+48,y
+    75 25AE 19 F3 A0			ora invers+3+192+48,y
+    76 25B1 F0 F1			beq _rts
+    77 25B3 4C 5F 33		eoy	jmp eorY
+    78 					.endl
+    79
+    80 				* ---------------------------------------------------
+    81 25B6			r2	.local				; ROW = 2
+    82 25B6 BD 68 33		left	lda addx,x
+    83 25B9 F0 23			beq up
+    84 25BB 10 10			bpl right
+    85
+    86 25BD B9 5F A0			lda invers-1+48*0+96,y
+    87 25C0 19 8F A0			ora invers-1+48*1+96,y
+    88 25C3 19 BF A0			ora invers-1+48*2+96,y
+    89 25C6 19 EF A0			ora invers-1+48*3+96,y
+    90 25C9 F0 13			beq up
+    91 25CB D0 0E			bne eox
+    92
+    93 25CD B9 64 A0		right	lda invers+48*0+4+96,y
+    94 25D0 19 94 A0			ora invers+48*1+4+96,y
+    95 25D3 19 C4 A0			ora invers+48*2+4+96,y
+    96 25D6 19 F4 A0			ora invers+48*3+4+96,y
+    97 25D9 F0 03			beq up
+    98
+    99 25DB 20 56 33		eox	jsr eorX
+   100
+   101 25DE BD 68 33		up	lda addcnt,x
+   102 25E1 10 0F			bpl down
+   103
+   104 25E3 B9 30 A0			lda invers-48+96,y
+   105 25E6 19 31 A0			ora invers-48+1+96,y
+   106 25E9 19 32 A0			ora invers-48+2+96,y
+   107 25EC 19 33 A0			ora invers-48+3+96,y
+   108 					ift .def eoy
+   109 25EF D0 0F			bne eoy
+   110 					els
+   111 					seq
+   112 					jmp eorY
+   113 					eif
+   114 25F1 60			_rts	rts
+   115
+   116 25F2 B9 20 A1		down	lda invers+192+96,y
+   117 25F5 19 21 A1			ora invers+1+192+96,y
+   118 25F8 19 22 A1			ora invers+2+192+96,y
+   119 25FB 19 23 A1			ora invers+3+192+96,y
+   120 25FE F0 F1			beq _rts
+   121 2600 4C 5F 33		eoy	jmp eorY
+   122 					.endl
+   123
+   124 				* ---------------------------------------------------
+   125 2603			r3	.local				; ROW = 3
+   126 2603 BD 68 33		left	lda addx,x
+   127 2606 F0 23			beq up
+   128 2608 10 10			bpl right
+   129
+   130 260A B9 8F A0			lda invers-1+48*0+144,y
+   131 260D 19 BF A0			ora invers-1+48*1+144,y
+   132 2610 19 EF A0			ora invers-1+48*2+144,y
+   133 2613 19 1F A1			ora invers-1+48*3+144,y
+   134 2616 F0 13			beq up
+   135 2618 D0 0E			bne eox
+   136
+   137 261A B9 94 A0		right	lda invers+48*0+4+144,y
+   138 261D 19 C4 A0			ora invers+48*1+4+144,y
+   139 2620 19 F4 A0			ora invers+48*2+4+144,y
+   140 2623 19 24 A1			ora invers+48*3+4+144,y
+   141 2626 F0 03			beq up
+   142
+   143 2628 20 56 33		eox	jsr eorX
+   144
+   145 262B BD 68 33		up	lda addcnt,x
+   146 262E 10 0F			bpl down
+   147
+   148 2630 B9 60 A0			lda invers-48+144,y
+   149 2633 19 61 A0			ora invers-48+1+144,y
+   150 2636 19 62 A0			ora invers-48+2+144,y
+   151 2639 19 63 A0			ora invers-48+3+144,y
+   152 					ift .def eoy
+   153 263C D0 0F			bne eoy
+   154 					els
+   155 					seq
+   156 					jmp eorY
+   157 					eif
+   158 263E 60			_rts	rts
+   159
+   160 263F B9 50 A1		down	lda invers+192+144,y
+   161 2642 19 51 A1			ora invers+1+192+144,y
+   162 2645 19 52 A1			ora invers+2+192+144,y
+   163 2648 19 53 A1			ora invers+3+192+144,y
+   164 264B F0 F1			beq _rts
+   165 264D 4C 5F 33		eoy	jmp eorY
+   166 					.endl
+   167
+   168 				* ---------------------------------------------------
+   169 2650			r4	.local				; ROW = 4
+   170 2650 BD 68 33		left	lda addx,x
+   171 2653 F0 23			beq up
+   172 2655 10 10			bpl right
+   173
+   174 2657 B9 BF A0			lda invers-1+48*0+192,y
+   175 265A 19 EF A0			ora invers-1+48*1+192,y
+   176 265D 19 1F A1			ora invers-1+48*2+192,y
+   177 2660 19 4F A1			ora invers-1+48*3+192,y
+   178 2663 F0 13			beq up
+   179 2665 D0 0E			bne eox
+   180
+   181 2667 B9 C4 A0		right	lda invers+48*0+4+192,y
+   182 266A 19 F4 A0			ora invers+48*1+4+192,y
+   183 266D 19 24 A1			ora invers+48*2+4+192,y
+   184 2670 19 54 A1			ora invers+48*3+4+192,y
+   185 2673 F0 03			beq up
+   186
+   187 2675 20 56 33		eox	jsr eorX
+   188
+   189 2678 BD 68 33		up	lda addcnt,x
+   190 267B 10 0F			bpl down
+   191
+   192 267D B9 90 A0			lda invers-48+192,y
+   193 2680 19 91 A0			ora invers-48+1+192,y
+   194 2683 19 92 A0			ora invers-48+2+192,y
+   195 2686 19 93 A0			ora invers-48+3+192,y
+   196 					ift .def eoy
+   197 2689 D0 0F			bne eoy
+   198 					els
+   199 					seq
+   200 					jmp eorY
+   201 					eif
+   202 268B 60			_rts	rts
+   203
+   204 268C B9 80 A1		down	lda invers+192+192,y
+   205 268F 19 81 A1			ora invers+1+192+192,y
+   206 2692 19 82 A1			ora invers+2+192+192,y
+   207 2695 19 83 A1			ora invers+3+192+192,y
+   208 2698 F0 F1			beq _rts
+   209 269A 4C 5F 33		eoy	jmp eorY
+   210 					.endl
+   211
+   212 				* ---------------------------------------------------
+   213 269D			r5	.local				; ROW = 5
+   214 269D BD 68 33		left	lda addx,x
+   215 26A0 F0 23			beq up
+   216 26A2 10 10			bpl right
+   217
+   218 26A4 B9 EF A0			lda invers-1+48*0+240,y
+   219 26A7 19 1F A1			ora invers-1+48*1+240,y
+   220 26AA 19 4F A1			ora invers-1+48*2+240,y
+   221 26AD 19 7F A1			ora invers-1+48*3+240,y
+   222 26B0 F0 13			beq up
+   223 26B2 D0 0E			bne eox
+   224
+   225 26B4 B9 F4 A0		right	lda invers+48*0+4+240,y
+   226 26B7 19 24 A1			ora invers+48*1+4+240,y
+   227 26BA 19 54 A1			ora invers+48*2+4+240,y
+   228 26BD 19 84 A1			ora invers+48*3+4+240,y
+   229 26C0 F0 03			beq up
+   230
+   231 26C2 20 56 33		eox	jsr eorX
+   232
+   233 26C5 BD 68 33		up	lda addcnt,x
+   234 26C8 10 0F			bpl down
+   235
+   236 26CA B9 C0 A0			lda invers-48+240,y
+   237 26CD 19 C1 A0			ora invers-48+1+240,y
+   238 26D0 19 C2 A0			ora invers-48+2+240,y
+   239 26D3 19 C3 A0			ora invers-48+3+240,y
+   240 					ift .def eoy
+   241 26D6 D0 0F			bne eoy
+   242 					els
+   243 					seq
+   244 					jmp eorY
+   245 					eif
+   246 26D8 60			_rts	rts
+   247
+   248 26D9 B9 B0 A1		down	lda invers+192+240,y
+   249 26DC 19 B1 A1			ora invers+1+192+240,y
+   250 26DF 19 B2 A1			ora invers+2+192+240,y
+   251 26E2 19 B3 A1			ora invers+3+192+240,y
+   252 26E5 F0 F1			beq _rts
+   253 26E7 4C 5F 33		eoy	jmp eorY
+   254 					.endl
+   255
+   256 				* ---------------------------------------------------
+   257 26EA			r6	.local				; ROW = 6
+   258 26EA BD 68 33		left	lda addx,x
+   259 26ED F0 23			beq up
+   260 26EF 10 10			bpl right
+   261
+   262 26F1 B9 1F A1			lda invers-1+48*0+288,y
+   263 26F4 19 4F A1			ora invers-1+48*1+288,y
+   264 26F7 19 7F A1			ora invers-1+48*2+288,y
+   265 26FA 19 AF A1			ora invers-1+48*3+288,y
+   266 26FD F0 13			beq up
+   267 26FF D0 0E			bne eox
+   268
+   269 2701 B9 24 A1		right	lda invers+48*0+4+288,y
+   270 2704 19 54 A1			ora invers+48*1+4+288,y
+   271 2707 19 84 A1			ora invers+48*2+4+288,y
+   272 270A 19 B4 A1			ora invers+48*3+4+288,y
+   273 270D F0 03			beq up
+   274
+   275 270F 20 56 33		eox	jsr eorX
+   276
+   277 2712 BD 68 33		up	lda addcnt,x
+   278 2715 10 0F			bpl down
+   279
+   280 2717 B9 F0 A0			lda invers-48+288,y
+   281 271A 19 F1 A0			ora invers-48+1+288,y
+   282 271D 19 F2 A0			ora invers-48+2+288,y
+   283 2720 19 F3 A0			ora invers-48+3+288,y
+   284 					ift .def eoy
+   285 2723 D0 0F			bne eoy
+   286 					els
+   287 					seq
+   288 					jmp eorY
+   289 					eif
+   290 2725 60			_rts	rts
+   291
+   292 2726 B9 E0 A1		down	lda invers+192+288,y
+   293 2729 19 E1 A1			ora invers+1+192+288,y
+   294 272C 19 E2 A1			ora invers+2+192+288,y
+   295 272F 19 E3 A1			ora invers+3+192+288,y
+   296 2732 F0 F1			beq _rts
+   297 2734 4C 5F 33		eoy	jmp eorY
+   298 					.endl
+   299
+   300 				* ---------------------------------------------------
+   301 2737			r7	.local				; ROW = 7
+   302 2737 BD 68 33		left	lda addx,x
+   303 273A F0 23			beq up
+   304 273C 10 10			bpl right
+   305
+   306 273E B9 4F A1			lda invers-1+48*0+336,y
+   307 2741 19 7F A1			ora invers-1+48*1+336,y
+   308 2744 19 AF A1			ora invers-1+48*2+336,y
+   309 2747 19 DF A1			ora invers-1+48*3+336,y
+   310 274A F0 13			beq up
+   311 274C D0 0E			bne eox
+   312
+   313 274E B9 54 A1		right	lda invers+48*0+4+336,y
+   314 2751 19 84 A1			ora invers+48*1+4+336,y
+   315 2754 19 B4 A1			ora invers+48*2+4+336,y
+   316 2757 19 E4 A1			ora invers+48*3+4+336,y
+   317 275A F0 03			beq up
+   318
+   319 275C 20 56 33		eox	jsr eorX
+   320
+   321 275F BD 68 33		up	lda addcnt,x
+   322 2762 10 0F			bpl down
+   323
+   324 2764 B9 20 A1			lda invers-48+336,y
+   325 2767 19 21 A1			ora invers-48+1+336,y
+   326 276A 19 22 A1			ora invers-48+2+336,y
+   327 276D 19 23 A1			ora invers-48+3+336,y
+   328 					ift .def eoy
+   329 2770 D0 0F			bne eoy
+   330 					els
+   331 					seq
+   332 					jmp eorY
+   333 					eif
+   334 2772 60			_rts	rts
+   335
+   336 2773 B9 10 A2		down	lda invers+192+336,y
+   337 2776 19 11 A2			ora invers+1+192+336,y
+   338 2779 19 12 A2			ora invers+2+192+336,y
+   339 277C 19 13 A2			ora invers+3+192+336,y
+   340 277F F0 F1			beq _rts
+   341 2781 4C 5F 33		eoy	jmp eorY
+   342 					.endl
+   343
+   344 				* ---------------------------------------------------
+   345 2784			r8	.local				; ROW = 8
+   346 2784 BD 68 33		left	lda addx,x
+   347 2787 F0 23			beq up
+   348 2789 10 10			bpl right
+   349
+   350 278B B9 7F A1			lda invers-1+48*0+384,y
+   351 278E 19 AF A1			ora invers-1+48*1+384,y
+   352 2791 19 DF A1			ora invers-1+48*2+384,y
+   353 2794 19 0F A2			ora invers-1+48*3+384,y
+   354 2797 F0 13			beq up
+   355 2799 D0 0E			bne eox
+   356
+   357 279B B9 84 A1		right	lda invers+48*0+4+384,y
+   358 279E 19 B4 A1			ora invers+48*1+4+384,y
+   359 27A1 19 E4 A1			ora invers+48*2+4+384,y
+   360 27A4 19 14 A2			ora invers+48*3+4+384,y
+   361 27A7 F0 03			beq up
+   362
+   363 27A9 20 56 33		eox	jsr eorX
+   364
+   365 27AC BD 68 33		up	lda addcnt,x
+   366 27AF 10 0F			bpl down
+   367
+   368 27B1 B9 50 A1			lda invers-48+384,y
+   369 27B4 19 51 A1			ora invers-48+1+384,y
+   370 27B7 19 52 A1			ora invers-48+2+384,y
+   371 27BA 19 53 A1			ora invers-48+3+384,y
+   372 					ift .def eoy
+   373 27BD D0 0F			bne eoy
+   374 					els
+   375 					seq
+   376 					jmp eorY
+   377 					eif
+   378 27BF 60			_rts	rts
+   379
+   380 27C0 B9 40 A2		down	lda invers+192+384,y
+   381 27C3 19 41 A2			ora invers+1+192+384,y
+   382 27C6 19 42 A2			ora invers+2+192+384,y
+   383 27C9 19 43 A2			ora invers+3+192+384,y
+   384 27CC F0 F1			beq _rts
+   385 27CE 4C 5F 33		eoy	jmp eorY
+   386 					.endl
+   387
+   388 				* ---------------------------------------------------
+   389 27D1			r9	.local				; ROW = 9
+   390 27D1 BD 68 33		left	lda addx,x
+   391 27D4 F0 23			beq up
+   392 27D6 10 10			bpl right
+   393
+   394 27D8 B9 AF A1			lda invers-1+48*0+432,y
+   395 27DB 19 DF A1			ora invers-1+48*1+432,y
+   396 27DE 19 0F A2			ora invers-1+48*2+432,y
+   397 27E1 19 3F A2			ora invers-1+48*3+432,y
+   398 27E4 F0 13			beq up
+   399 27E6 D0 0E			bne eox
+   400
+   401 27E8 B9 B4 A1		right	lda invers+48*0+4+432,y
+   402 27EB 19 E4 A1			ora invers+48*1+4+432,y
+   403 27EE 19 14 A2			ora invers+48*2+4+432,y
+   404 27F1 19 44 A2			ora invers+48*3+4+432,y
+   405 27F4 F0 03			beq up
+   406
+   407 27F6 20 56 33		eox	jsr eorX
+   408
+   409 27F9 BD 68 33		up	lda addcnt,x
+   410 27FC 10 0F			bpl down
+   411
+   412 27FE B9 80 A1			lda invers-48+432,y
+   413 2801 19 81 A1			ora invers-48+1+432,y
+   414 2804 19 82 A1			ora invers-48+2+432,y
+   415 2807 19 83 A1			ora invers-48+3+432,y
+   416 					ift .def eoy
+   417 280A D0 0F			bne eoy
+   418 					els
+   419 					seq
+   420 					jmp eorY
+   421 					eif
+   422 280C 60			_rts	rts
+   423
+   424 280D B9 70 A2		down	lda invers+192+432,y
+   425 2810 19 71 A2			ora invers+1+192+432,y
+   426 2813 19 72 A2			ora invers+2+192+432,y
+   427 2816 19 73 A2			ora invers+3+192+432,y
+   428 2819 F0 F1			beq _rts
+   429 281B 4C 5F 33		eoy	jmp eorY
+   430 					.endl
+   431
+   432 				* ---------------------------------------------------
+   433 281E			r10	.local				; ROW = 10
+   434 281E BD 68 33		left	lda addx,x
+   435 2821 F0 23			beq up
+   436 2823 10 10			bpl right
+   437
+   438 2825 B9 DF A1			lda invers-1+48*0+480,y
+   439 2828 19 0F A2			ora invers-1+48*1+480,y
+   440 282B 19 3F A2			ora invers-1+48*2+480,y
+   441 282E 19 6F A2			ora invers-1+48*3+480,y
+   442 2831 F0 13			beq up
+   443 2833 D0 0E			bne eox
+   444
+   445 2835 B9 E4 A1		right	lda invers+48*0+4+480,y
+   446 2838 19 14 A2			ora invers+48*1+4+480,y
+   447 283B 19 44 A2			ora invers+48*2+4+480,y
+   448 283E 19 74 A2			ora invers+48*3+4+480,y
+   449 2841 F0 03			beq up
+   450
+   451 2843 20 56 33		eox	jsr eorX
+   452
+   453 2846 BD 68 33		up	lda addcnt,x
+   454 2849 10 0F			bpl down
+   455
+   456 284B B9 B0 A1			lda invers-48+480,y
+   457 284E 19 B1 A1			ora invers-48+1+480,y
+   458 2851 19 B2 A1			ora invers-48+2+480,y
+   459 2854 19 B3 A1			ora invers-48+3+480,y
+   460 					ift .def eoy
+   461 2857 D0 0F			bne eoy
+   462 					els
+   463 					seq
+   464 					jmp eorY
+   465 					eif
+   466 2859 60			_rts	rts
+   467
+   468 285A B9 A0 A2		down	lda invers+192+480,y
+   469 285D 19 A1 A2			ora invers+1+192+480,y
+   470 2860 19 A2 A2			ora invers+2+192+480,y
+   471 2863 19 A3 A2			ora invers+3+192+480,y
+   472 2866 F0 F1			beq _rts
+   473 2868 4C 5F 33		eoy	jmp eorY
+   474 					.endl
+   475
+   476 				* ---------------------------------------------------
+   477 286B			r11	.local				; ROW = 11
+   478 286B BD 68 33		left	lda addx,x
+   479 286E F0 23			beq up
+   480 2870 10 10			bpl right
+   481
+   482 2872 B9 0F A2			lda invers-1+48*0+528,y
+   483 2875 19 3F A2			ora invers-1+48*1+528,y
+   484 2878 19 6F A2			ora invers-1+48*2+528,y
+   485 287B 19 9F A2			ora invers-1+48*3+528,y
+   486 287E F0 13			beq up
+   487 2880 D0 0E			bne eox
+   488
+   489 2882 B9 14 A2		right	lda invers+48*0+4+528,y
+   490 2885 19 44 A2			ora invers+48*1+4+528,y
+   491 2888 19 74 A2			ora invers+48*2+4+528,y
+   492 288B 19 A4 A2			ora invers+48*3+4+528,y
+   493 288E F0 03			beq up
+   494
+   495 2890 20 56 33		eox	jsr eorX
+   496
+   497 2893 BD 68 33		up	lda addcnt,x
+   498 2896 10 0F			bpl down
+   499
+   500 2898 B9 E0 A1			lda invers-48+528,y
+   501 289B 19 E1 A1			ora invers-48+1+528,y
+   502 289E 19 E2 A1			ora invers-48+2+528,y
+   503 28A1 19 E3 A1			ora invers-48+3+528,y
+   504 					ift .def eoy
+   505 28A4 D0 0F			bne eoy
+   506 					els
+   507 					seq
+   508 					jmp eorY
+   509 					eif
+   510 28A6 60			_rts	rts
+   511
+   512 28A7 B9 D0 A2		down	lda invers+192+528,y
+   513 28AA 19 D1 A2			ora invers+1+192+528,y
+   514 28AD 19 D2 A2			ora invers+2+192+528,y
+   515 28B0 19 D3 A2			ora invers+3+192+528,y
+   516 28B3 F0 F1			beq _rts
+   517 28B5 4C 5F 33		eoy	jmp eorY
+   518 					.endl
+   519
+   520 				* ---------------------------------------------------
+   521 28B8			r12	.local				; ROW = 12
+   522 28B8 BD 68 33		left	lda addx,x
+   523 28BB F0 23			beq up
+   524 28BD 10 10			bpl right
+   525
+   526 28BF B9 3F A2			lda invers-1+48*0+576,y
+   527 28C2 19 6F A2			ora invers-1+48*1+576,y
+   528 28C5 19 9F A2			ora invers-1+48*2+576,y
+   529 28C8 19 CF A2			ora invers-1+48*3+576,y
+   530 28CB F0 13			beq up
+   531 28CD D0 0E			bne eox
+   532
+   533 28CF B9 44 A2		right	lda invers+48*0+4+576,y
+   534 28D2 19 74 A2			ora invers+48*1+4+576,y
+   535 28D5 19 A4 A2			ora invers+48*2+4+576,y
+   536 28D8 19 D4 A2			ora invers+48*3+4+576,y
+   537 28DB F0 03			beq up
+   538
+   539 28DD 20 56 33		eox	jsr eorX
+   540
+   541 28E0 BD 68 33		up	lda addcnt,x
+   542 28E3 10 11			bpl down
+   543
+   544 28E5 B9 10 A2			lda invers-48+576,y
+   545 28E8 19 11 A2			ora invers-48+1+576,y
+   546 28EB 19 12 A2			ora invers-48+2+576,y
+   547 28EE 19 13 A2			ora invers-48+3+576,y
+   548 					ift .def eoy
+   549 					bne eoy
+   550 					els
+   551 28F1 F0 03			seq
+   552 28F3 4C 5F 33			jmp eorY
+   553 					eif
+   554 28F6 60			_rts	rts
+   555
+   556 = 28F6			down	= _rts
+   557 					.endl
+   558
+   559 				* ---------------------------------------------------
+   560 28F7			r13	.local				; ROW = 13
+   561 28F7 BD 68 33		left	lda addx,x
+   562 28FA F0 23			beq up
+   563 28FC 10 10			bpl right
+   564
+   565 28FE B9 6F A2			lda invers-1+48*0+624,y
+   566 2901 19 9F A2			ora invers-1+48*1+624,y
+   567 2904 19 CF A2			ora invers-1+48*2+624,y
+   568 2907 19 FF A2			ora invers-1+48*3+624,y
+   569 290A F0 13			beq up
+   570 290C D0 0E			bne eox
+   571
+   572 290E B9 74 A2		right	lda invers+48*0+4+624,y
+   573 2911 19 A4 A2			ora invers+48*1+4+624,y
+   574 2914 19 D4 A2			ora invers+48*2+4+624,y
+   575 2917 19 04 A3			ora invers+48*3+4+624,y
+   576 291A F0 03			beq up
+   577
+   578 291C 20 56 33		eox	jsr eorX
+   579
+   580 291F BD 68 33		up	lda addcnt,x
+   581 2922 10 11			bpl down
+   582
+   583 2924 B9 40 A2			lda invers-48+624,y
+   584 2927 19 41 A2			ora invers-48+1+624,y
+   585 292A 19 42 A2			ora invers-48+2+624,y
+   586 292D 19 43 A2			ora invers-48+3+624,y
+   587 					ift .def eoy
+   588 					bne eoy
+   589 					els
+   590 2930 F0 03			seq
+   591 2932 4C 5F 33			jmp eorY
+   592 					eif
+   593 2935 60			_rts	rts
+   594
+   595 = 2935			down	= _rts
+   596 					.endl
+   597
+   598 				* ---------------------------------------------------
+   599 2936			r14	.local				; ROW = 14
+   600 2936 BD 68 33		left	lda addx,x
+   601 2939 F0 23			beq up
+   602 293B 10 10			bpl right
+   603
+   604 293D B9 9F A2			lda invers-1+48*0+672,y
+   605 2940 19 CF A2			ora invers-1+48*1+672,y
+   606 2943 19 FF A2			ora invers-1+48*2+672,y
+   607 2946 19 2F A3			ora invers-1+48*3+672,y
+   608 2949 F0 13			beq up
+   609 294B D0 0E			bne eox
+   610
+   611 294D B9 A4 A2		right	lda invers+48*0+4+672,y
+   612 2950 19 D4 A2			ora invers+48*1+4+672,y
+   613 2953 19 04 A3			ora invers+48*2+4+672,y
+   614 2956 19 34 A3			ora invers+48*3+4+672,y
+   615 2959 F0 03			beq up
+   616
+   617 295B 20 56 33		eox	jsr eorX
+   618
+   619 295E BD 68 33		up	lda addcnt,x
+   620 2961 10 11			bpl down
+   621
+   622 2963 B9 70 A2			lda invers-48+672,y
+   623 2966 19 71 A2			ora invers-48+1+672,y
+   624 2969 19 72 A2			ora invers-48+2+672,y
+   625 296C 19 73 A2			ora invers-48+3+672,y
+   626 					ift .def eoy
+   627 					bne eoy
+   628 					els
+   629 296F F0 03			seq
+   630 2971 4C 5F 33			jmp eorY
+   631 					eif
+   632 2974 60			_rts	rts
+   633
+   634 = 2974			down	= _rts
+   635 					.endl
+   636
+   637 				* ---------------------------------------------------
+   638 2975			r15	.local				; ROW = 15
+   639 2975 BD 68 33		left	lda addx,x
+   640 2978 F0 23			beq up
+   641 297A 10 10			bpl right
+   642
+   643 297C B9 CF A2			lda invers-1+48*0+720,y
+   644 297F 19 FF A2			ora invers-1+48*1+720,y
+   645 2982 19 2F A3			ora invers-1+48*2+720,y
+   646 2985 19 5F A3			ora invers-1+48*3+720,y
+   647 2988 F0 13			beq up
+   648 298A D0 0E			bne eox
+   649
+   650 298C B9 D4 A2		right	lda invers+48*0+4+720,y
+   651 298F 19 04 A3			ora invers+48*1+4+720,y
+   652 2992 19 34 A3			ora invers+48*2+4+720,y
+   653 2995 19 64 A3			ora invers+48*3+4+720,y
+   654 2998 F0 03			beq up
+   655
+   656 299A 20 56 33		eox	jsr eorX
+   657
+   658 299D BD 68 33		up	lda addcnt,x
+   659 29A0 10 11			bpl down
+   660
+   661 29A2 B9 A0 A2			lda invers-48+720,y
+   662 29A5 19 A1 A2			ora invers-48+1+720,y
+   663 29A8 19 A2 A2			ora invers-48+2+720,y
+   664 29AB 19 A3 A2			ora invers-48+3+720,y
+   665 					ift .def eoy
+   666 					bne eoy
+   667 					els
+   668 29AE F0 03			seq
+   669 29B0 4C 5F 33			jmp eorY
+   670 					eif
+   671 29B3 60			_rts	rts
+   672
+   673 = 29B3			down	= _rts
+   674 					.endl
+   675
+   676 				.endl
+     8 29B4				icl 'ckula2.asm'
+Source: F:\!Atari\Pang\_PC\asm\ckula2.asm
+     1 29B4			.local	ck2
+     2 				* ---------------------------------------------------
+     3 29B4			r0	.local				; ROW = 0
+     4 29B4 BD 68 33		left	lda addx,x
+     5 29B7 F0 1D			beq up
+     6 29B9 10 0D			bpl right
+     7
+     8 29BB B9 FF 9F			lda invers-1+48*0+0,y
+     9 29BE 19 2F A0			ora invers-1+48*1+0,y
+    10 29C1 19 5F A0			ora invers-1+48*2+0,y
+    11 29C4 F0 10			beq up
+    12 29C6 D0 0B			bne eox
+    13
+    14 29C8 B9 03 A0		right	lda invers+48*0+3+0,y
+    15 29CB 19 33 A0			ora invers+48*1+3+0,y
+    16 29CE 19 63 A0			ora invers+48*2+3+0,y
+    17 29D1 F0 03			beq up
+    18
+    19 29D3 20 56 33		eox	jsr eorX
+    20
+    21 29D6 BD 68 33		up	lda addcnt,x
+    22 29D9 10 01			bpl down
+    23
+    24 29DB 60			_rts	rts
+    25
+    26 29DC B9 90 A0		down	lda invers+144+0,y
+    27 29DF 19 91 A0			ora invers+1+144+0,y
+    28 29E2 19 92 A0			ora invers+2+144+0,y
+    29 29E5 F0 F4			beq _rts
+    30 29E7 4C 5F 33		eoy	jmp eorY
+    31 					.endl
+    32
+    33 				* ---------------------------------------------------
+    34 29EA			r1	.local				; ROW = 1
+    35 29EA BD 68 33		left	lda addx,x
+    36 29ED F0 1D			beq up
+    37 29EF 10 0D			bpl right
+    38
+    39 29F1 B9 2F A0			lda invers-1+48*0+48,y
+    40 29F4 19 5F A0			ora invers-1+48*1+48,y
+    41 29F7 19 8F A0			ora invers-1+48*2+48,y
+    42 29FA F0 10			beq up
+    43 29FC D0 0B			bne eox
+    44
+    45 29FE B9 33 A0		right	lda invers+48*0+3+48,y
+    46 2A01 19 63 A0			ora invers+48*1+3+48,y
+    47 2A04 19 93 A0			ora invers+48*2+3+48,y
+    48 2A07 F0 03			beq up
+    49
+    50 2A09 20 56 33		eox	jsr eorX
+    51
+    52 2A0C BD 68 33		up	lda addcnt,x
+    53 2A0F 10 0C			bpl down
+    54
+    55 2A11 B9 00 A0			lda invers-48+48,y
+    56 2A14 19 01 A0			ora invers-48+1+48,y
+    57 2A17 19 02 A0			ora invers-48+2+48,y
+    58 					ift .def eoy
+    59 2A1A D0 0C			bne eoy
+    60 					els
+    61 					seq
+    62 					jmp eorY
+    63 					eif
+    64 2A1C 60			_rts	rts
+    65
+    66 2A1D B9 C0 A0		down	lda invers+144+48,y
+    67 2A20 19 C1 A0			ora invers+1+144+48,y
+    68 2A23 19 C2 A0			ora invers+2+144+48,y
+    69 2A26 F0 F4			beq _rts
+    70 2A28 4C 5F 33		eoy	jmp eorY
+    71 					.endl
+    72
+    73 				* ---------------------------------------------------
+    74 2A2B			r2	.local				; ROW = 2
+    75 2A2B BD 68 33		left	lda addx,x
+    76 2A2E F0 1D			beq up
+    77 2A30 10 0D			bpl right
+    78
+    79 2A32 B9 5F A0			lda invers-1+48*0+96,y
+    80 2A35 19 8F A0			ora invers-1+48*1+96,y
+    81 2A38 19 BF A0			ora invers-1+48*2+96,y
+    82 2A3B F0 10			beq up
+    83 2A3D D0 0B			bne eox
+    84
+    85 2A3F B9 63 A0		right	lda invers+48*0+3+96,y
+    86 2A42 19 93 A0			ora invers+48*1+3+96,y
+    87 2A45 19 C3 A0			ora invers+48*2+3+96,y
+    88 2A48 F0 03			beq up
+    89
+    90 2A4A 20 56 33		eox	jsr eorX
+    91
+    92 2A4D BD 68 33		up	lda addcnt,x
+    93 2A50 10 0C			bpl down
+    94
+    95 2A52 B9 30 A0			lda invers-48+96,y
+    96 2A55 19 31 A0			ora invers-48+1+96,y
+    97 2A58 19 32 A0			ora invers-48+2+96,y
+    98 					ift .def eoy
+    99 2A5B D0 0C			bne eoy
+   100 					els
+   101 					seq
+   102 					jmp eorY
+   103 					eif
+   104 2A5D 60			_rts	rts
+   105
+   106 2A5E B9 F0 A0		down	lda invers+144+96,y
+   107 2A61 19 F1 A0			ora invers+1+144+96,y
+   108 2A64 19 F2 A0			ora invers+2+144+96,y
+   109 2A67 F0 F4			beq _rts
+   110 2A69 4C 5F 33		eoy	jmp eorY
+   111 					.endl
+   112
+   113 				* ---------------------------------------------------
+   114 2A6C			r3	.local				; ROW = 3
+   115 2A6C BD 68 33		left	lda addx,x
+   116 2A6F F0 1D			beq up
+   117 2A71 10 0D			bpl right
+   118
+   119 2A73 B9 8F A0			lda invers-1+48*0+144,y
+   120 2A76 19 BF A0			ora invers-1+48*1+144,y
+   121 2A79 19 EF A0			ora invers-1+48*2+144,y
+   122 2A7C F0 10			beq up
+   123 2A7E D0 0B			bne eox
+   124
+   125 2A80 B9 93 A0		right	lda invers+48*0+3+144,y
+   126 2A83 19 C3 A0			ora invers+48*1+3+144,y
+   127 2A86 19 F3 A0			ora invers+48*2+3+144,y
+   128 2A89 F0 03			beq up
+   129
+   130 2A8B 20 56 33		eox	jsr eorX
+   131
+   132 2A8E BD 68 33		up	lda addcnt,x
+   133 2A91 10 0C			bpl down
+   134
+   135 2A93 B9 60 A0			lda invers-48+144,y
+   136 2A96 19 61 A0			ora invers-48+1+144,y
+   137 2A99 19 62 A0			ora invers-48+2+144,y
+   138 					ift .def eoy
+   139 2A9C D0 0C			bne eoy
+   140 					els
+   141 					seq
+   142 					jmp eorY
+   143 					eif
+   144 2A9E 60			_rts	rts
+   145
+   146 2A9F B9 20 A1		down	lda invers+144+144,y
+   147 2AA2 19 21 A1			ora invers+1+144+144,y
+   148 2AA5 19 22 A1			ora invers+2+144+144,y
+   149 2AA8 F0 F4			beq _rts
+   150 2AAA 4C 5F 33		eoy	jmp eorY
+   151 					.endl
+   152
+   153 				* ---------------------------------------------------
+   154 2AAD			r4	.local				; ROW = 4
+   155 2AAD BD 68 33		left	lda addx,x
+   156 2AB0 F0 1D			beq up
+   157 2AB2 10 0D			bpl right
+   158
+   159 2AB4 B9 BF A0			lda invers-1+48*0+192,y
+   160 2AB7 19 EF A0			ora invers-1+48*1+192,y
+   161 2ABA 19 1F A1			ora invers-1+48*2+192,y
+   162 2ABD F0 10			beq up
+   163 2ABF D0 0B			bne eox
+   164
+   165 2AC1 B9 C3 A0		right	lda invers+48*0+3+192,y
+   166 2AC4 19 F3 A0			ora invers+48*1+3+192,y
+   167 2AC7 19 23 A1			ora invers+48*2+3+192,y
+   168 2ACA F0 03			beq up
+   169
+   170 2ACC 20 56 33		eox	jsr eorX
+   171
+   172 2ACF BD 68 33		up	lda addcnt,x
+   173 2AD2 10 0C			bpl down
+   174
+   175 2AD4 B9 90 A0			lda invers-48+192,y
+   176 2AD7 19 91 A0			ora invers-48+1+192,y
+   177 2ADA 19 92 A0			ora invers-48+2+192,y
+   178 					ift .def eoy
+   179 2ADD D0 0C			bne eoy
+   180 					els
+   181 					seq
+   182 					jmp eorY
+   183 					eif
+   184 2ADF 60			_rts	rts
+   185
+   186 2AE0 B9 50 A1		down	lda invers+144+192,y
+   187 2AE3 19 51 A1			ora invers+1+144+192,y
+   188 2AE6 19 52 A1			ora invers+2+144+192,y
+   189 2AE9 F0 F4			beq _rts
+   190 2AEB 4C 5F 33		eoy	jmp eorY
+   191 					.endl
+   192
+   193 				* ---------------------------------------------------
+   194 2AEE			r5	.local				; ROW = 5
+   195 2AEE BD 68 33		left	lda addx,x
+   196 2AF1 F0 1D			beq up
+   197 2AF3 10 0D			bpl right
+   198
+   199 2AF5 B9 EF A0			lda invers-1+48*0+240,y
+   200 2AF8 19 1F A1			ora invers-1+48*1+240,y
+   201 2AFB 19 4F A1			ora invers-1+48*2+240,y
+   202 2AFE F0 10			beq up
+   203 2B00 D0 0B			bne eox
+   204
+   205 2B02 B9 F3 A0		right	lda invers+48*0+3+240,y
+   206 2B05 19 23 A1			ora invers+48*1+3+240,y
+   207 2B08 19 53 A1			ora invers+48*2+3+240,y
+   208 2B0B F0 03			beq up
+   209
+   210 2B0D 20 56 33		eox	jsr eorX
+   211
+   212 2B10 BD 68 33		up	lda addcnt,x
+   213 2B13 10 0C			bpl down
+   214
+   215 2B15 B9 C0 A0			lda invers-48+240,y
+   216 2B18 19 C1 A0			ora invers-48+1+240,y
+   217 2B1B 19 C2 A0			ora invers-48+2+240,y
+   218 					ift .def eoy
+   219 2B1E D0 0C			bne eoy
+   220 					els
+   221 					seq
+   222 					jmp eorY
+   223 					eif
+   224 2B20 60			_rts	rts
+   225
+   226 2B21 B9 80 A1		down	lda invers+144+240,y
+   227 2B24 19 81 A1			ora invers+1+144+240,y
+   228 2B27 19 82 A1			ora invers+2+144+240,y
+   229 2B2A F0 F4			beq _rts
+   230 2B2C 4C 5F 33		eoy	jmp eorY
+   231 					.endl
+   232
+   233 				* ---------------------------------------------------
+   234 2B2F			r6	.local				; ROW = 6
+   235 2B2F BD 68 33		left	lda addx,x
+   236 2B32 F0 1D			beq up
+   237 2B34 10 0D			bpl right
+   238
+   239 2B36 B9 1F A1			lda invers-1+48*0+288,y
+   240 2B39 19 4F A1			ora invers-1+48*1+288,y
+   241 2B3C 19 7F A1			ora invers-1+48*2+288,y
+   242 2B3F F0 10			beq up
+   243 2B41 D0 0B			bne eox
+   244
+   245 2B43 B9 23 A1		right	lda invers+48*0+3+288,y
+   246 2B46 19 53 A1			ora invers+48*1+3+288,y
+   247 2B49 19 83 A1			ora invers+48*2+3+288,y
+   248 2B4C F0 03			beq up
+   249
+   250 2B4E 20 56 33		eox	jsr eorX
+   251
+   252 2B51 BD 68 33		up	lda addcnt,x
+   253 2B54 10 0C			bpl down
+   254
+   255 2B56 B9 F0 A0			lda invers-48+288,y
+   256 2B59 19 F1 A0			ora invers-48+1+288,y
+   257 2B5C 19 F2 A0			ora invers-48+2+288,y
+   258 					ift .def eoy
+   259 2B5F D0 0C			bne eoy
+   260 					els
+   261 					seq
+   262 					jmp eorY
+   263 					eif
+   264 2B61 60			_rts	rts
+   265
+   266 2B62 B9 B0 A1		down	lda invers+144+288,y
+   267 2B65 19 B1 A1			ora invers+1+144+288,y
+   268 2B68 19 B2 A1			ora invers+2+144+288,y
+   269 2B6B F0 F4			beq _rts
+   270 2B6D 4C 5F 33		eoy	jmp eorY
+   271 					.endl
+   272
+   273 				* ---------------------------------------------------
+   274 2B70			r7	.local				; ROW = 7
+   275 2B70 BD 68 33		left	lda addx,x
+   276 2B73 F0 1D			beq up
+   277 2B75 10 0D			bpl right
+   278
+   279 2B77 B9 4F A1			lda invers-1+48*0+336,y
+   280 2B7A 19 7F A1			ora invers-1+48*1+336,y
+   281 2B7D 19 AF A1			ora invers-1+48*2+336,y
+   282 2B80 F0 10			beq up
+   283 2B82 D0 0B			bne eox
+   284
+   285 2B84 B9 53 A1		right	lda invers+48*0+3+336,y
+   286 2B87 19 83 A1			ora invers+48*1+3+336,y
+   287 2B8A 19 B3 A1			ora invers+48*2+3+336,y
+   288 2B8D F0 03			beq up
+   289
+   290 2B8F 20 56 33		eox	jsr eorX
+   291
+   292 2B92 BD 68 33		up	lda addcnt,x
+   293 2B95 10 0C			bpl down
+   294
+   295 2B97 B9 20 A1			lda invers-48+336,y
+   296 2B9A 19 21 A1			ora invers-48+1+336,y
+   297 2B9D 19 22 A1			ora invers-48+2+336,y
+   298 					ift .def eoy
+   299 2BA0 D0 0C			bne eoy
+   300 					els
+   301 					seq
+   302 					jmp eorY
+   303 					eif
+   304 2BA2 60			_rts	rts
+   305
+   306 2BA3 B9 E0 A1		down	lda invers+144+336,y
+   307 2BA6 19 E1 A1			ora invers+1+144+336,y
+   308 2BA9 19 E2 A1			ora invers+2+144+336,y
+   309 2BAC F0 F4			beq _rts
+   310 2BAE 4C 5F 33		eoy	jmp eorY
+   311 					.endl
+   312
+   313 				* ---------------------------------------------------
+   314 2BB1			r8	.local				; ROW = 8
+   315 2BB1 BD 68 33		left	lda addx,x
+   316 2BB4 F0 1D			beq up
+   317 2BB6 10 0D			bpl right
+   318
+   319 2BB8 B9 7F A1			lda invers-1+48*0+384,y
+   320 2BBB 19 AF A1			ora invers-1+48*1+384,y
+   321 2BBE 19 DF A1			ora invers-1+48*2+384,y
+   322 2BC1 F0 10			beq up
+   323 2BC3 D0 0B			bne eox
+   324
+   325 2BC5 B9 83 A1		right	lda invers+48*0+3+384,y
+   326 2BC8 19 B3 A1			ora invers+48*1+3+384,y
+   327 2BCB 19 E3 A1			ora invers+48*2+3+384,y
+   328 2BCE F0 03			beq up
+   329
+   330 2BD0 20 56 33		eox	jsr eorX
+   331
+   332 2BD3 BD 68 33		up	lda addcnt,x
+   333 2BD6 10 0C			bpl down
+   334
+   335 2BD8 B9 50 A1			lda invers-48+384,y
+   336 2BDB 19 51 A1			ora invers-48+1+384,y
+   337 2BDE 19 52 A1			ora invers-48+2+384,y
+   338 					ift .def eoy
+   339 2BE1 D0 0C			bne eoy
+   340 					els
+   341 					seq
+   342 					jmp eorY
+   343 					eif
+   344 2BE3 60			_rts	rts
+   345
+   346 2BE4 B9 10 A2		down	lda invers+144+384,y
+   347 2BE7 19 11 A2			ora invers+1+144+384,y
+   348 2BEA 19 12 A2			ora invers+2+144+384,y
+   349 2BED F0 F4			beq _rts
+   350 2BEF 4C 5F 33		eoy	jmp eorY
+   351 					.endl
+   352
+   353 				* ---------------------------------------------------
+   354 2BF2			r9	.local				; ROW = 9
+   355 2BF2 BD 68 33		left	lda addx,x
+   356 2BF5 F0 1D			beq up
+   357 2BF7 10 0D			bpl right
+   358
+   359 2BF9 B9 AF A1			lda invers-1+48*0+432,y
+   360 2BFC 19 DF A1			ora invers-1+48*1+432,y
+   361 2BFF 19 0F A2			ora invers-1+48*2+432,y
+   362 2C02 F0 10			beq up
+   363 2C04 D0 0B			bne eox
+   364
+   365 2C06 B9 B3 A1		right	lda invers+48*0+3+432,y
+   366 2C09 19 E3 A1			ora invers+48*1+3+432,y
+   367 2C0C 19 13 A2			ora invers+48*2+3+432,y
+   368 2C0F F0 03			beq up
+   369
+   370 2C11 20 56 33		eox	jsr eorX
+   371
+   372 2C14 BD 68 33		up	lda addcnt,x
+   373 2C17 10 0C			bpl down
+   374
+   375 2C19 B9 80 A1			lda invers-48+432,y
+   376 2C1C 19 81 A1			ora invers-48+1+432,y
+   377 2C1F 19 82 A1			ora invers-48+2+432,y
+   378 					ift .def eoy
+   379 2C22 D0 0C			bne eoy
+   380 					els
+   381 					seq
+   382 					jmp eorY
+   383 					eif
+   384 2C24 60			_rts	rts
+   385
+   386 2C25 B9 40 A2		down	lda invers+144+432,y
+   387 2C28 19 41 A2			ora invers+1+144+432,y
+   388 2C2B 19 42 A2			ora invers+2+144+432,y
+   389 2C2E F0 F4			beq _rts
+   390 2C30 4C 5F 33		eoy	jmp eorY
+   391 					.endl
+   392
+   393 				* ---------------------------------------------------
+   394 2C33			r10	.local				; ROW = 10
+   395 2C33 BD 68 33		left	lda addx,x
+   396 2C36 F0 1D			beq up
+   397 2C38 10 0D			bpl right
+   398
+   399 2C3A B9 DF A1			lda invers-1+48*0+480,y
+   400 2C3D 19 0F A2			ora invers-1+48*1+480,y
+   401 2C40 19 3F A2			ora invers-1+48*2+480,y
+   402 2C43 F0 10			beq up
+   403 2C45 D0 0B			bne eox
+   404
+   405 2C47 B9 E3 A1		right	lda invers+48*0+3+480,y
+   406 2C4A 19 13 A2			ora invers+48*1+3+480,y
+   407 2C4D 19 43 A2			ora invers+48*2+3+480,y
+   408 2C50 F0 03			beq up
+   409
+   410 2C52 20 56 33		eox	jsr eorX
+   411
+   412 2C55 BD 68 33		up	lda addcnt,x
+   413 2C58 10 0C			bpl down
+   414
+   415 2C5A B9 B0 A1			lda invers-48+480,y
+   416 2C5D 19 B1 A1			ora invers-48+1+480,y
+   417 2C60 19 B2 A1			ora invers-48+2+480,y
+   418 					ift .def eoy
+   419 2C63 D0 0C			bne eoy
+   420 					els
+   421 					seq
+   422 					jmp eorY
+   423 					eif
+   424 2C65 60			_rts	rts
+   425
+   426 2C66 B9 70 A2		down	lda invers+144+480,y
+   427 2C69 19 71 A2			ora invers+1+144+480,y
+   428 2C6C 19 72 A2			ora invers+2+144+480,y
+   429 2C6F F0 F4			beq _rts
+   430 2C71 4C 5F 33		eoy	jmp eorY
+   431 					.endl
+   432
+   433 				* ---------------------------------------------------
+   434 2C74			r11	.local				; ROW = 11
+   435 2C74 BD 68 33		left	lda addx,x
+   436 2C77 F0 1D			beq up
+   437 2C79 10 0D			bpl right
+   438
+   439 2C7B B9 0F A2			lda invers-1+48*0+528,y
+   440 2C7E 19 3F A2			ora invers-1+48*1+528,y
+   441 2C81 19 6F A2			ora invers-1+48*2+528,y
+   442 2C84 F0 10			beq up
+   443 2C86 D0 0B			bne eox
+   444
+   445 2C88 B9 13 A2		right	lda invers+48*0+3+528,y
+   446 2C8B 19 43 A2			ora invers+48*1+3+528,y
+   447 2C8E 19 73 A2			ora invers+48*2+3+528,y
+   448 2C91 F0 03			beq up
+   449
+   450 2C93 20 56 33		eox	jsr eorX
+   451
+   452 2C96 BD 68 33		up	lda addcnt,x
+   453 2C99 10 0C			bpl down
+   454
+   455 2C9B B9 E0 A1			lda invers-48+528,y
+   456 2C9E 19 E1 A1			ora invers-48+1+528,y
+   457 2CA1 19 E2 A1			ora invers-48+2+528,y
+   458 					ift .def eoy
+   459 2CA4 D0 0C			bne eoy
+   460 					els
+   461 					seq
+   462 					jmp eorY
+   463 					eif
+   464 2CA6 60			_rts	rts
+   465
+   466 2CA7 B9 A0 A2		down	lda invers+144+528,y
+   467 2CAA 19 A1 A2			ora invers+1+144+528,y
+   468 2CAD 19 A2 A2			ora invers+2+144+528,y
+   469 2CB0 F0 F4			beq _rts
+   470 2CB2 4C 5F 33		eoy	jmp eorY
+   471 					.endl
+   472
+   473 				* ---------------------------------------------------
+   474 2CB5			r12	.local				; ROW = 12
+   475 2CB5 BD 68 33		left	lda addx,x
+   476 2CB8 F0 1D			beq up
+   477 2CBA 10 0D			bpl right
+   478
+   479 2CBC B9 3F A2			lda invers-1+48*0+576,y
+   480 2CBF 19 6F A2			ora invers-1+48*1+576,y
+   481 2CC2 19 9F A2			ora invers-1+48*2+576,y
+   482 2CC5 F0 10			beq up
+   483 2CC7 D0 0B			bne eox
+   484
+   485 2CC9 B9 43 A2		right	lda invers+48*0+3+576,y
+   486 2CCC 19 73 A2			ora invers+48*1+3+576,y
+   487 2CCF 19 A3 A2			ora invers+48*2+3+576,y
+   488 2CD2 F0 03			beq up
+   489
+   490 2CD4 20 56 33		eox	jsr eorX
+   491
+   492 2CD7 BD 68 33		up	lda addcnt,x
+   493 2CDA 10 0C			bpl down
+   494
+   495 2CDC B9 10 A2			lda invers-48+576,y
+   496 2CDF 19 11 A2			ora invers-48+1+576,y
+   497 2CE2 19 12 A2			ora invers-48+2+576,y
+   498 					ift .def eoy
+   499 2CE5 D0 0C			bne eoy
+   500 					els
+   501 					seq
+   502 					jmp eorY
+   503 					eif
+   504 2CE7 60			_rts	rts
+   505
+   506 2CE8 B9 D0 A2		down	lda invers+144+576,y
+   507 2CEB 19 D1 A2			ora invers+1+144+576,y
+   508 2CEE 19 D2 A2			ora invers+2+144+576,y
+   509 2CF1 F0 F4			beq _rts
+   510 2CF3 4C 5F 33		eoy	jmp eorY
+   511 					.endl
+   512
+   513 				* ---------------------------------------------------
+   514 2CF6			r13	.local				; ROW = 13
+   515 2CF6 BD 68 33		left	lda addx,x
+   516 2CF9 F0 1D			beq up
+   517 2CFB 10 0D			bpl right
+   518
+   519 2CFD B9 6F A2			lda invers-1+48*0+624,y
+   520 2D00 19 9F A2			ora invers-1+48*1+624,y
+   521 2D03 19 CF A2			ora invers-1+48*2+624,y
+   522 2D06 F0 10			beq up
+   523 2D08 D0 0B			bne eox
+   524
+   525 2D0A B9 73 A2		right	lda invers+48*0+3+624,y
+   526 2D0D 19 A3 A2			ora invers+48*1+3+624,y
+   527 2D10 19 D3 A2			ora invers+48*2+3+624,y
+   528 2D13 F0 03			beq up
+   529
+   530 2D15 20 56 33		eox	jsr eorX
+   531
+   532 2D18 BD 68 33		up	lda addcnt,x
+   533 2D1B 10 0E			bpl down
+   534
+   535 2D1D B9 40 A2			lda invers-48+624,y
+   536 2D20 19 41 A2			ora invers-48+1+624,y
+   537 2D23 19 42 A2			ora invers-48+2+624,y
+   538 					ift .def eoy
+   539 					bne eoy
+   540 					els
+   541 2D26 F0 03			seq
+   542 2D28 4C 5F 33			jmp eorY
+   543 					eif
+   544 2D2B 60			_rts	rts
+   545
+   546 = 2D2B			down	= _rts
+   547 					.endl
+   548
+   549 				* ---------------------------------------------------
+   550 2D2C			r14	.local				; ROW = 14
+   551 2D2C BD 68 33		left	lda addx,x
+   552 2D2F F0 1D			beq up
+   553 2D31 10 0D			bpl right
+   554
+   555 2D33 B9 9F A2			lda invers-1+48*0+672,y
+   556 2D36 19 CF A2			ora invers-1+48*1+672,y
+   557 2D39 19 FF A2			ora invers-1+48*2+672,y
+   558 2D3C F0 10			beq up
+   559 2D3E D0 0B			bne eox
+   560
+   561 2D40 B9 A3 A2		right	lda invers+48*0+3+672,y
+   562 2D43 19 D3 A2			ora invers+48*1+3+672,y
+   563 2D46 19 03 A3			ora invers+48*2+3+672,y
+   564 2D49 F0 03			beq up
+   565
+   566 2D4B 20 56 33		eox	jsr eorX
+   567
+   568 2D4E BD 68 33		up	lda addcnt,x
+   569 2D51 10 0E			bpl down
+   570
+   571 2D53 B9 70 A2			lda invers-48+672,y
+   572 2D56 19 71 A2			ora invers-48+1+672,y
+   573 2D59 19 72 A2			ora invers-48+2+672,y
+   574 					ift .def eoy
+   575 					bne eoy
+   576 					els
+   577 2D5C F0 03			seq
+   578 2D5E 4C 5F 33			jmp eorY
+   579 					eif
+   580 2D61 60			_rts	rts
+   581
+   582 = 2D61			down	= _rts
+   583 					.endl
+   584
+   585 				* ---------------------------------------------------
+   586 2D62			r15	.local				; ROW = 15
+   587 2D62 BD 68 33		left	lda addx,x
+   588 2D65 F0 1D			beq up
+   589 2D67 10 0D			bpl right
+   590
+   591 2D69 B9 CF A2			lda invers-1+48*0+720,y
+   592 2D6C 19 FF A2			ora invers-1+48*1+720,y
+   593 2D6F 19 2F A3			ora invers-1+48*2+720,y
+   594 2D72 F0 10			beq up
+   595 2D74 D0 0B			bne eox
+   596
+   597 2D76 B9 D3 A2		right	lda invers+48*0+3+720,y
+   598 2D79 19 03 A3			ora invers+48*1+3+720,y
+   599 2D7C 19 33 A3			ora invers+48*2+3+720,y
+   600 2D7F F0 03			beq up
+   601
+   602 2D81 20 56 33		eox	jsr eorX
+   603
+   604 2D84 BD 68 33		up	lda addcnt,x
+   605 2D87 10 0E			bpl down
+   606
+   607 2D89 B9 A0 A2			lda invers-48+720,y
+   608 2D8C 19 A1 A2			ora invers-48+1+720,y
+   609 2D8F 19 A2 A2			ora invers-48+2+720,y
+   610 					ift .def eoy
+   611 					bne eoy
+   612 					els
+   613 2D92 F0 03			seq
+   614 2D94 4C 5F 33			jmp eorY
+   615 					eif
+   616 2D97 60			_rts	rts
+   617
+   618 = 2D97			down	= _rts
+   619 					.endl
+   620
+   621 				.endl
+     9 2D98				icl 'ckula3.asm'
+Source: F:\!Atari\Pang\_PC\asm\ckula3.asm
+     1 2D98			.local	ck3
+     2 				* ---------------------------------------------------
+     3 2D98			r0	.local				; ROW = 0
+     4 2D98 BD 68 33		left	lda addx,x
+     5 2D9B F0 17			beq up
+     6 2D9D 10 0A			bpl right
+     7
+     8 2D9F B9 FF 9F			lda invers-1+48*0+0,y
+     9 2DA2 19 2F A0			ora invers-1+48*1+0,y
+    10 2DA5 F0 0D			beq up
+    11 2DA7 D0 08			bne eox
+    12
+    13 2DA9 B9 02 A0		right	lda invers+48*0+2+0,y
+    14 2DAC 19 32 A0			ora invers+48*1+2+0,y
+    15 2DAF F0 03			beq up
+    16
+    17 2DB1 20 56 33		eox	jsr eorX
+    18
+    19 2DB4 BD 68 33		up	lda addcnt,x
+    20 2DB7 10 01			bpl down
+    21
+    22 2DB9 60			_rts	rts
+    23
+    24 2DBA B9 60 A0		down	lda invers+96+0,y
+    25 2DBD 19 61 A0			ora invers+1+96+0,y
+    26 2DC0 F0 F7			beq _rts
+    27 2DC2 4C 5F 33		eoy	jmp eorY
+    28 					.endl
+    29
+    30 				* ---------------------------------------------------
+    31 2DC5			r1	.local				; ROW = 1
+    32 2DC5 BD 68 33		left	lda addx,x
+    33 2DC8 F0 17			beq up
+    34 2DCA 10 0A			bpl right
+    35
+    36 2DCC B9 2F A0			lda invers-1+48*0+48,y
+    37 2DCF 19 5F A0			ora invers-1+48*1+48,y
+    38 2DD2 F0 0D			beq up
+    39 2DD4 D0 08			bne eox
+    40
+    41 2DD6 B9 32 A0		right	lda invers+48*0+2+48,y
+    42 2DD9 19 62 A0			ora invers+48*1+2+48,y
+    43 2DDC F0 03			beq up
+    44
+    45 2DDE 20 56 33		eox	jsr eorX
+    46
+    47 2DE1 BD 68 33		up	lda addcnt,x
+    48 2DE4 10 09			bpl down
+    49
+    50 2DE6 B9 00 A0			lda invers-48+48,y
+    51 2DE9 19 01 A0			ora invers-48+1+48,y
+    52 					ift .def eoy
+    53 2DEC D0 09			bne eoy
+    54 					els
+    55 					seq
+    56 					jmp eorY
+    57 					eif
+    58 2DEE 60			_rts	rts
+    59
+    60 2DEF B9 90 A0		down	lda invers+96+48,y
+    61 2DF2 19 91 A0			ora invers+1+96+48,y
+    62 2DF5 F0 F7			beq _rts
+    63 2DF7 4C 5F 33		eoy	jmp eorY
+    64 					.endl
+    65
+    66 				* ---------------------------------------------------
+    67 2DFA			r2	.local				; ROW = 2
+    68 2DFA BD 68 33		left	lda addx,x
+    69 2DFD F0 17			beq up
+    70 2DFF 10 0A			bpl right
+    71
+    72 2E01 B9 5F A0			lda invers-1+48*0+96,y
+    73 2E04 19 8F A0			ora invers-1+48*1+96,y
+    74 2E07 F0 0D			beq up
+    75 2E09 D0 08			bne eox
+    76
+    77 2E0B B9 62 A0		right	lda invers+48*0+2+96,y
+    78 2E0E 19 92 A0			ora invers+48*1+2+96,y
+    79 2E11 F0 03			beq up
+    80
+    81 2E13 20 56 33		eox	jsr eorX
+    82
+    83 2E16 BD 68 33		up	lda addcnt,x
+    84 2E19 10 09			bpl down
+    85
+    86 2E1B B9 30 A0			lda invers-48+96,y
+    87 2E1E 19 31 A0			ora invers-48+1+96,y
+    88 					ift .def eoy
+    89 2E21 D0 09			bne eoy
+    90 					els
+    91 					seq
+    92 					jmp eorY
+    93 					eif
+    94 2E23 60			_rts	rts
+    95
+    96 2E24 B9 C0 A0		down	lda invers+96+96,y
+    97 2E27 19 C1 A0			ora invers+1+96+96,y
+    98 2E2A F0 F7			beq _rts
+    99 2E2C 4C 5F 33		eoy	jmp eorY
+   100 					.endl
+   101
+   102 				* ---------------------------------------------------
+   103 2E2F			r3	.local				; ROW = 3
+   104 2E2F BD 68 33		left	lda addx,x
+   105 2E32 F0 17			beq up
+   106 2E34 10 0A			bpl right
+   107
+   108 2E36 B9 8F A0			lda invers-1+48*0+144,y
+   109 2E39 19 BF A0			ora invers-1+48*1+144,y
+   110 2E3C F0 0D			beq up
+   111 2E3E D0 08			bne eox
+   112
+   113 2E40 B9 92 A0		right	lda invers+48*0+2+144,y
+   114 2E43 19 C2 A0			ora invers+48*1+2+144,y
+   115 2E46 F0 03			beq up
+   116
+   117 2E48 20 56 33		eox	jsr eorX
+   118
+   119 2E4B BD 68 33		up	lda addcnt,x
+   120 2E4E 10 09			bpl down
+   121
+   122 2E50 B9 60 A0			lda invers-48+144,y
+   123 2E53 19 61 A0			ora invers-48+1+144,y
+   124 					ift .def eoy
+   125 2E56 D0 09			bne eoy
+   126 					els
+   127 					seq
+   128 					jmp eorY
+   129 					eif
+   130 2E58 60			_rts	rts
+   131
+   132 2E59 B9 F0 A0		down	lda invers+96+144,y
+   133 2E5C 19 F1 A0			ora invers+1+96+144,y
+   134 2E5F F0 F7			beq _rts
+   135 2E61 4C 5F 33		eoy	jmp eorY
+   136 					.endl
+   137
+   138 				* ---------------------------------------------------
+   139 2E64			r4	.local				; ROW = 4
+   140 2E64 BD 68 33		left	lda addx,x
+   141 2E67 F0 17			beq up
+   142 2E69 10 0A			bpl right
+   143
+   144 2E6B B9 BF A0			lda invers-1+48*0+192,y
+   145 2E6E 19 EF A0			ora invers-1+48*1+192,y
+   146 2E71 F0 0D			beq up
+   147 2E73 D0 08			bne eox
+   148
+   149 2E75 B9 C2 A0		right	lda invers+48*0+2+192,y
+   150 2E78 19 F2 A0			ora invers+48*1+2+192,y
+   151 2E7B F0 03			beq up
+   152
+   153 2E7D 20 56 33		eox	jsr eorX
+   154
+   155 2E80 BD 68 33		up	lda addcnt,x
+   156 2E83 10 09			bpl down
+   157
+   158 2E85 B9 90 A0			lda invers-48+192,y
+   159 2E88 19 91 A0			ora invers-48+1+192,y
+   160 					ift .def eoy
+   161 2E8B D0 09			bne eoy
+   162 					els
+   163 					seq
+   164 					jmp eorY
+   165 					eif
+   166 2E8D 60			_rts	rts
+   167
+   168 2E8E B9 20 A1		down	lda invers+96+192,y
+   169 2E91 19 21 A1			ora invers+1+96+192,y
+   170 2E94 F0 F7			beq _rts
+   171 2E96 4C 5F 33		eoy	jmp eorY
+   172 					.endl
+   173
+   174 				* ---------------------------------------------------
+   175 2E99			r5	.local				; ROW = 5
+   176 2E99 BD 68 33		left	lda addx,x
+   177 2E9C F0 17			beq up
+   178 2E9E 10 0A			bpl right
+   179
+   180 2EA0 B9 EF A0			lda invers-1+48*0+240,y
+   181 2EA3 19 1F A1			ora invers-1+48*1+240,y
+   182 2EA6 F0 0D			beq up
+   183 2EA8 D0 08			bne eox
+   184
+   185 2EAA B9 F2 A0		right	lda invers+48*0+2+240,y
+   186 2EAD 19 22 A1			ora invers+48*1+2+240,y
+   187 2EB0 F0 03			beq up
+   188
+   189 2EB2 20 56 33		eox	jsr eorX
+   190
+   191 2EB5 BD 68 33		up	lda addcnt,x
+   192 2EB8 10 09			bpl down
+   193
+   194 2EBA B9 C0 A0			lda invers-48+240,y
+   195 2EBD 19 C1 A0			ora invers-48+1+240,y
+   196 					ift .def eoy
+   197 2EC0 D0 09			bne eoy
+   198 					els
+   199 					seq
+   200 					jmp eorY
+   201 					eif
+   202 2EC2 60			_rts	rts
+   203
+   204 2EC3 B9 50 A1		down	lda invers+96+240,y
+   205 2EC6 19 51 A1			ora invers+1+96+240,y
+   206 2EC9 F0 F7			beq _rts
+   207 2ECB 4C 5F 33		eoy	jmp eorY
+   208 					.endl
+   209
+   210 				* ---------------------------------------------------
+   211 2ECE			r6	.local				; ROW = 6
+   212 2ECE BD 68 33		left	lda addx,x
+   213 2ED1 F0 17			beq up
+   214 2ED3 10 0A			bpl right
+   215
+   216 2ED5 B9 1F A1			lda invers-1+48*0+288,y
+   217 2ED8 19 4F A1			ora invers-1+48*1+288,y
+   218 2EDB F0 0D			beq up
+   219 2EDD D0 08			bne eox
+   220
+   221 2EDF B9 22 A1		right	lda invers+48*0+2+288,y
+   222 2EE2 19 52 A1			ora invers+48*1+2+288,y
+   223 2EE5 F0 03			beq up
+   224
+   225 2EE7 20 56 33		eox	jsr eorX
+   226
+   227 2EEA BD 68 33		up	lda addcnt,x
+   228 2EED 10 09			bpl down
+   229
+   230 2EEF B9 F0 A0			lda invers-48+288,y
+   231 2EF2 19 F1 A0			ora invers-48+1+288,y
+   232 					ift .def eoy
+   233 2EF5 D0 09			bne eoy
+   234 					els
+   235 					seq
+   236 					jmp eorY
+   237 					eif
+   238 2EF7 60			_rts	rts
+   239
+   240 2EF8 B9 80 A1		down	lda invers+96+288,y
+   241 2EFB 19 81 A1			ora invers+1+96+288,y
+   242 2EFE F0 F7			beq _rts
+   243 2F00 4C 5F 33		eoy	jmp eorY
+   244 					.endl
+   245
+   246 				* ---------------------------------------------------
+   247 2F03			r7	.local				; ROW = 7
+   248 2F03 BD 68 33		left	lda addx,x
+   249 2F06 F0 17			beq up
+   250 2F08 10 0A			bpl right
+   251
+   252 2F0A B9 4F A1			lda invers-1+48*0+336,y
+   253 2F0D 19 7F A1			ora invers-1+48*1+336,y
+   254 2F10 F0 0D			beq up
+   255 2F12 D0 08			bne eox
+   256
+   257 2F14 B9 52 A1		right	lda invers+48*0+2+336,y
+   258 2F17 19 82 A1			ora invers+48*1+2+336,y
+   259 2F1A F0 03			beq up
+   260
+   261 2F1C 20 56 33		eox	jsr eorX
+   262
+   263 2F1F BD 68 33		up	lda addcnt,x
+   264 2F22 10 09			bpl down
+   265
+   266 2F24 B9 20 A1			lda invers-48+336,y
+   267 2F27 19 21 A1			ora invers-48+1+336,y
+   268 					ift .def eoy
+   269 2F2A D0 09			bne eoy
+   270 					els
+   271 					seq
+   272 					jmp eorY
+   273 					eif
+   274 2F2C 60			_rts	rts
+   275
+   276 2F2D B9 B0 A1		down	lda invers+96+336,y
+   277 2F30 19 B1 A1			ora invers+1+96+336,y
+   278 2F33 F0 F7			beq _rts
+   279 2F35 4C 5F 33		eoy	jmp eorY
+   280 					.endl
+   281
+   282 				* ---------------------------------------------------
+   283 2F38			r8	.local				; ROW = 8
+   284 2F38 BD 68 33		left	lda addx,x
+   285 2F3B F0 17			beq up
+   286 2F3D 10 0A			bpl right
+   287
+   288 2F3F B9 7F A1			lda invers-1+48*0+384,y
+   289 2F42 19 AF A1			ora invers-1+48*1+384,y
+   290 2F45 F0 0D			beq up
+   291 2F47 D0 08			bne eox
+   292
+   293 2F49 B9 82 A1		right	lda invers+48*0+2+384,y
+   294 2F4C 19 B2 A1			ora invers+48*1+2+384,y
+   295 2F4F F0 03			beq up
+   296
+   297 2F51 20 56 33		eox	jsr eorX
+   298
+   299 2F54 BD 68 33		up	lda addcnt,x
+   300 2F57 10 09			bpl down
+   301
+   302 2F59 B9 50 A1			lda invers-48+384,y
+   303 2F5C 19 51 A1			ora invers-48+1+384,y
+   304 					ift .def eoy
+   305 2F5F D0 09			bne eoy
+   306 					els
+   307 					seq
+   308 					jmp eorY
+   309 					eif
+   310 2F61 60			_rts	rts
+   311
+   312 2F62 B9 E0 A1		down	lda invers+96+384,y
+   313 2F65 19 E1 A1			ora invers+1+96+384,y
+   314 2F68 F0 F7			beq _rts
+   315 2F6A 4C 5F 33		eoy	jmp eorY
+   316 					.endl
+   317
+   318 				* ---------------------------------------------------
+   319 2F6D			r9	.local				; ROW = 9
+   320 2F6D BD 68 33		left	lda addx,x
+   321 2F70 F0 17			beq up
+   322 2F72 10 0A			bpl right
+   323
+   324 2F74 B9 AF A1			lda invers-1+48*0+432,y
+   325 2F77 19 DF A1			ora invers-1+48*1+432,y
+   326 2F7A F0 0D			beq up
+   327 2F7C D0 08			bne eox
+   328
+   329 2F7E B9 B2 A1		right	lda invers+48*0+2+432,y
+   330 2F81 19 E2 A1			ora invers+48*1+2+432,y
+   331 2F84 F0 03			beq up
+   332
+   333 2F86 20 56 33		eox	jsr eorX
+   334
+   335 2F89 BD 68 33		up	lda addcnt,x
+   336 2F8C 10 09			bpl down
+   337
+   338 2F8E B9 80 A1			lda invers-48+432,y
+   339 2F91 19 81 A1			ora invers-48+1+432,y
+   340 					ift .def eoy
+   341 2F94 D0 09			bne eoy
+   342 					els
+   343 					seq
+   344 					jmp eorY
+   345 					eif
+   346 2F96 60			_rts	rts
+   347
+   348 2F97 B9 10 A2		down	lda invers+96+432,y
+   349 2F9A 19 11 A2			ora invers+1+96+432,y
+   350 2F9D F0 F7			beq _rts
+   351 2F9F 4C 5F 33		eoy	jmp eorY
+   352 					.endl
+   353
+   354 				* ---------------------------------------------------
+   355 2FA2			r10	.local				; ROW = 10
+   356 2FA2 BD 68 33		left	lda addx,x
+   357 2FA5 F0 17			beq up
+   358 2FA7 10 0A			bpl right
+   359
+   360 2FA9 B9 DF A1			lda invers-1+48*0+480,y
+   361 2FAC 19 0F A2			ora invers-1+48*1+480,y
+   362 2FAF F0 0D			beq up
+   363 2FB1 D0 08			bne eox
+   364
+   365 2FB3 B9 E2 A1		right	lda invers+48*0+2+480,y
+   366 2FB6 19 12 A2			ora invers+48*1+2+480,y
+   367 2FB9 F0 03			beq up
+   368
+   369 2FBB 20 56 33		eox	jsr eorX
+   370
+   371 2FBE BD 68 33		up	lda addcnt,x
+   372 2FC1 10 09			bpl down
+   373
+   374 2FC3 B9 B0 A1			lda invers-48+480,y
+   375 2FC6 19 B1 A1			ora invers-48+1+480,y
+   376 					ift .def eoy
+   377 2FC9 D0 09			bne eoy
+   378 					els
+   379 					seq
+   380 					jmp eorY
+   381 					eif
+   382 2FCB 60			_rts	rts
+   383
+   384 2FCC B9 40 A2		down	lda invers+96+480,y
+   385 2FCF 19 41 A2			ora invers+1+96+480,y
+   386 2FD2 F0 F7			beq _rts
+   387 2FD4 4C 5F 33		eoy	jmp eorY
+   388 					.endl
+   389
+   390 				* ---------------------------------------------------
+   391 2FD7			r11	.local				; ROW = 11
+   392 2FD7 BD 68 33		left	lda addx,x
+   393 2FDA F0 17			beq up
+   394 2FDC 10 0A			bpl right
+   395
+   396 2FDE B9 0F A2			lda invers-1+48*0+528,y
+   397 2FE1 19 3F A2			ora invers-1+48*1+528,y
+   398 2FE4 F0 0D			beq up
+   399 2FE6 D0 08			bne eox
+   400
+   401 2FE8 B9 12 A2		right	lda invers+48*0+2+528,y
+   402 2FEB 19 42 A2			ora invers+48*1+2+528,y
+   403 2FEE F0 03			beq up
+   404
+   405 2FF0 20 56 33		eox	jsr eorX
+   406
+   407 2FF3 BD 68 33		up	lda addcnt,x
+   408 2FF6 10 09			bpl down
+   409
+   410 2FF8 B9 E0 A1			lda invers-48+528,y
+   411 2FFB 19 E1 A1			ora invers-48+1+528,y
+   412 					ift .def eoy
+   413 2FFE D0 09			bne eoy
+   414 					els
+   415 					seq
+   416 					jmp eorY
+   417 					eif
+   418 3000 60			_rts	rts
+   419
+   420 3001 B9 70 A2		down	lda invers+96+528,y
+   421 3004 19 71 A2			ora invers+1+96+528,y
+   422 3007 F0 F7			beq _rts
+   423 3009 4C 5F 33		eoy	jmp eorY
+   424 					.endl
+   425
+   426 				* ---------------------------------------------------
+   427 300C			r12	.local				; ROW = 12
+   428 300C BD 68 33		left	lda addx,x
+   429 300F F0 17			beq up
+   430 3011 10 0A			bpl right
+   431
+   432 3013 B9 3F A2			lda invers-1+48*0+576,y
+   433 3016 19 6F A2			ora invers-1+48*1+576,y
+   434 3019 F0 0D			beq up
+   435 301B D0 08			bne eox
+   436
+   437 301D B9 42 A2		right	lda invers+48*0+2+576,y
+   438 3020 19 72 A2			ora invers+48*1+2+576,y
+   439 3023 F0 03			beq up
+   440
+   441 3025 20 56 33		eox	jsr eorX
+   442
+   443 3028 BD 68 33		up	lda addcnt,x
+   444 302B 10 09			bpl down
+   445
+   446 302D B9 10 A2			lda invers-48+576,y
+   447 3030 19 11 A2			ora invers-48+1+576,y
+   448 					ift .def eoy
+   449 3033 D0 09			bne eoy
+   450 					els
+   451 					seq
+   452 					jmp eorY
+   453 					eif
+   454 3035 60			_rts	rts
+   455
+   456 3036 B9 A0 A2		down	lda invers+96+576,y
+   457 3039 19 A1 A2			ora invers+1+96+576,y
+   458 303C F0 F7			beq _rts
+   459 303E 4C 5F 33		eoy	jmp eorY
+   460 					.endl
+   461
+   462 				* ---------------------------------------------------
+   463 3041			r13	.local				; ROW = 13
+   464 3041 BD 68 33		left	lda addx,x
+   465 3044 F0 17			beq up
+   466 3046 10 0A			bpl right
+   467
+   468 3048 B9 6F A2			lda invers-1+48*0+624,y
+   469 304B 19 9F A2			ora invers-1+48*1+624,y
+   470 304E F0 0D			beq up
+   471 3050 D0 08			bne eox
+   472
+   473 3052 B9 72 A2		right	lda invers+48*0+2+624,y
+   474 3055 19 A2 A2			ora invers+48*1+2+624,y
+   475 3058 F0 03			beq up
+   476
+   477 305A 20 56 33		eox	jsr eorX
+   478
+   479 305D BD 68 33		up	lda addcnt,x
+   480 3060 10 09			bpl down
+   481
+   482 3062 B9 40 A2			lda invers-48+624,y
+   483 3065 19 41 A2			ora invers-48+1+624,y
+   484 					ift .def eoy
+   485 3068 D0 09			bne eoy
+   486 					els
+   487 					seq
+   488 					jmp eorY
+   489 					eif
+   490 306A 60			_rts	rts
+   491
+   492 306B B9 D0 A2		down	lda invers+96+624,y
+   493 306E 19 D1 A2			ora invers+1+96+624,y
+   494 3071 F0 F7			beq _rts
+   495 3073 4C 5F 33		eoy	jmp eorY
+   496 					.endl
+   497
+   498 				* ---------------------------------------------------
+   499 3076			r14	.local				; ROW = 14
+   500 3076 BD 68 33		left	lda addx,x
+   501 3079 F0 17			beq up
+   502 307B 10 0A			bpl right
+   503
+   504 307D B9 9F A2			lda invers-1+48*0+672,y
+   505 3080 19 CF A2			ora invers-1+48*1+672,y
+   506 3083 F0 0D			beq up
+   507 3085 D0 08			bne eox
+   508
+   509 3087 B9 A2 A2		right	lda invers+48*0+2+672,y
+   510 308A 19 D2 A2			ora invers+48*1+2+672,y
+   511 308D F0 03			beq up
+   512
+   513 308F 20 56 33		eox	jsr eorX
+   514
+   515 3092 BD 68 33		up	lda addcnt,x
+   516 3095 10 0B			bpl down
+   517
+   518 3097 B9 70 A2			lda invers-48+672,y
+   519 309A 19 71 A2			ora invers-48+1+672,y
+   520 					ift .def eoy
+   521 					bne eoy
+   522 					els
+   523 309D F0 03			seq
+   524 309F 4C 5F 33			jmp eorY
+   525 					eif
+   526 30A2 60			_rts	rts
+   527
+   528 = 30A2			down	= _rts
+   529 					.endl
+   530
+   531 				* ---------------------------------------------------
+   532 30A3			r15	.local				; ROW = 15
+   533 30A3 BD 68 33		left	lda addx,x
+   534 30A6 F0 17			beq up
+   535 30A8 10 0A			bpl right
+   536
+   537 30AA B9 CF A2			lda invers-1+48*0+720,y
+   538 30AD 19 FF A2			ora invers-1+48*1+720,y
+   539 30B0 F0 0D			beq up
+   540 30B2 D0 08			bne eox
+   541
+   542 30B4 B9 D2 A2		right	lda invers+48*0+2+720,y
+   543 30B7 19 02 A3			ora invers+48*1+2+720,y
+   544 30BA F0 03			beq up
+   545
+   546 30BC 20 56 33		eox	jsr eorX
+   547
+   548 30BF BD 68 33		up	lda addcnt,x
+   549 30C2 10 0B			bpl down
+   550
+   551 30C4 B9 A0 A2			lda invers-48+720,y
+   552 30C7 19 A1 A2			ora invers-48+1+720,y
+   553 					ift .def eoy
+   554 					bne eoy
+   555 					els
+   556 30CA F0 03			seq
+   557 30CC 4C 5F 33			jmp eorY
+   558 					eif
+   559 30CF 60			_rts	rts
+   560
+   561 = 30CF			down	= _rts
+   562 					.endl
+   563
+   564 				.endl
+    10 30D0				icl 'ckula4.asm'
+Source: F:\!Atari\Pang\_PC\asm\ckula4.asm
+     1 30D0			.local	ck4
+     2 				* ---------------------------------------------------
+     3 30D0			r0	.local				; ROW = 0
+     4 30D0 BD 68 33		left	lda addx,x
+     5 30D3 F0 11			beq up
+     6 30D5 10 07			bpl right
+     7
+     8 30D7 B9 FF 9F			lda invers-1+48*0+0,y
+     9 30DA F0 0A			beq up
+    10 30DC D0 05			bne eox
+    11
+    12 30DE B9 01 A0		right	lda invers+48*0+1+0,y
+    13 30E1 F0 03			beq up
+    14
+    15 30E3 20 56 33		eox	jsr eorX
+    16
+    17 30E6 BD 68 33		up	lda addcnt,x
+    18 30E9 10 01			bpl down
+    19
+    20 30EB 60			_rts	rts
+    21
+    22 30EC B9 30 A0		down	lda invers+48+0,y
+    23 30EF F0 FA			beq _rts
+    24 30F1 4C 5F 33		eoy	jmp eorY
+    25 					.endl
+    26
+    27 				* ---------------------------------------------------
+    28 30F4			r1	.local				; ROW = 1
+    29 30F4 BD 68 33		left	lda addx,x
+    30 30F7 F0 11			beq up
+    31 30F9 10 07			bpl right
+    32
+    33 30FB B9 2F A0			lda invers-1+48*0+48,y
+    34 30FE F0 0A			beq up
+    35 3100 D0 05			bne eox
+    36
+    37 3102 B9 31 A0		right	lda invers+48*0+1+48,y
+    38 3105 F0 03			beq up
+    39
+    40 3107 20 56 33		eox	jsr eorX
+    41
+    42 310A BD 68 33		up	lda addcnt,x
+    43 310D 10 06			bpl down
+    44
+    45 310F B9 00 A0			lda invers-48+48,y
+    46 					ift .def eoy
+    47 3112 D0 06			bne eoy
+    48 					els
+    49 					seq
+    50 					jmp eorY
+    51 					eif
+    52 3114 60			_rts	rts
+    53
+    54 3115 B9 60 A0		down	lda invers+48+48,y
+    55 3118 F0 FA			beq _rts
+    56 311A 4C 5F 33		eoy	jmp eorY
+    57 					.endl
+    58
+    59 				* ---------------------------------------------------
+    60 311D			r2	.local				; ROW = 2
+    61 311D BD 68 33		left	lda addx,x
+    62 3120 F0 11			beq up
+    63 3122 10 07			bpl right
+    64
+    65 3124 B9 5F A0			lda invers-1+48*0+96,y
+    66 3127 F0 0A			beq up
+    67 3129 D0 05			bne eox
+    68
+    69 312B B9 61 A0		right	lda invers+48*0+1+96,y
+    70 312E F0 03			beq up
+    71
+    72 3130 20 56 33		eox	jsr eorX
+    73
+    74 3133 BD 68 33		up	lda addcnt,x
+    75 3136 10 06			bpl down
+    76
+    77 3138 B9 30 A0			lda invers-48+96,y
+    78 					ift .def eoy
+    79 313B D0 06			bne eoy
+    80 					els
+    81 					seq
+    82 					jmp eorY
+    83 					eif
+    84 313D 60			_rts	rts
+    85
+    86 313E B9 90 A0		down	lda invers+48+96,y
+    87 3141 F0 FA			beq _rts
+    88 3143 4C 5F 33		eoy	jmp eorY
+    89 					.endl
+    90
+    91 				* ---------------------------------------------------
+    92 3146			r3	.local				; ROW = 3
+    93 3146 BD 68 33		left	lda addx,x
+    94 3149 F0 11			beq up
+    95 314B 10 07			bpl right
+    96
+    97 314D B9 8F A0			lda invers-1+48*0+144,y
+    98 3150 F0 0A			beq up
+    99 3152 D0 05			bne eox
+   100
+   101 3154 B9 91 A0		right	lda invers+48*0+1+144,y
+   102 3157 F0 03			beq up
+   103
+   104 3159 20 56 33		eox	jsr eorX
+   105
+   106 315C BD 68 33		up	lda addcnt,x
+   107 315F 10 06			bpl down
+   108
+   109 3161 B9 60 A0			lda invers-48+144,y
+   110 					ift .def eoy
+   111 3164 D0 06			bne eoy
+   112 					els
+   113 					seq
+   114 					jmp eorY
+   115 					eif
+   116 3166 60			_rts	rts
+   117
+   118 3167 B9 C0 A0		down	lda invers+48+144,y
+   119 316A F0 FA			beq _rts
+   120 316C 4C 5F 33		eoy	jmp eorY
+   121 					.endl
+   122
+   123 				* ---------------------------------------------------
+   124 316F			r4	.local				; ROW = 4
+   125 316F BD 68 33		left	lda addx,x
+   126 3172 F0 11			beq up
+   127 3174 10 07			bpl right
+   128
+   129 3176 B9 BF A0			lda invers-1+48*0+192,y
+   130 3179 F0 0A			beq up
+   131 317B D0 05			bne eox
+   132
+   133 317D B9 C1 A0		right	lda invers+48*0+1+192,y
+   134 3180 F0 03			beq up
+   135
+   136 3182 20 56 33		eox	jsr eorX
+   137
+   138 3185 BD 68 33		up	lda addcnt,x
+   139 3188 10 06			bpl down
+   140
+   141 318A B9 90 A0			lda invers-48+192,y
+   142 					ift .def eoy
+   143 318D D0 06			bne eoy
+   144 					els
+   145 					seq
+   146 					jmp eorY
+   147 					eif
+   148 318F 60			_rts	rts
+   149
+   150 3190 B9 F0 A0		down	lda invers+48+192,y
+   151 3193 F0 FA			beq _rts
+   152 3195 4C 5F 33		eoy	jmp eorY
+   153 					.endl
+   154
+   155 				* ---------------------------------------------------
+   156 3198			r5	.local				; ROW = 5
+   157 3198 BD 68 33		left	lda addx,x
+   158 319B F0 11			beq up
+   159 319D 10 07			bpl right
+   160
+   161 319F B9 EF A0			lda invers-1+48*0+240,y
+   162 31A2 F0 0A			beq up
+   163 31A4 D0 05			bne eox
+   164
+   165 31A6 B9 F1 A0		right	lda invers+48*0+1+240,y
+   166 31A9 F0 03			beq up
+   167
+   168 31AB 20 56 33		eox	jsr eorX
+   169
+   170 31AE BD 68 33		up	lda addcnt,x
+   171 31B1 10 06			bpl down
+   172
+   173 31B3 B9 C0 A0			lda invers-48+240,y
+   174 					ift .def eoy
+   175 31B6 D0 06			bne eoy
+   176 					els
+   177 					seq
+   178 					jmp eorY
+   179 					eif
+   180 31B8 60			_rts	rts
+   181
+   182 31B9 B9 20 A1		down	lda invers+48+240,y
+   183 31BC F0 FA			beq _rts
+   184 31BE 4C 5F 33		eoy	jmp eorY
+   185 					.endl
+   186
+   187 				* ---------------------------------------------------
+   188 31C1			r6	.local				; ROW = 6
+   189 31C1 BD 68 33		left	lda addx,x
+   190 31C4 F0 11			beq up
+   191 31C6 10 07			bpl right
+   192
+   193 31C8 B9 1F A1			lda invers-1+48*0+288,y
+   194 31CB F0 0A			beq up
+   195 31CD D0 05			bne eox
+   196
+   197 31CF B9 21 A1		right	lda invers+48*0+1+288,y
+   198 31D2 F0 03			beq up
+   199
+   200 31D4 20 56 33		eox	jsr eorX
+   201
+   202 31D7 BD 68 33		up	lda addcnt,x
+   203 31DA 10 06			bpl down
+   204
+   205 31DC B9 F0 A0			lda invers-48+288,y
+   206 					ift .def eoy
+   207 31DF D0 06			bne eoy
+   208 					els
+   209 					seq
+   210 					jmp eorY
+   211 					eif
+   212 31E1 60			_rts	rts
+   213
+   214 31E2 B9 50 A1		down	lda invers+48+288,y
+   215 31E5 F0 FA			beq _rts
+   216 31E7 4C 5F 33		eoy	jmp eorY
+   217 					.endl
+   218
+   219 				* ---------------------------------------------------
+   220 31EA			r7	.local				; ROW = 7
+   221 31EA BD 68 33		left	lda addx,x
+   222 31ED F0 11			beq up
+   223 31EF 10 07			bpl right
+   224
+   225 31F1 B9 4F A1			lda invers-1+48*0+336,y
+   226 31F4 F0 0A			beq up
+   227 31F6 D0 05			bne eox
+   228
+   229 31F8 B9 51 A1		right	lda invers+48*0+1+336,y
+   230 31FB F0 03			beq up
+   231
+   232 31FD 20 56 33		eox	jsr eorX
+   233
+   234 3200 BD 68 33		up	lda addcnt,x
+   235 3203 10 06			bpl down
+   236
+   237 3205 B9 20 A1			lda invers-48+336,y
+   238 					ift .def eoy
+   239 3208 D0 06			bne eoy
+   240 					els
+   241 					seq
+   242 					jmp eorY
+   243 					eif
+   244 320A 60			_rts	rts
+   245
+   246 320B B9 80 A1		down	lda invers+48+336,y
+   247 320E F0 FA			beq _rts
+   248 3210 4C 5F 33		eoy	jmp eorY
+   249 					.endl
+   250
+   251 				* ---------------------------------------------------
+   252 3213			r8	.local				; ROW = 8
+   253 3213 BD 68 33		left	lda addx,x
+   254 3216 F0 11			beq up
+   255 3218 10 07			bpl right
+   256
+   257 321A B9 7F A1			lda invers-1+48*0+384,y
+   258 321D F0 0A			beq up
+   259 321F D0 05			bne eox
+   260
+   261 3221 B9 81 A1		right	lda invers+48*0+1+384,y
+   262 3224 F0 03			beq up
+   263
+   264 3226 20 56 33		eox	jsr eorX
+   265
+   266 3229 BD 68 33		up	lda addcnt,x
+   267 322C 10 06			bpl down
+   268
+   269 322E B9 50 A1			lda invers-48+384,y
+   270 					ift .def eoy
+   271 3231 D0 06			bne eoy
+   272 					els
+   273 					seq
+   274 					jmp eorY
+   275 					eif
+   276 3233 60			_rts	rts
+   277
+   278 3234 B9 B0 A1		down	lda invers+48+384,y
+   279 3237 F0 FA			beq _rts
+   280 3239 4C 5F 33		eoy	jmp eorY
+   281 					.endl
+   282
+   283 				* ---------------------------------------------------
+   284 323C			r9	.local				; ROW = 9
+   285 323C BD 68 33		left	lda addx,x
+   286 323F F0 11			beq up
+   287 3241 10 07			bpl right
+   288
+   289 3243 B9 AF A1			lda invers-1+48*0+432,y
+   290 3246 F0 0A			beq up
+   291 3248 D0 05			bne eox
+   292
+   293 324A B9 B1 A1		right	lda invers+48*0+1+432,y
+   294 324D F0 03			beq up
+   295
+   296 324F 20 56 33		eox	jsr eorX
+   297
+   298 3252 BD 68 33		up	lda addcnt,x
+   299 3255 10 06			bpl down
+   300
+   301 3257 B9 80 A1			lda invers-48+432,y
+   302 					ift .def eoy
+   303 325A D0 06			bne eoy
+   304 					els
+   305 					seq
+   306 					jmp eorY
+   307 					eif
+   308 325C 60			_rts	rts
+   309
+   310 325D B9 E0 A1		down	lda invers+48+432,y
+   311 3260 F0 FA			beq _rts
+   312 3262 4C 5F 33		eoy	jmp eorY
+   313 					.endl
+   314
+   315 				* ---------------------------------------------------
+   316 3265			r10	.local				; ROW = 10
+   317 3265 BD 68 33		left	lda addx,x
+   318 3268 F0 11			beq up
+   319 326A 10 07			bpl right
+   320
+   321 326C B9 DF A1			lda invers-1+48*0+480,y
+   322 326F F0 0A			beq up
+   323 3271 D0 05			bne eox
+   324
+   325 3273 B9 E1 A1		right	lda invers+48*0+1+480,y
+   326 3276 F0 03			beq up
+   327
+   328 3278 20 56 33		eox	jsr eorX
+   329
+   330 327B BD 68 33		up	lda addcnt,x
+   331 327E 10 06			bpl down
+   332
+   333 3280 B9 B0 A1			lda invers-48+480,y
+   334 					ift .def eoy
+   335 3283 D0 06			bne eoy
+   336 					els
+   337 					seq
+   338 					jmp eorY
+   339 					eif
+   340 3285 60			_rts	rts
+   341
+   342 3286 B9 10 A2		down	lda invers+48+480,y
+   343 3289 F0 FA			beq _rts
+   344 328B 4C 5F 33		eoy	jmp eorY
+   345 					.endl
+   346
+   347 				* ---------------------------------------------------
+   348 328E			r11	.local				; ROW = 11
+   349 328E BD 68 33		left	lda addx,x
+   350 3291 F0 11			beq up
+   351 3293 10 07			bpl right
+   352
+   353 3295 B9 0F A2			lda invers-1+48*0+528,y
+   354 3298 F0 0A			beq up
+   355 329A D0 05			bne eox
+   356
+   357 329C B9 11 A2		right	lda invers+48*0+1+528,y
+   358 329F F0 03			beq up
+   359
+   360 32A1 20 56 33		eox	jsr eorX
+   361
+   362 32A4 BD 68 33		up	lda addcnt,x
+   363 32A7 10 06			bpl down
+   364
+   365 32A9 B9 E0 A1			lda invers-48+528,y
+   366 					ift .def eoy
+   367 32AC D0 06			bne eoy
+   368 					els
+   369 					seq
+   370 					jmp eorY
+   371 					eif
+   372 32AE 60			_rts	rts
+   373
+   374 32AF B9 40 A2		down	lda invers+48+528,y
+   375 32B2 F0 FA			beq _rts
+   376 32B4 4C 5F 33		eoy	jmp eorY
+   377 					.endl
+   378
+   379 				* ---------------------------------------------------
+   380 32B7			r12	.local				; ROW = 12
+   381 32B7 BD 68 33		left	lda addx,x
+   382 32BA F0 11			beq up
+   383 32BC 10 07			bpl right
+   384
+   385 32BE B9 3F A2			lda invers-1+48*0+576,y
+   386 32C1 F0 0A			beq up
+   387 32C3 D0 05			bne eox
+   388
+   389 32C5 B9 41 A2		right	lda invers+48*0+1+576,y
+   390 32C8 F0 03			beq up
+   391
+   392 32CA 20 56 33		eox	jsr eorX
+   393
+   394 32CD BD 68 33		up	lda addcnt,x
+   395 32D0 10 06			bpl down
+   396
+   397 32D2 B9 10 A2			lda invers-48+576,y
+   398 					ift .def eoy
+   399 32D5 D0 06			bne eoy
+   400 					els
+   401 					seq
+   402 					jmp eorY
+   403 					eif
+   404 32D7 60			_rts	rts
+   405
+   406 32D8 B9 70 A2		down	lda invers+48+576,y
+   407 32DB F0 FA			beq _rts
+   408 32DD 4C 5F 33		eoy	jmp eorY
+   409 					.endl
+   410
+   411 				* ---------------------------------------------------
+   412 32E0			r13	.local				; ROW = 13
+   413 32E0 BD 68 33		left	lda addx,x
+   414 32E3 F0 11			beq up
+   415 32E5 10 07			bpl right
+   416
+   417 32E7 B9 6F A2			lda invers-1+48*0+624,y
+   418 32EA F0 0A			beq up
+   419 32EC D0 05			bne eox
+   420
+   421 32EE B9 71 A2		right	lda invers+48*0+1+624,y
+   422 32F1 F0 03			beq up
+   423
+   424 32F3 20 56 33		eox	jsr eorX
+   425
+   426 32F6 BD 68 33		up	lda addcnt,x
+   427 32F9 10 06			bpl down
+   428
+   429 32FB B9 40 A2			lda invers-48+624,y
+   430 					ift .def eoy
+   431 32FE D0 06			bne eoy
+   432 					els
+   433 					seq
+   434 					jmp eorY
+   435 					eif
+   436 3300 60			_rts	rts
+   437
+   438 3301 B9 A0 A2		down	lda invers+48+624,y
+   439 3304 F0 FA			beq _rts
+   440 3306 4C 5F 33		eoy	jmp eorY
+   441 					.endl
+   442
+   443 				* ---------------------------------------------------
+   444 3309			r14	.local				; ROW = 14
+   445 3309 BD 68 33		left	lda addx,x
+   446 330C F0 11			beq up
+   447 330E 10 07			bpl right
+   448
+   449 3310 B9 9F A2			lda invers-1+48*0+672,y
+   450 3313 F0 0A			beq up
+   451 3315 D0 05			bne eox
+   452
+   453 3317 B9 A1 A2		right	lda invers+48*0+1+672,y
+   454 331A F0 03			beq up
+   455
+   456 331C 20 56 33		eox	jsr eorX
+   457
+   458 331F BD 68 33		up	lda addcnt,x
+   459 3322 10 06			bpl down
+   460
+   461 3324 B9 70 A2			lda invers-48+672,y
+   462 					ift .def eoy
+   463 3327 D0 06			bne eoy
+   464 					els
+   465 					seq
+   466 					jmp eorY
+   467 					eif
+   468 3329 60			_rts	rts
+   469
+   470 332A B9 D0 A2		down	lda invers+48+672,y
+   471 332D F0 FA			beq _rts
+   472 332F 4C 5F 33		eoy	jmp eorY
+   473 					.endl
+   474
+   475 				* ---------------------------------------------------
+   476 3332			r15	.local				; ROW = 15
+   477 3332 BD 68 33		left	lda addx,x
+   478 3335 F0 11			beq up
+   479 3337 10 07			bpl right
+   480
+   481 3339 B9 CF A2			lda invers-1+48*0+720,y
+   482 333C F0 0A			beq up
+   483 333E D0 05			bne eox
+   484
+   485 3340 B9 D1 A2		right	lda invers+48*0+1+720,y
+   486 3343 F0 03			beq up
+   487
+   488 3345 20 56 33		eox	jsr eorX
+   489
+   490 3348 BD 68 33		up	lda addcnt,x
+   491 334B 10 08			bpl down
+   492
+   493 334D B9 A0 A2			lda invers-48+720,y
+   494 					ift .def eoy
+   495 					bne eoy
+   496 					els
+   497 3350 F0 03			seq
+   498 3352 4C 5F 33			jmp eorY
+   499 					eif
+   500 3355 60			_rts	rts
+   501
+   502 = 3355			down	= _rts
+   503 					.endl
+   504
+   505 				.endl
+    11
+    12 3356 BD 68 33		eorX	lda addx,x
+    13 3359 49 FE			eor #$fe
+    14 335B 9D 68 33			sta addx,x
+    15 335E 60				rts
+    16
+    17 335F BD 68 33		eorY	lda addcnt,x
+    18 3362 49 FE			eor #$fe
+    19 3364 9D 68 33			sta addcnt,x
+    20 3367 60				rts
+    21
+    22 3368			addx
+    23 3368			addcnt
