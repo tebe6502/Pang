@@ -1,0 +1,470 @@
+// detekcja kolizji kul z murkami (12.06.2009)
+// wymogiem jest aby kula posiadala zaznaczona krawedz (wartosc '1')
+// pozostale kolory kuli interpretowane sa jako wartosc '0', tlo to wartosc '$ff'
+
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, StdCtrls;
+
+type
+  TForm1 = class(TForm)
+    Image1: TImage;
+    Button1: TButton;
+    OpenDialog1: TOpenDialog;
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+type
+ tablica = array of record
+                      x, y, l: integer;
+                    end;
+var
+  Form1: TForm1;
+
+  kule: TBitmap;
+
+  fasm, ferr: textfile;
+
+  tmp: array [0..63, 0..63] of byte;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure add_result(var r: tablica; x,y, ln: integer);
+var i: integer;
+begin
+
+ i:=High(r);
+ r[i].x:=x;
+ r[i].y:=y;
+ r[i].l:=ln;
+
+ SetLength(r, i+2);
+end;
+
+
+function block(x,y: integer; side: char): integer;
+ var i, j, l0, l1, ln: integer;
+     ok: Boolean;
+begin
+
+ Result:=0;
+
+ l0:=0; l1:=0;
+
+ for j:=0 to 7 do
+  for i:=0 to 7 do
+   case tmp[x*8+i,y*8+j] of
+    $00: inc(l0);
+    $ff: inc(l1);
+   end;
+
+ if (l0=64) or (l1=64) then
+  Result:=-1
+ else begin
+
+  Result:=8;
+
+  ok:=false;      // w kazdym takim bloku wystapi przynajmniej raz wartosc '1'
+  for j:=0 to 7 do
+   for i:=0 to 7 do
+    if tmp[x*8+i,y*8+j]=1 then begin ok:=true; Break; end;
+
+  if not(ok) then writeln(ferr, x,',',y,',',side);  // inaczej to blad
+
+  case side of
+   'l': for j:=0 to 7 do begin
+         ln:=0;
+         i:=0;
+         while (i<=7) and (tmp[x*8+i,y*8+j]<>1) do begin inc(i); inc(ln) end;
+         if ln<Result then Result:=ln;
+        end;
+
+   'r': for j:=0 to 7 do begin
+         ln:=0;
+         i:=7;
+         while (i>=0) and (tmp[x*8+i,y*8+j]<>1) do begin dec(i); inc(ln) end;
+         if ln<Result then Result:=ln;
+        end;
+
+   'u': for i:=0 to 7 do begin
+         ln:=0;
+         j:=0;
+         while (j<=7) and not(tmp[x*8+i,y*8+j] in [1,2]) do begin inc(j); inc(ln) end;
+         if ln<Result then Result:=ln;
+        end;
+
+   'd': for i:=0 to 7 do begin
+         ln:=0;
+         j:=7;
+         while (j>=0) and not(tmp[x*8+i,y*8+j] in [1,2]) do begin dec(j); inc(ln) end;
+         if ln<Result then Result:=ln;
+        end;
+  end;  //case
+
+ Result:=8-Result;
+
+ if side in ['l','r'] then
+  if Result>0 then Result:=2 else
+   if Result<0 then Result:=-2;
+
+ end;
+
+end;
+
+
+function left_side: tablica;
+var x, y: integer;
+begin
+ SetLength(Result, 1);
+
+ for y:=0 to 7 do begin
+
+ for x:=0 to 7 do
+  if block(x,y, 'l')>=0 then begin add_result(Result, x,y, block(x,y, 'l')); Break end;
+
+ end;
+
+end;
+
+
+function right_side: tablica;
+var x, y: integer;
+begin
+ SetLength(Result, 1);
+
+ for y:=0 to 7 do begin
+
+ for x:=7 downto 0 do
+  if block(x,y, 'r')>=0 then begin add_result(Result, x,y, block(x,y, 'r')); Break end;
+
+ end;
+
+end;
+
+
+function up_side: tablica;
+var x, y: integer;
+begin
+ SetLength(Result, 1);
+
+ for x:=0 to 7 do begin
+
+ for y:=0 to 7 do
+  if block(x,y, 'u')>=0 then begin add_result(Result, x,y, block(x,y, 'u')); Break end;
+
+ end;
+
+end;
+
+
+function down_side: tablica;
+var x, y: integer;
+begin
+ SetLength(Result, 1);
+
+ for x:=0 to 7 do begin
+
+ for y:=7 downto 0 do
+  if block(x,y, 'd')>=0 then begin add_result(Result, x,y, block(x,y, 'd')); Break end;
+
+ end;
+
+end;
+
+
+procedure wynikASM(var wynik: tablica; lab:char);
+var i, j, ldy, cnt, min, y, x: integer;
+    lda: Boolean;
+begin
+
+ cnt:=0;
+
+ if lab in ['l','r'] then
+  ldy:=0
+ else
+  ldy:=-100;
+
+ min:=255;
+ for i:=0 to High(wynik)-1 do
+  if wynik[i].l<min then min:=wynik[i].l;
+
+//  min:=0;
+//  for i:=0 to High(wynik)-1 do
+//   if wynik[i].l>min then min:=wynik[i].l;
+
+// for j:=0 to 8 do begin
+
+ for j:=8 downto 0 do begin
+
+ lda:=false;
+
+ for i:=0 to High(wynik)-1 do
+  if wynik[i].l=j then begin
+
+   y:=wynik[i].x+wynik[i].y*48;
+
+   if ldy<>y then begin
+
+    case y-ldy of
+      1: writeln(fasm, #9'iny');
+     -1: writeln(fasm, #9'dey');
+    else
+     writeln(fasm, #9'ldy #',IntToStr(y));
+    end;
+
+    ldy:=y;
+   end;
+
+   if not(lda) then begin
+    writeln(fasm, #9'lda (rw0),y');
+    inc(cnt);
+   end else
+    writeln(fasm, #9'ora (rw0),y');
+
+   lda:=true;
+
+ end;
+
+
+  if lda then begin
+
+   if j=min then begin
+    if lab in ['l','r'] then
+     writeln(fasm, #9'beq updown')
+    else
+     writeln(fasm, #9'beq quit')
+   end else
+    writeln(fasm, #9'beq ',lab,IntToStr(cnt));
+
+   if lab in ['l','r'] then
+    x:=j div 2
+   else
+    x:=j;
+
+   case lab of
+    'u': writeln(fasm, #9'lda #',IntToStr(x));
+    'd': writeln(fasm, #9'lda #-',IntToStr(x));
+   end;
+
+   if lab in ['l','r'] then begin
+    if not((j=min) and (lab='r')) then begin writeln(fasm, #13#10#9'inc _posx'); writeln(fasm, #9'bne updown'); end;
+   end else
+    if not((j=min) and (lab='d')) then writeln(fasm, #9'bne y');
+
+   if j<>min then writeln(fasm, lab,IntToStr(cnt));
+
+  end;
+  end;
+
+
+end;
+
+
+procedure kolizje(k, dx, dy: integer);
+var w, h, ofs, x, y: integer;
+    wynik: tablica;
+begin
+
+ case k of
+  0: begin ofs:=0; h:=40 end;
+  1: begin ofs:=40; h:=32 end;
+  2: begin ofs:=72; h:=24 end;
+  3: begin ofs:=96; h:=16 end;
+  4: begin ofs:=112; h:=8 end;
+ end;
+
+ w:=40;
+
+ writeln(fasm, #13#10'dx',IntToStr(dx),'_dy',IntToStr(dy),#9'.local'#13#10);
+
+ fillchar(tmp, sizeof(tmp), $ff);
+
+ for y:=0 to h-1 do
+  for x:=0 to w-1 do
+   if form1.Image1.Canvas.Pixels[x,y+ofs]=0 then tmp[x+dx*2,y+dy]:=0 else
+    if form1.Image1.Canvas.Pixels[x,y+ofs]=clWhite then tmp[x+dx*2,y+dy]:=1 else
+     if form1.Image1.Canvas.Pixels[x,y+ofs]=clYellow then tmp[x+dx*2,y+dy]:=2;
+
+(* ------------- LEFT SIDE -------------- *)
+
+// writeln(fasm, #9'lda _addx');
+ writeln(fasm, #9'beq updown');
+ writeln(fasm, #9'bpl right');
+ writeln(fasm, 'left');
+
+ wynik:=left_side;
+ wynikASM(wynik, 'l');
+
+// for x:=0 to High(wynik)-1 do
+//  writeln(fasm, wynik[x].x,',',wynik[x].y,' | ',wynik[x].l);
+
+(* ------------- RIGHT SIDE -------------- *)
+
+ writeln(fasm, 'right');
+
+ wynik:=right_side;
+ wynikASM(wynik, 'r');
+
+ writeln(fasm, #13#10#9'dec _posx'#13#10);
+
+// for x:=0 to High(wynik)-1 do
+//  writeln(fasm, wynik[x].x,',',wynik[x].y,' | ',wynik[x].l);
+
+(* ------------- UP SIDE -------------- *)
+ writeln(fasm, 'updown'#9'lda _addy');
+ writeln(fasm, #9'beq quit');
+ writeln(fasm, #9'bpl down');
+ writeln(fasm, 'up');
+
+ wynik:=up_side;
+ wynikASM(wynik, 'u');
+
+// for x:=0 to High(wynik)-1 do
+//  writeln(fasm, wynik[x].x,',',wynik[x].y,' | ',wynik[x].l);
+
+
+(* ------------- DOWN SIDE -------------- *)
+
+ writeln(fasm, 'down');
+
+ wynik:=down_side;
+ wynikASM(wynik, 'd');
+
+ writeln(fasm, #13#10'y'#9'add:sta _posy'#13#10);
+
+ writeln(fasm, 'quit'#9'rts');
+ writeln(fasm, #9'.endl');
+end;
+
+
+procedure test(k: integer);
+var dx, dy: integer;
+begin
+
+ assignfile(fasm, 'ckula'+IntToStr(k)+'.asm'); rewrite(fasm);
+
+ writeln(fasm, #9'.RELOC'#13#10);
+
+ writeln(fasm, #9'.extrn rw0 .byte');
+ writeln(fasm, #9'.extrn _posx _posy _addx _addy .byte');
+ writeln(fasm, #9'.extrn linv48 hinv48 tmul8 .word'#13#10);
+
+ writeln(fasm, #9'.public ck',IntToStr(k),'.main'#13#10);
+
+ writeln(fasm, '.local'#9'ck',IntToStr(k));
+
+  for dy:=0 to 7 do begin
+   write(fasm, #9'dta a(');
+
+   for dx:=0 to 3 do begin
+    write(fasm, 'dx'+IntToStr(dx)+'_dy'+IntToStr(dy));
+
+    if dx<>3 then
+     write(fasm, ', ')
+    else
+     writeln(fasm, ')');
+   end;
+
+  end;
+
+	writeln(fasm, #13#10'main'#9'lda _posx');
+  writeln(fasm, #9'cmp #240');
+  writeln(fasm, #9'scc');
+  writeln(fasm, #9'mva #0 _posx'#13#10);
+	writeln(fasm, #9':2 lsr @'#13#10);
+
+	writeln(fasm, #9'ldy _posy');
+  writeln(fasm, #9'cpy #240');
+  writeln(fasm, #9'scc');
+  writeln(fasm, #9'mvy #0 _posy'#13#10);
+
+	writeln(fasm, #9'add linv48,y');
+	writeln(fasm, #9'sta rw0');
+	writeln(fasm, #9'lda #0');
+	writeln(fasm, #9'adc hinv48,y');
+	writeln(fasm, #9'sta rw0+1'#13#10);
+
+  writeln(fasm, #9'tya');
+  writeln(fasm, #9'and #7');
+  writeln(fasm, #9'tay'#13#10);
+
+	writeln(fasm, #9'lda _posx');
+	writeln(fasm, #9'and #3');
+	writeln(fasm, #9'asl @');
+  writeln(fasm, #9'ora tmul8,y');
+	writeln(fasm, #9'sta _jmp+1'#13#10);
+
+	writeln(fasm, #9'ldy #0'#13#10);
+
+ writeln(fasm, #9'lda _addx'#13#10);
+
+  writeln(fasm, '_jmp'#9'jmp (ck',IntToStr(k),')'#13#10);
+
+ for dy:=0 to 7 do
+  for dx:=0 to 3 do
+   kolizje(k, dx, dy);
+
+ writeln(fasm, '.endl');
+
+ writeln(fasm, #13#10'.print .len ck',IntToStr(k));
+
+ closefile(fasm);
+end;
+
+
+procedure TForm1.Button1Click(Sender: TObject);
+var x, y: integer;
+    bak, col, add: TColor;
+begin
+
+if OpenDialog1.Execute then begin
+
+assignfile(ferr, 'error.txt'); rewrite(ferr);
+
+kule:=TBitmap.Create;
+kule.LoadFromFile(OpenDialog1.FileName);
+
+bak:=kule.Canvas.Pixels[0,0];
+col:=kule.Canvas.Pixels[2,0];
+add:=kule.Canvas.Pixels[4,0];
+
+for x:=0 to 7 do kule.Canvas.Pixels[x,0]:=bak;
+
+with image1.Canvas do begin
+ pen.Color:=clRed; brush.Color:=clRed;
+ rectangle(0,0,image1.Width,image1.Height);
+end;
+
+
+for y:=0 to image1.Height-1 do
+ for x:=0 to image1.Width-1 do
+  if kule.Canvas.Pixels[x,y]=col then image1.Canvas.Pixels[x,y]:=clWhite else
+   if kule.Canvas.Pixels[x,y]=add then image1.Canvas.Pixels[x,y]:=clYellow else
+    if kule.Canvas.Pixels[x,y]<>bak then image1.Canvas.Pixels[x,y]:=0;
+  
+ test(0);
+ test(1);
+ test(2);
+ test(3);
+ test(4);
+
+closefile(ferr);
+
+kule.Free;
+
+end;
+
+end;
+
+end.
