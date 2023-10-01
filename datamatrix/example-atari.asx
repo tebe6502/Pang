@@ -1,0 +1,223 @@
+// PANG datamatrix
+// tour / panic mode
+
+TEST	= 0
+
+	icl 'atari.hea'
+
+
+	ift !TEST
+	opt h-f+
+	eif
+
+
+	ift TEST
+	_add	= 0
+	els
+	_add	= $9800
+	eif
+
+DataMatrix_code	equ	$4000+_add
+DataMatrix_data	equ	$4400+_add
+DataMatrix_SIZE	equ	24
+
+width		= 48
+
+cloc		= $14
+
+	icl	'datamatrix.asx'
+
+
+	org 	DataMatrix_data
+
+	dta	c'http://atari.pl/hsc/?x=10'
+hscode	dta	c'2'
+hscore	dta 	c'123456',DataMatrix_EOF
+
+
+	org $4c00+_add
+
+fnt	ins 'hsc.fnt'
+
+dlist	dta d'pp'
+	dta $42,a(text)
+	:25 dta 2
+	dta $41,a(dlist)
+
+	.align $100
+
+text	ins 'hsc.scr',4*width,26*width
+
+main	sta mode
+	stx score
+	sty score+1
+
+	lda:rne vcount
+
+	ift TEST
+	sei			;stop IRQ interrupts
+	mva #$00 nmien		;stop NMI interrupts
+	sta dmactl
+	mva #$fe portb		;switch off ROM to get 16k more ram
+	els
+	mva #$00 nmien		;stop NMI interrupts
+	eif
+
+	ldx #$1f
+	lda #0
+	sta:rpl $d000,x-
+
+	mwa #NMI $fffa		;new NMI handler
+
+	mva #$40 nmien
+
+	mwa #text+20+width scr
+	mva #0 px
+
+	ldy #5			; dopisujemy nowy wynik
+mv	lda $ffff,y
+score	equ *-2
+	add #'0'
+	sta hscore,y
+	add #"0"-'0'
+	sta text+9*48+8,y
+	dey
+	bpl mv
+
+	lda #0
+mode	equ *-1
+	beq skip
+
+	ldy #4
+cp	lda panic,y
+	sta text+6*48+9,y
+	dey
+	bpl cp
+
+	lda #'3'
+	sta hscode
+
+skip
+	jsr	DataMatrix_code
+
+; print result
+
+	mwa	#DataMatrix_symbol	symbol_ptr
+	mva	#DataMatrix_SIZE	rows
+print_line
+	mva	#DataMatrix_SIZE	columns
+print_char
+	ldx	DataMatrix_symbol
+symbol_ptr	equ	*-2
+	inw	symbol_ptr
+	lda	chars,x
+	jsr	putchar
+	dec	columns
+	bne	print_char
+	lda	#$9b
+	jsr	putchar
+	dec	rows
+	bne	print_line
+
+
+fade_in	jsr wait
+	inc c0
+	lda c0
+	cmp #$c
+	bne fade_in
+
+_lp
+	lda trig0		; FIRE #0
+	beq stop
+
+	lda trig1		; FIRE #1
+	beq stop
+
+	lda consol		; START
+	and #1
+	beq stop
+
+	lda skctl
+	and #$04
+	beq stop		;wait to press any key; here you can put any own routine
+
+	jmp _lp
+stop
+
+fade_out
+	jsr wait
+	dec c0
+	bne fade_out
+
+	jsr wait
+
+rts_	rts
+
+putchar
+	cmp #$9b
+	bne skp
+
+	adw scr #width
+	mva #0 px
+	rts
+
+skp	sty ry
+
+	ldy #0
+px	equ *-1
+
+	sta	$ffff,y
+scr	equ *-2
+
+	inc px
+
+	ldy #0
+ry	equ *-1
+	rts
+
+chars	dta	d' ',d' '*,d'?'
+columns	.ds 1
+rows	.ds 1
+
+
+nmi	bit nmist
+	bpl vbl
+
+	rti
+
+vbl	phr
+
+	mva #@dmactl(wide|dma) dmactl
+	mwa #dlist dlptr
+
+	inc cloc
+
+	mva >fnt chbase
+
+	lda	#0
+c0	equ *-1
+	sta	$d018		; white background
+	sta	$d01a		; white border
+
+	mva	#0	$d017	; black ink
+
+	plr
+	rti
+
+
+wait	lda:cmp:req cloc
+	rts
+
+panic	dta d'PANIC'
+
+
+	ift TEST
+	run main
+	els
+	org	$ffe0
+	jmp	main
+
+msxPlay	jmp	rts_
+msxStop	jmp	rts_
+
+	eif
