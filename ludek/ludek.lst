@@ -1,0 +1,296 @@
+mads 1.7.9
+Source: F:\!Atari\Pang\ludek\ludek.asm
+     1 				/***************************************/
+     2 				/*  Use MADS http://mads.atari8.info/  */
+     3 				/*  Mode: DLI (char mode)              */
+     4 				/***************************************/
+     5
+     6 = 003F			scr48	= %00111111	;screen 48b
+     7 = 003E			scr40	= %00111110	;screen 40b
+     8 = 003D			scr32	= %00111101	;screen 32b
+     9
+    10 = 0014			cloc	= $0014		;(1)
+    11 = 0000			byt2	= $0000		;(1) <$0100
+    12 = 0100			byt3	= $0100		;(1) >$00FF
+    13
+    14 = 0080			ftmp	= $80		;(2)
+    15 = 0082			regA	= ftmp+2	;(1)
+    16 = 0083			regX	= regA+1	;(1)
+    17 = 0084			regY	= regX+1	;(1)
+    18
+    19 = D000			hposp0	= $D000
+    20 = D001			hposp1	= $D001
+    21 = D002			hposp2	= $D002
+    22 = D003			hposp3	= $D003
+    23 = D004			hposm0	= $D004
+    24 = D005			hposm1	= $D005
+    25 = D006			hposm2	= $D006
+    26 = D007			hposm3	= $D007
+    27 = D008			sizep0	= $D008
+    28 = D009			sizep1	= $D009
+    29 = D00A			sizep2	= $D00A
+    30 = D00B			sizep3	= $D00B
+    31 = D00C			sizem	= $D00C
+    32
+    33 = D012			colpm0	= $D012
+    34 = D013			colpm1	= $D013
+    35 = D014			colpm2	= $D014
+    36 = D015			colpm3	= $D015
+    37 = D016			color0	= $D016
+    38 = D017			color1	= $D017
+    39 = D018			color2	= $D018
+    40 = D019			color3	= $D019
+    41 = D01A			colbak	= $D01A
+    42 = D01B			gtictl	= $D01B
+    43
+    44 = D409			chbase	= $D409
+    45
+    46 				* ---	BASIC switch OFF
+    47 					org $2000\ mva #$ff $d301\ rts\ ini $2000
+    47 					ORG $2000
+    47 FFFF> 2000-2005> A9 FF +  MVA #$FF $D301
+    47 2005 60			 RTS
+    47 02E2-02E3> 00 20		 INI $2000
+    48
+    49 				* ---	MAIN PROGRAM
+    50 02E4				org $2000
+    51
+Macro: ANTIC_PROGRAM [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     1 2000-25C2> 44 23 20 04 + 	dta $44,a(SCR),$04,$04,$84,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
+     2 2010 04 84 04 04 04 04 + 	dta $04,$84,$04,$04,$04,$04,$84,$04,$04,$04,$04,$04,$04,$04,$04,$04
+     3 2020 41 00 20			dta $41,a(ANT)
+Source: F:\!Atari\Pang\ludek\ludek.asm
+    53
+Macro: SCREEN_DATA [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     1 2023 00 00 00 00 01 02 + 	ins 'ludek.scr'
+Source: F:\!Atari\Pang\ludek\ludek.asm
+    55
+Macro: ALIGN [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     2 25C3				org (*/$0400)*$0400+$0400
+Source: F:\!Atari\Pang\ludek\ludek.asm
+Macro: FONTS [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     1 2800-2BFF> 00 00 00 00 + 	ins 'ludek.fnt'
+Source: F:\!Atari\Pang\ludek\ludek.asm
+    58
+Macro: ALIGN [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     2 2C00				org (*/$0800)*$0800+$0800
+Source: F:\!Atari\Pang\ludek\ludek.asm
+    60 = 3000				.ds $0300
+Macro: SPRITES [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     1 3300-35FF> 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$06,$07,$06,$09
+     2 3310 0A 02 00 00 00 02 + 	dta $0A,$02,$00,$00,$00,$02,$09,$0E,$01,$08,$00,$00,$02,$00,$02,$0B
+     3 3320 0E 02 00 00 00 01 + 	dta $0E,$02,$00,$00,$00,$01,$06,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     4 3330 00 00 00 02 08 0B + 	dta $00,$00,$00,$02,$08,$0B,$0B,$08,$03,$0C,$0B,$02,$00,$00,$02,$09
+     5 3340 09 09 02 00 00 00 + 	dta $09,$09,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$08,$0A
+     6 3350 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     7 3360 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     8 3370 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+     9 3380 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    10 3390 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    11 33A0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    12 33B0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    13 33C0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    14 33D0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    15 33E0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    16 33F0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    18 3400 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$17,$2D,$5F,$7E,$BF,$FF,$FE,$BD
+    19 3410 DB 3D C5 FB 77 7F + 	dta $DB,$3D,$C5,$FB,$77,$7F,$D5,$AF,$BF,$B6,$E7,$7F,$56,$7B,$3F,$7D
+    20 3420 55 2E 03 11 28 08 + 	dta $55,$2E,$03,$11,$28,$08,$B1,$D9,$00,$00,$00,$00,$00,$00,$00,$00
+    21 3430 18 28 32 99 7E FF + 	dta $18,$28,$32,$99,$7E,$FF,$5F,$AE,$74,$6F,$28,$15,$00,$7D,$AA,$7D
+    22 3440 BB 13 39 37 5A 15 + 	dta $BB,$13,$39,$37,$5A,$15,$62,$EF,$40,$55,$00,$00,$00,$80,$41,$02
+    23 3450 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    24 3460 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    25 3470 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    26 3480 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    27 3490 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    28 34A0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    29 34B0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    30 34C0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    31 34D0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    32 34E0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    33 34F0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+    35 3500 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$08,$16,$32,$27,$5F,$7F,$7F,$5E
+    36 3510 2C C3 7E 2C 00 00 + 	dta $2C,$C3,$7E,$2C,$00,$00,$2F,$7F,$77,$73,$36,$2A,$2F,$04,$00,$13
+    37 3520 2A 11 00 00 00 00 + 	dta $2A,$11,$00,$00,$00,$00,$40,$60,$00,$00,$00,$00,$00,$00,$00,$00
+    38 3530 04 1A 13 39 BE BF + 	dta $04,$1A,$13,$39,$BE,$BF,$BF,$5E,$4D,$30,$1F,$0D,$00,$00,$7D,$FF
+    39 3540 3B 73 1B 15 3D 08 + 	dta $3B,$73,$1B,$15,$3D,$08,$00,$72,$D5,$22,$00,$00,$00,$00,$80,$01
+    40 3550 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    41 3560 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    42 3570 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    43 3580 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    44 3590 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    45 35A0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    46 35B0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    47 35C0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    48 35D0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    49 35E0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+    50 35F0 00 00 00 00 00 00 + 	dta $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+Source: F:\!Atari\Pang\ludek\ludek.asm
+    62
+    63 3800			main
+    64 				* ---	init PMG
+    65 3800-3919> A9 33 8D 07 + 	mva >pmg $d407		;missiles and players data address
+    66 3805 A9 03 8D 1D D0		mva #3 $d01d		;enable players and missiles
+    67
+    68 380A A5 14 C5 14 F0 FC		lda:cmp:req 20		;wait 1 frame
+    69
+    70 3810 78				sei			;stop IRQ interrupts
+    71 3811 A9 00 8D 0E D4		mva #0 $d40e		;stop NMI interrupts
+    72 3816 A9 FE 8D 01 D3		mva #$fe $d301		;switch off ROM to get 16k more ram
+    73
+    74 381B A9 9F 8D FA FF A9 + 	mwa #NMI $fffa		;new NMI handler
+    75
+    76 3825 A9 C0 8D 0E D4		mva #$c0 $d40e		;switch on NMI+DLI again
+    77
+    78
+    79 					ift .def CHANGES	;if label CHANGES defined
+    80
+    81 				;	jsr fade_in		;fade in colors
+    82 382A AD 0F D2		_lp	lda $d20f		;wait to press any key; here you can put any own routine
+    83 382D 29 04			and #4
+    84 382F D0 F9			bne _lp
+    85 				;	jsr fade_out		;fade out colors
+    86 3831 A9 00 8D 1D D0		mva #0   $d01d		;PMG disabled
+    87 					ldx #$0c\ sta:rpl $d000,x-
+    87 3836 A2 0C			LDX #$0C
+    87 3838 9D 00 D0 CA 10 FA	 STA:RPL $D000,X-
+    88 383E A9 FF 8D 01 D3		mva #$ff $d301		;ROM switch on
+    89 3843 A9 40 8D 0E D4		mva #$40 $d40e		;only NMI interrupts, DLI disabled
+    90 3848 58				cli			;IRQ enabled
+    91 3849 6C 0A 00			jmp ($a)		;jump to DOS
+    92
+    93 					els
+    94
+    95 				null	jmp dli1		;CPU is busy here, so no more routines allowed
+    96
+    97 					eif
+    98
+    99
+   100 				* ---	DLI PROGRAM
+   101
+   102 = 384C			 ?old_dli = *
+   103
+   104 384C			dli1
+   105 384C AD 0B D4			lda $d40b
+   106 384F C9 02			cmp #2
+   107 3851 D0 F9			bne dli1
+   108 3853 8D 0A D4 8D 0A D4 + 	:3 sta $d40a
+Macro: DLINEW [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     2 385C A9 64 8D AB 38		mva <DLI4 NMI.dliv
+     7 3861 4C 13 39			jmp NMI.quit
+     9 = 3864				?old_dli = *
+Source: F:\!Atari\Pang\ludek\ludek.asm
+   110
+   111 3864			dli_start
+   112 3864			dli4
+   113
+   114 3864 A9 32			lda #$32
+   115 3866 A2 3A			ldx #$3A
+   116 3868 8D 0A D4			sta $d40a		;line=32
+   117 386B 8D 00 D0			sta hposp0
+   118 386E 8D 01 D0			sta hposp1
+   119 3871 8E 04 D0			stx hposm0
+   120 3874 A9 3A			lda #$3A
+   121 3876 8D 0A D4			sta $d40a		;line=33
+   122 3879 8D 05 D0			sta hposm1
+Macro: DLINEW [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     2 387C A9 84 8D AB 38		mva <DLI5 NMI.dliv
+     7 3881 4C 13 39			jmp NMI.quit
+     9 = 3884				?old_dli = *
+Source: F:\!Atari\Pang\ludek\ludek.asm
+   124
+   125 3884			dli5
+   126
+   127 3884 A9 14		c7	lda #$14
+   128 3886 8D 0A D4			sta $d40a		;line=128
+   129 3889 8D 18 D0			sta color2
+Macro: DLINEW [Source: F:\!Atari\Pang\ludek\ludek.asm]
+     2 388C A9 94 8D AB 38		mva <DLI6 NMI.dliv
+     7 3891 4C 13 39			jmp NMI.quit
+     9 = 3894				?old_dli = *
+Source: F:\!Atari\Pang\ludek\ludek.asm
+   131
+   132 3894			dli6
+   133
+   134 3894 A9 B6		c8	lda #$B6
+   135 3896 8D 0A D4			sta $d40a		;line=168
+   136 3899 8D 18 D0			sta color2
+   137 389C 4C 13 39			jmp NMI.quit
+   138
+   139
+   140 				;---
+   141
+   142 389F			CHANGES
+   143
+   144 				;---
+   145
+   146 389F			.PROC NMI
+   147 389F 85 82			sta regA
+   148 38A1 86 83			stx regX
+   149 38A3 84 84			sty regY
+   150
+   151 38A5 2C 0F D4			bit $d40f
+   152 38A8 10 03			bpl VBL
+   153
+   154 38AA 4C 64 38			jmp dli_start
+   155 = 38AB			dliv	equ *-2
+   156
+   157 38AD			VBL
+   158 38AD 8D 0F D4			sta $d40f		;reset NMI flag
+   159
+   160 38B0 E6 14			inc cloc		;little timer
+   161
+   162 38B2 A9 00 8D 02 D4 A9 + 	mwa #ant $d402		;ANTIC address program
+   163
+   164 38BC A9 3F 8D 00 D4		mva #scr48 $d400	;set new screen's width
+   165
+   166 				;--- first line of screen initialization
+   167
+   168 38C1 A9 28			lda >fnt
+   169 38C3 8D 09 D4			sta chbase
+   170 38C6 A9 38		c0	lda #$38
+   171 38C8 8D 1A D0			sta colbak
+   172 38CB A9 0A		c1	lda #$0A
+   173 38CD 8D 16 D0			sta color0
+   174 38D0 A9 00		c2	lda #$00
+   175 38D2 8D 17 D0			sta color1
+   176 38D5 A9 9A		c3	lda #$9A
+   177 38D7 8D 18 D0			sta color2
+   178 38DA A9 44		c4	lda #$44
+   179 38DC 8D 19 D0			sta color3
+   180 38DF A9 24			lda #$24
+   181 38E1 8D 1B D0			sta gtictl
+   182 38E4 A9 00			lda #$00
+   183 38E6 8D 08 D0			sta sizep0
+   184 38E9 8D 09 D0			sta sizep1
+   185 38EC 8D 0C D0			sta sizem
+   186 38EF A9 30			lda #$30
+   187 38F1 8D 00 D0			sta hposp0
+   188 38F4 8D 01 D0			sta hposp1
+   189 38F7 A9 38			lda #$38
+   190 38F9 8D 04 D0			sta hposm0
+   191 38FC 8D 05 D0			sta hposm1
+   192 38FF A9 04		c5	lda #$04
+   193 3901 8D 12 D0			sta colpm0
+   194 3904 A9 78		c6	lda #$78
+   195 3906 8D 13 D0			sta colpm1
+   196
+   197 3909 A9 64 8D AB 38 A9 + 	mwa #dli_start dliv	;set the first address of DLI interrupt
+   198
+   199 				;this area is for yours routines
+   200
+   201 3913			quit
+   202 3913 A5 82			lda regA
+   203 3915 A6 83			ldx regX
+   204 3917 A4 84			ldy regY
+   205 3919 40				rti
+   206
+   207 				.ENDP
+   208
+   209 				;---
+   210 				;	icl 'ludek.fad'
+   211
+   212 02E0-02E1> 00 38			run main
+   213
+   214 				;---
+   215
