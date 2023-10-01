@@ -1,0 +1,453 @@
+mads 1.8.x
+Source: D:\!Atari\Pang_2\gwiazdki\gwiazdka_2.asm
+     1
+     2 				// gwiazdki wykorzystuj¹ce tylko 1 ducha
+     3
+     4 = 003F			scr48	= %00111111	;screen 48b
+     5 = 003E			scr40	= %00111110	;screen 40b
+     6 = 003D			scr32	= %00111101	;screen 32b
+     7
+     8 = 0014			cloc	= $0014		;(1)
+     9
+    10 = 0000			pmgB1	= $0
+    11 = A000			pmgB2	= $a000
+    12
+    13 = D000			hposp0	= $D000
+    14 = D001			hposp1	= $D001
+    15 = D002			hposp2	= $D002
+    16 = D003			hposp3	= $D003
+    17 = D004			hposm0	= $D004
+    18 = D005			hposm1	= $D005
+    19 = D006			hposm2	= $D006
+    20 = D007			hposm3	= $D007
+    21 = D008			sizep0	= $D008
+    22 = D009			sizep1	= $D009
+    23 = D00A			sizep2	= $D00A
+    24 = D00B			sizep3	= $D00B
+    25 = D00C			sizem	= $D00C
+    26
+    27 = D012			colpm0	= $D012
+    28 = D013			colpm1	= $D013
+    29 = D014			colpm2	= $D014
+    30 = D015			colpm3	= $D015
+    31 = D016			color0	= $D016
+    32 = D017			color1	= $D017
+    33 = D018			color2	= $D018
+    34 = D019			color3	= $D019
+    35 = D01A			colbak	= $D01A
+    36 = D01B			gtictl	= $D01B
+    37
+    38 = D409			chbase	= $D409
+    39
+    40 				* ---	MAIN PROGRAM
+    41 					org $2000
+    42
+    43 FFFF> 2000-22F5> 44 1A + ant	dta $44,a(scr)
+    44 2003 04 04 04 04 04 04 + 	:20 dta 4
+    45 2017 41 00 20			dta $41,a(ant)
+    46
+    47 201A			scr
+    48
+    49
+    50 201A			main
+    51 				* ---	init PMG
+    52 201A A9 00 8D 07 D4		mva >pmgB1 $d407		;missiles and players data address
+    53 201F A9 03 8D 1D D0		mva #3 $d01d		;enable players and missiles
+    54
+    55 2024 A5 14 C5 14 F0 FC		lda:cmp:req 20		;wait 1 frame
+    56
+    57 202A 78				sei			;stop IRQ interrupts
+    58 202B A9 00 8D 0E D4		mva #0 $d40e		;stop NMI interrupts
+    59 2030 A9 FE 8D 01 D3		mva #$fe $d301		;switch off ROM to get 16k more ram
+    60
+    61 2035 A9 35 8D FA FF A9 + 	mwa #NMI $fffa		;new NMI handler
+    62
+    63 203F A9 C0 8D 0E D4		mva #$c0 $d40e		;switch on NMI+DLI again
+    64
+    65
+    66 2044			gogo
+    67 2044 AD 0A D2			lda $d20a		; init wartosci poczatkowych
+    68 2047 29 7F			and #$7f
+    69 2049 18 69 28			add #40
+    70 204C 8D F6 22			sta dataStar[0].x
+    71 204F 8D FB 22			sta dataStar[1].x
+    72 2052 8D 00 23			sta dataStar[2].x
+    73 2055 8D 05 23			sta dataStar[3].x
+    74
+    75 2058 AD 0A D2			lda $d20a
+    76 205B 29 7F			and #$7f
+    77 205D 18 69 1E			add #30
+    78 2060 8D F7 22			sta dataStar[0].y
+    79 2063 8D FC 22			sta dataStar[1].y
+    80 2066 8D 01 23			sta dataStar[2].y
+    81 2069 8D 06 23			sta dataStar[3].y
+    82
+    83 206C AD 0A D2			lda $d20a			; star #0
+    84 206F 29 0F			and #15
+    85 2071 AA				tax
+    86 2072 BD 0D 21 8D F9 22		mva rndMinus,x	dataStar[0].dx
+    87 2078 BD 0D 21 8D FA 22		mva rndMinus,x	dataStar[0].dy
+    88
+    89 207E AD 0A D2			lda $d20a			; star #2
+    90 2081 29 0F			and #15
+    91 2083 AA				tax
+    92 2084 BD 1D 21 8D 03 23		mva rndPlus,x	dataStar[2].dx
+    93 208A BD 1D 21 8D 04 23		mva rndPlus,x	dataStar[2].dy
+    94
+    95 2090 AD 0A D2			lda $d20a			; star #1
+    96 2093 29 0F			and #15
+    97 2095 AA				tax
+    98 2096 BD 0D 21 8D FE 22		mva rndMinus,x	dataStar[1].dx
+    99 209C BD 1D 21 8D FF 22		mva rndPlus,x	dataStar[1].dy
+   100
+   101 20A2 AD 0A D2			lda $d20a			; star #3
+   102 20A5 29 0F			and #15
+   103 20A7 AA				tax
+   104 20A8 BD 1D 21 8D 08 23		mva rndPlus,x	dataStar[3].dx
+   105 20AE BD 0D 21 8D 09 23		mva rndMinus,x	dataStar[3].dy
+   106
+   107
+   108 20B4 A9 0A 8D 2D 21		mva #10 starsCnt
+   109
+   110 20B9 20 2E 21		loop	jsr wait					; #1
+   111
+   112 20BC A0 0F			ldy #@@shape*3
+   113 20BE 20 F9 21			jsr stars1.clr
+   114
+   115 20C1 A0 00			ldy #0
+   116 20C3 B9 F6 22 8D 02 D0		mva dataStar+@@shape.x,y	$d002
+   117 20C9 20 80 21			jsr stars1
+   118
+   119 20CC 20 2E 21			jsr wait
+   120
+   121 20CF A0 00			ldy #0
+   122 20D1 20 F9 21			jsr stars1.clr
+   123
+   124 20D4 A0 0A			ldy #@@shape*2
+   125 20D6 B9 F6 22 8D 02 D0		mva dataStar+@@shape.x,y	$d002
+   126 20DC 20 80 21			jsr stars1
+   127
+   128 				* --------------------------------------------------
+   129
+   130 20DF 20 2E 21			jsr wait					; #2
+   131
+   132 20E2 A0 0A			ldy #@@shape*2
+   133 20E4 20 F9 21			jsr stars1.clr
+   134
+   135 20E7 A0 05			ldy #@@shape
+   136 20E9 B9 F6 22 8D 02 D0		mva dataStar+@@shape.x,y	$d002
+   137 20EF 20 80 21			jsr stars1
+   138
+   139 20F2 20 2E 21			jsr wait
+   140
+   141 20F5 A0 05			ldy #@@shape
+   142 20F7 20 F9 21			jsr stars1.clr
+   143
+   144 20FA A0 0F			ldy #@@shape*3
+   145 20FC B9 F6 22 8D 02 D0		mva dataStar+@@shape.x,y	$d002
+   146 2102 20 80 21			jsr stars1
+   147
+   148 2105 CE 2D 21			dec starsCnt
+   149 2108 D0 AF			bne loop
+   150
+   151 210A 4C 44 20			jmp gogo
+   152
+   153
+   154 210D FA FA FA FA FC FA + rndMinus	dta rnd($fa,$fe,16)
+   155
+   156 211D 02 02 02 02 04 02 + rndPlus		dta rnd(2,6,16)
+   157
+   158 212D 00			starsCnt brk
+   159
+   160 212E A5 14 C5 14 F0 FC	wait	lda:cmp:req cloc
+   161 2134 60				rts
+   162
+   163
+   164 2135			.PROC NMI
+   165 2135 2C 0F D4			bit $d40f
+   166 2138 10 01			bpl VBL
+   167
+   168 213A 40				rti
+   169 = 2139			dliv	equ *-2
+   170
+   171 213B 48 8A 48 98 48	VBL	phr
+   172 2140 8D 0F D4			sta $d40f		;reset NMI flag
+   173
+   174 2143 E6 14			inc cloc		;little timer
+   175
+   176 2145 A9 00 8D 02 D4 A9 + 	mwa #ant $d402		;ANTIC address program
+   177
+   178 214F A9 3D 8D 00 D4		mva #scr32 $d400	;set new screen's width
+   179
+   180 				;--- first line of screen initialization
+   181
+   182
+   183 2154 A9 00		c0	lda #$00
+   184 2156 8D 1A D0			sta colbak
+   185 2159 A9 04		c1	lda #$04
+   186 215B 8D 16 D0			sta color0
+   187 215E A9 06		c2	lda #$06
+   188 2160 8D 17 D0			sta color1
+   189 2163 A9 08		c3	lda #$08
+   190 2165 8D 18 D0			sta color2
+   191 2168 A9 0E		c4	lda #$0E
+   192 216A 8D 19 D0			sta color3
+   193 216D A9 04			lda #$04
+   194 216F 8D 1B D0			sta gtictl
+   195
+   196
+   197 2172 A5 14			lda cloc
+   198 2174 8D 14 D0			sta colpm2
+   199 2177 8D 15 D0			sta colpm3
+   200
+   201 				;	mwa #dli_start dliv	;set the first address of DLI interrupt
+   202
+   203 				;this area is for yours routines
+   204
+   205 217A 68 A8 68 AA 68		plr
+   206 217F 40				rti
+   207
+   208 				.ENDP
+   209
+   210
+   211 2180				icl 'stars.asm'
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+     1
+     2 				// w 1 ramce wyswietlana jest gwiazdka #0 i #2
+     3 				// w 2 ramce wyswietlana jest gwiazdka #1 i #3
+     4
+     5 				.struct	@@shape
+     6 = 0000			x	.byte
+     7 = 0001			y	.byte
+     8 = 0002			py	.byte
+     9
+    10 = 0003			dx	.byte
+    11 = 0004			dy	.byte
+    12 				.ends
+    13
+    14
+    15 				.macro	@updateXY
+    16 					lda dataStar+@@shape.y,y
+    17 					tax
+    18 					sta dataStar+@@shape.py,y
+    19 				
+    20 					add dataStar+@@shape.dy,y
+    21 				
+    22 				;	bcs skp
+    23 					cmp #240
+    24 					bcs skp
+    25 				
+    26 					sta dataStar+@@shape.y,y
+    27 				
+    28 				skp	lda dataStar+@@shape.x,y
+    29 					add dataStar+@@shape.dx,y
+    30 					sta dataStar+@@shape.x,y
+    31 				.endm
+    32
+    33
+    34 2180			.proc	stars1 (.byte y) .reg
+    35
+    36 2180				@updateXY
+Macro: @UPDATEXY [Source: D:\!Atari\Pang_2\gwiazdki\stars.asm]
+     1 2180 B9 F7 22			lda dataStar+@@shape.y,y
+     2 2183 AA				tax
+     3 2184 99 F8 22			sta dataStar+@@shape.py,y
+     5 2187 18 79 FA 22			add dataStar+@@shape.dy,y
+     8 218B C9 F0			cmp #240
+     9 218D B0 03			bcs skp
+    11 218F 99 F7 22			sta dataStar+@@shape.y,y
+    13 2192 B9 F6 22		skp	lda dataStar+@@shape.x,y
+    14 2195 18 79 F9 22			add dataStar+@@shape.dx,y
+    15 2199 99 F6 22			sta dataStar+@@shape.x,y
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    37
+    38 219C A0 00			ldy #0
+    39
+    40 					.rept 10
+    41 					lda shapeStar+#,y
+    42 					sta pmgB1+$600+#,x
+    43 					sta pmgB2+$600+#,x
+    44 					.endr
+Source: REPT
+    41 219E B9 0A 23			lda shapeStar+#,y
+    42 21A1 9D 00 06			sta pmgB1+$600+#,x
+    43 21A4 9D 00 A6			sta pmgB2+$600+#,x
+    41 21A7 B9 0B 23			lda shapeStar+#,y
+    42 21AA 9D 01 06			sta pmgB1+$600+#,x
+    43 21AD 9D 01 A6			sta pmgB2+$600+#,x
+    41 21B0 B9 0C 23			lda shapeStar+#,y
+    42 21B3 9D 02 06			sta pmgB1+$600+#,x
+    43 21B6 9D 02 A6			sta pmgB2+$600+#,x
+    41 21B9 B9 0D 23			lda shapeStar+#,y
+    42 21BC 9D 03 06			sta pmgB1+$600+#,x
+    43 21BF 9D 03 A6			sta pmgB2+$600+#,x
+    41 21C2 B9 0E 23			lda shapeStar+#,y
+    42 21C5 9D 04 06			sta pmgB1+$600+#,x
+    43 21C8 9D 04 A6			sta pmgB2+$600+#,x
+    41 21CB B9 0F 23			lda shapeStar+#,y
+    42 21CE 9D 05 06			sta pmgB1+$600+#,x
+    43 21D1 9D 05 A6			sta pmgB2+$600+#,x
+    41 21D4 B9 10 23			lda shapeStar+#,y
+    42 21D7 9D 06 06			sta pmgB1+$600+#,x
+    43 21DA 9D 06 A6			sta pmgB2+$600+#,x
+    41 21DD B9 11 23			lda shapeStar+#,y
+    42 21E0 9D 07 06			sta pmgB1+$600+#,x
+    43 21E3 9D 07 A6			sta pmgB2+$600+#,x
+    41 21E6 B9 12 23			lda shapeStar+#,y
+    42 21E9 9D 08 06			sta pmgB1+$600+#,x
+    43 21EC 9D 08 A6			sta pmgB2+$600+#,x
+    41 21EF B9 13 23			lda shapeStar+#,y
+    42 21F2 9D 09 06			sta pmgB1+$600+#,x
+    43 21F5 9D 09 A6			sta pmgB2+$600+#,x
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    45
+    46 21F8 60				rts
+    47
+    48
+    49 21F9 BE F8 22		clr	ldx dataStar+@@shape.py,y
+    50
+    51 21FC A9 00			lda #0
+    52
+    53 					.rept 10
+    54 					sta pmgB1+$600+#,x
+    55 					sta pmgB2+$600+#,x
+    56 					.endr
+Source: REPT
+    54 21FE 9D 00 06			sta pmgB1+$600+#,x
+    55 2201 9D 00 A6			sta pmgB2+$600+#,x
+    54 2204 9D 01 06			sta pmgB1+$600+#,x
+    55 2207 9D 01 A6			sta pmgB2+$600+#,x
+    54 220A 9D 02 06			sta pmgB1+$600+#,x
+    55 220D 9D 02 A6			sta pmgB2+$600+#,x
+    54 2210 9D 03 06			sta pmgB1+$600+#,x
+    55 2213 9D 03 A6			sta pmgB2+$600+#,x
+    54 2216 9D 04 06			sta pmgB1+$600+#,x
+    55 2219 9D 04 A6			sta pmgB2+$600+#,x
+    54 221C 9D 05 06			sta pmgB1+$600+#,x
+    55 221F 9D 05 A6			sta pmgB2+$600+#,x
+    54 2222 9D 06 06			sta pmgB1+$600+#,x
+    55 2225 9D 06 A6			sta pmgB2+$600+#,x
+    54 2228 9D 07 06			sta pmgB1+$600+#,x
+    55 222B 9D 07 A6			sta pmgB2+$600+#,x
+    54 222E 9D 08 06			sta pmgB1+$600+#,x
+    55 2231 9D 08 A6			sta pmgB2+$600+#,x
+    54 2234 9D 09 06			sta pmgB1+$600+#,x
+    55 2237 9D 09 A6			sta pmgB2+$600+#,x
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    57
+    58 223A 60				rts
+    59 				.endp
+    60
+    61
+    62 223B			.proc	stars2 (.byte y) .reg
+    63
+    64 223B				@updateXY
+Macro: @UPDATEXY [Source: D:\!Atari\Pang_2\gwiazdki\stars.asm]
+     1 223B B9 F7 22			lda dataStar+@@shape.y,y
+     2 223E AA				tax
+     3 223F 99 F8 22			sta dataStar+@@shape.py,y
+     5 2242 18 79 FA 22			add dataStar+@@shape.dy,y
+     8 2246 C9 F0			cmp #240
+     9 2248 B0 03			bcs skp
+    11 224A 99 F7 22			sta dataStar+@@shape.y,y
+    13 224D B9 F6 22		skp	lda dataStar+@@shape.x,y
+    14 2250 18 79 F9 22			add dataStar+@@shape.dx,y
+    15 2254 99 F6 22			sta dataStar+@@shape.x,y
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    65
+    66 2257 A0 00			ldy #0
+    67
+    68 					.rept 10
+    69 					lda shapeStar+#,y
+    70 					sta pmgB1+$700+#,x
+    71 					sta pmgB2+$700+#,x
+    72 					.endr
+Source: REPT
+    69 2259 B9 0A 23			lda shapeStar+#,y
+    70 225C 9D 00 07			sta pmgB1+$700+#,x
+    71 225F 9D 00 A7			sta pmgB2+$700+#,x
+    69 2262 B9 0B 23			lda shapeStar+#,y
+    70 2265 9D 01 07			sta pmgB1+$700+#,x
+    71 2268 9D 01 A7			sta pmgB2+$700+#,x
+    69 226B B9 0C 23			lda shapeStar+#,y
+    70 226E 9D 02 07			sta pmgB1+$700+#,x
+    71 2271 9D 02 A7			sta pmgB2+$700+#,x
+    69 2274 B9 0D 23			lda shapeStar+#,y
+    70 2277 9D 03 07			sta pmgB1+$700+#,x
+    71 227A 9D 03 A7			sta pmgB2+$700+#,x
+    69 227D B9 0E 23			lda shapeStar+#,y
+    70 2280 9D 04 07			sta pmgB1+$700+#,x
+    71 2283 9D 04 A7			sta pmgB2+$700+#,x
+    69 2286 B9 0F 23			lda shapeStar+#,y
+    70 2289 9D 05 07			sta pmgB1+$700+#,x
+    71 228C 9D 05 A7			sta pmgB2+$700+#,x
+    69 228F B9 10 23			lda shapeStar+#,y
+    70 2292 9D 06 07			sta pmgB1+$700+#,x
+    71 2295 9D 06 A7			sta pmgB2+$700+#,x
+    69 2298 B9 11 23			lda shapeStar+#,y
+    70 229B 9D 07 07			sta pmgB1+$700+#,x
+    71 229E 9D 07 A7			sta pmgB2+$700+#,x
+    69 22A1 B9 12 23			lda shapeStar+#,y
+    70 22A4 9D 08 07			sta pmgB1+$700+#,x
+    71 22A7 9D 08 A7			sta pmgB2+$700+#,x
+    69 22AA B9 13 23			lda shapeStar+#,y
+    70 22AD 9D 09 07			sta pmgB1+$700+#,x
+    71 22B0 9D 09 A7			sta pmgB2+$700+#,x
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    73
+    74 22B3 60				rts
+    75
+    76
+    77 22B4 BE F8 22		clr	ldx dataStar+@@shape.py,y
+    78
+    79 22B7 A9 00			lda #0
+    80
+    81 					.rept 10
+    82 					sta pmgB1+$700+#,x
+    83 					sta pmgB2+$700+#,x
+    84 					.end
+Source: REPT
+    82 22B9 9D 00 07			sta pmgB1+$700+#,x
+    83 22BC 9D 00 A7			sta pmgB2+$700+#,x
+    82 22BF 9D 01 07			sta pmgB1+$700+#,x
+    83 22C2 9D 01 A7			sta pmgB2+$700+#,x
+    82 22C5 9D 02 07			sta pmgB1+$700+#,x
+    83 22C8 9D 02 A7			sta pmgB2+$700+#,x
+    82 22CB 9D 03 07			sta pmgB1+$700+#,x
+    83 22CE 9D 03 A7			sta pmgB2+$700+#,x
+    82 22D1 9D 04 07			sta pmgB1+$700+#,x
+    83 22D4 9D 04 A7			sta pmgB2+$700+#,x
+    82 22D7 9D 05 07			sta pmgB1+$700+#,x
+    83 22DA 9D 05 A7			sta pmgB2+$700+#,x
+    82 22DD 9D 06 07			sta pmgB1+$700+#,x
+    83 22E0 9D 06 A7			sta pmgB2+$700+#,x
+    82 22E3 9D 07 07			sta pmgB1+$700+#,x
+    83 22E6 9D 07 A7			sta pmgB2+$700+#,x
+    82 22E9 9D 08 07			sta pmgB1+$700+#,x
+    83 22EC 9D 08 A7			sta pmgB2+$700+#,x
+    82 22EF 9D 09 07			sta pmgB1+$700+#,x
+    83 22F2 9D 09 A7			sta pmgB2+$700+#,x
+Source: D:\!Atari\Pang_2\gwiazdki\stars.asm
+    85
+    86 22F5 60				rts
+    87 				.endp
+    88
+    89
+    90 				// parametry gwiazdek
+    91 22F6			dataStar	dta @@shape [3]
+    92
+    93 				// kszta³t gwiazdki
+    94 230A			shapeStar
+    95 230A-2313> 10			dta %00010000
+    96 230B 10				dta %00010000
+    97 230C 10				dta %00010000
+    98 230D 38				dta %00111000
+    99 230E FE				dta %11111110
+   100 230F 38				dta %00111000
+   101 2310 7C				dta %01111100
+   102 2311 7C				dta %01111100
+   103 2312 C6				dta %11000110
+   104 2313 82				dta %10000010
+   212
+   213
+   214 02E0-02E1> 1A 20			run main
