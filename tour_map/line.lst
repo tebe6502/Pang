@@ -1,0 +1,307 @@
+mads 2.0.4 build 4 (28 Mar 16)
+Source: D:\!Atari\Pang_2\tour_map\line.asm
+     1 				// LINE (19.06.2006)// tworzymy strukture dla zmiennych na stronie zerowej, aby wymusic ich relokowalnosc
+     2
+     3 					.struct	zp
+     4 = 0000				d	.word
+     5 = 0002				i	.byte
+     6 = 0003				npix	.byte
+     7 = 0004				dx	.byte
+     8 = 0005				dy	.byte
+     9 					.ends
+    10
+    11
+    12 = 0000			zpage	ext	.byte
+    13 = 0000			plot	ext	.proc (.byte x,y) .reg
+    14
+    15 					.public	line
+    16
+    17 FFFF> 01,0000-00FC> 4D + 	.reloc
+    18
+    19 				/********************************************************************
+    20 				  BRESENHAM LINE
+    21 				  
+    22 				  maksymalna dlugosc linii ograniczona jest do 128 pixli
+    23
+    24 				  wywolanie procedury:
+    25 				                      LINE #x1 , #y1 , #x2 , #y2
+    26 				                      LINE X1,Y1,#X2,#Y2
+    27
+    28 				  X -> wspolrzedna pozioma
+    29 				  Y -> wspolrzedna pionowa
+    30
+    31 				********************************************************************/
+    31
+    32
+    33 01,0000			.proc line (.byte x1,y1,x2,y2) .var
+    34
+    35 01,0000				.var x1, y1, x2, y2	.byte
+    36
+    37 				;procedure Line(x1, y1, x2, y2, color : byte);
+    38 				;var d : integer;
+    39 				;    dinc2 : word;
+    40 				;    xinc1, xinc2, yinc1, yinc2, dinc1, i, npix, dx, dy, x, y : byte;
+    41 				;begin
+    42
+    43 				;  xinc2 := 1;
+    44 				;  yinc2 := 1;
+    45
+    46 01,0000 A9 E8		        lda #{inx}
+    47 01,0002 8D F2 00		        sta xinc2
+    48
+    49 01,0005 A9 C8		        lda #{iny}
+    50 01,0007 8D F3 00		        sta yinc2
+    51
+    52 				; { Calculate dx and dy for initialisation }
+    53 				;  dx := abs(x2 - x1);
+    54 				;  dy := abs(y2 - y1);
+    55
+    56 01,000A AD FB 00		        lda x2
+    57 01,000D 38		        sec
+    58 01,000E ED F9 00		        sbc x1
+    59 01,0011 10 04		        bpl abs_00
+    60 				        
+    61 01,0013 49 FF		        eor #$ff        ; zmiana znaku na przeciwny
+    62 01,0015 69 01		        adc #1
+    63
+    64 01,0017 85 04		abs_00  sta zpage+zp.dx
+    65
+    66 01,0019 AD FC 00		        lda y2
+    67 01,001C 38		        sec
+    68 01,001D ED FA 00		        sbc y1
+    69 01,0020 10 04		        bpl abs_01
+    70 				        
+    71 01,0022 49 FF		        eor #$ff        ; zmiana znaku na przeciwny
+    72 01,0024 69 01		        adc #1
+    73 				        
+    74 01,0026 85 05		abs_01  sta zpage+zp.dy
+    75
+    76 				; { Initialize all vars based on which is the independent variable }
+    77 				;  if dx >= dy then
+    78 				;    begin
+    79 				        
+    80 01,0028 A5 04		        lda zpage+zp.dx
+    81 01,002A C5 05		        cmp zpage+zp.dy
+    82 01,002C 90 4E		        bcc y_independent        
+    83
+    84 				; >= tutaj
+    85
+    86 				; { x is independent variable }
+    87 				;      npix := dx;
+    88 				;      dinc1 := dy Shl 1;
+    89 				;      d := dinc1 - dx;
+    90 				;      dinc2 := d - dx;
+    91 				;      xinc1 := 1;
+    92 				;      yinc1 := 0;
+    93
+    94 01,002E			x_independent
+    95 01,002E A5 04		        lda zpage+zp.dx
+    96 01,0030 85 03		        sta zpage+zp.npix
+    97 				        
+    98 01,0032 A5 05		        lda zpage+zp.dy
+    99 01,0034 0A		        asl @
+   100 01,0035 8D D8 00		        sta dinc1+1
+   101 				        
+   102 01,0038 38		        sec
+   103 01,0039 E5 04		        sbc zpage+zp.dx
+   104 01,003B 85 00		        sta zpage+zp.d
+   105 01,003D A9 00		        lda #0
+   106 01,003F E9 00		        sbc #0
+   107 01,0041 85 01		        sta zpage+zp.d+1
+   108 				        
+   109 01,0043 A5 00		        lda zpage+zp.d
+   110 01,0045 38		        sec
+   111 01,0046 E5 04		        sbc zpage+zp.dx
+   112 01,0048 8D E9 00		        sta l_dinc2+1
+   113 01,004B A5 01		        lda zpage+zp.d+1
+   114 01,004D E9 00		        sbc #0
+   115 01,004F 8D EF 00		        sta h_dinc2+1
+   116
+   117 01,0052 A9 E8		        lda #{inx}
+   118 01,0054 8D DF 00		        sta xinc1
+   119
+   120 01,0057 A9 EA		        lda #{nop}
+   121 01,0059 8D E0 00		        sta yinc1
+   122
+   123 				; { Make sure x and y move in the right directions }
+   124 				;      if x1 >= x2 then
+   125 				;       begin
+   126 				;        xinc1 := $ff;
+   127 				;        xinc2 := $ff;
+   128 				;      end;
+   129 				;      if y1 >= y2 then yinc2 := $ff;
+   130
+   131 01,005C AD F9 00		        lda x1
+   132 01,005F CD FB 00		        cmp x2
+   133 01,0062 90 08		        bcc lt_00
+   134 				        
+   135 01,0064 A9 CA		        lda #{dex}
+   136 01,0066 8D DF 00		        sta xinc1
+   137 01,0069 8D F2 00		        sta xinc2        
+   138
+   139 01,006C AD FA 00		lt_00   lda y1
+   140 01,006F CD FC 00		        cmp y2
+   141 01,0072 90 53		        bcc drawing
+   142 				        
+   143 01,0074 A9 88		        lda #{dey}
+   144 01,0076 8D F3 00		        sta yinc2
+   145 01,0079 4C C7 00		        jmp drawing
+   146 				                        
+   147 				; < tutaj
+   148
+   149 				;  else
+   150 				;    begin
+   151 				; { y is independent variable }
+   152 				;      npix := dy;
+   153 				;      dinc1 := dx Shl 1;
+   154 				;      d := dinc1 - dy;
+   155 				;      dinc2 := d - dy;
+   156 				;      xinc1 := 0;
+   157 				;      yinc1 := 1;
+   158
+   159 01,007C			y_independent
+   160 01,007C A5 05		        lda zpage+zp.dy
+   161 01,007E 85 03		        sta zpage+zp.npix
+   162 				        
+   163 01,0080 A5 04		        lda zpage+zp.dx
+   164 01,0082 0A		        asl @
+   165 01,0083 8D D8 00		        sta dinc1+1
+   166 				        
+   167 01,0086 38		        sec
+   168 01,0087 E5 05		        sbc zpage+zp.dy
+   169 01,0089 85 00		        sta zpage+zp.d
+   170 01,008B A9 00		        lda #0
+   171 01,008D E9 00		        sbc #0
+   172 01,008F 85 01		        sta zpage+zp.d+1
+   173 				        
+   174 01,0091 A5 00		        lda zpage+zp.d
+   175 01,0093 38		        sec
+   176 01,0094 E5 05		        sbc zpage+zp.dy
+   177 01,0096 8D E9 00		        sta l_dinc2+1
+   178 01,0099 A5 01		        lda zpage+zp.d+1
+   179 01,009B E9 00		        sbc #0
+   180 01,009D 8D EF 00		        sta h_dinc2+1
+   181
+   182 01,00A0 A9 C8		        lda #{iny}
+   183 01,00A2 8D E0 00		        sta yinc1
+   184
+   185 01,00A5 A9 EA		        lda #{nop}
+   186 01,00A7 8D DF 00		        sta xinc1
+   187
+   188 				; { Make sure x and y move in the right directions }
+   189 				;      if x1 >= x2 then xinc2 := $ff;
+   190 				;      if y1 >= y2 then
+   191 				;       begin
+   192 				;        yinc1 := $ff;
+   193 				;        yinc2 := $ff;
+   194 				;      end;
+   195
+   196 01,00AA AD F9 00		        lda x1
+   197 01,00AD CD FB 00		        cmp x2
+   198 01,00B0 90 05		        bcc lt_01
+   199 				        
+   200 01,00B2 A9 CA		        lda #{dex}
+   201 01,00B4 8D F2 00		        sta xinc2
+   202
+   203 01,00B7 AD FA 00		lt_01   lda y1
+   204 01,00BA CD FC 00		        cmp y2
+   205 01,00BD 90 08		        bcc drawing
+   206 				        
+   207 01,00BF A9 88		        lda #{dey}
+   208 01,00C1 8D E0 00		        sta yinc1
+   209 01,00C4 8D F3 00		        sta yinc2
+   210
+   211 				; { Start drawing at <x1,y1> }
+   212 				;  x := x1;
+   213 				;  y := y1;
+   214
+   215 01,00C7 AE F9 00		drawing ldx x1
+   216 01,00CA AC FA 00		        ldy y1
+   217
+   218 				; { Draw the pixels }
+   219 				;  for i := 0 to npix do begin
+   220
+   221 01,00CD			petla
+   222
+   223 				;      PutPixel(x, y, color);
+   224
+   225
+   226 				// dla procedury PLOT typu .REG nie musimy podawac parametrow jesli akurat wiemy
+   227 				// ze w odpowiednich rejestrach sa juz wlasciwe dane
+   228
+   229 				        plot
+   229 01,00CD 20 00 00		 JSR PLOT
+   230
+   231 				;      if d < 0 then
+   232
+   233 01,00D0 18		        clc
+   234 				        
+   235 01,00D1 A5 01		        lda zpage+zp.d+1
+   236 01,00D3 10 11		        bpl plus
+   237
+   238 				;        begin
+   239 				;          d := d + dinc1;
+   240 				;          x := x + xinc1;
+   241 				;          y := y + yinc1;
+   242 				;        end
+   243
+   244 01,00D5 A5 00		minus   lda zpage+zp.d
+   245 				;        clc
+   246 01,00D7 69 00		dinc1   adc #0
+   247 01,00D9 85 00		        sta zpage+zp.d
+   248 01,00DB 90 02		        bcc xinc1
+   249 01,00DD E6 01		        inc zpage+zp.d+1
+   250
+   251 01,00DF EA		xinc1   nop
+   252 01,00E0 EA		yinc1   nop
+   253
+   254 01,00E1 C6 03		        dec zpage+zp.npix
+   255 01,00E3 10 E8		        bpl petla
+   256
+   257 01,00E5 60		        rts
+   258
+   259 				;      else
+   260 				;        begin
+   261 				;          d := d + dinc2;
+   262 				;          x := x + xinc2;
+   263 				;          y := y + yinc2;
+   264 				;        end;
+   265 				;    end;
+   266 				;end;
+   267
+   268 01,00E6 A5 00		plus    lda zpage+zp.d
+   269 				;        clc
+   270 01,00E8 69 00		l_dinc2 adc #0
+   271 01,00EA 85 00		        sta zpage+zp.d
+   272 01,00EC A5 01		        lda zpage+zp.d+1
+   273 01,00EE 69 00		h_dinc2 adc #0
+   274 01,00F0 85 01		        sta zpage+zp.d+1
+   275
+   276 01,00F2 EA		xinc2   nop
+   277 01,00F3 EA		yinc2   nop
+   278
+   279 01,00F4 C6 03		        dec zpage+zp.npix
+   280 01,00F6 10 D5		        bpl petla       
+   281
+   282 01,00F8 60			rts
+   283
+   284 = 01,00F9 00		X1
+   284 = 01,00FA 00		Y1
+   284 = 01,00FB 00		X2
+   284 = 01,00FC 00		Y2
+   284 				.endp
+   285
+   286 01,00FD				blk update address
+   286 01,00FD EF FF 57		
+   286 01,00FD 21 00 03 00 08 + 
+   287 01,00FD				blk update external
+   287 01,00FD EE FF 42		
+   287 01,00FD 20 00 05 00 5A + ZPAGE
+   287 01,00FD EE FF 57		
+   287 01,00FD 01 00 04 00 50 + PLOT
+   288 01,00FD				blk update public
+   288 01,00FD 57 50 04 00 4C + LINE
+   288 01,00FD 57 56 07 00 4C + LINE.X1
+   288 01,00FD 57 56 07 00 4C + LINE.Y1
+   288 01,00FD 57 56 07 00 4C + LINE.X2
+   288 01,00FD 57 56 07 00 4C + LINE.Y2

@@ -1,0 +1,3071 @@
+
+/****************************************************/
+/* PANG Title Screen v2.6 (11.04.2008 - 25.05.2009) */
+/****************************************************/
+
+// kod modyfikuj¹cy PMG2 dla SHAPE16 wpleciony w program rastra
+
+	icl 'atari.hea'
+
+
+ile_wierszy_tekstu	= 2
+
+fnt	= $c000
+
+balls	= $1010-17*40
+
+volume	= $0a00		; tablica g³oœnoœci dla RMT
+
+pmg	= $0000
+pmg2	= $2000
+
+cloc	= $0014		;(1)
+byt2	= $0000		;(1) <$0100
+byt3	= $0100		;(1) >$00FF
+
+
+* ---	MAIN PROGRAM
+
+	opt h-f+
+	org $80
+
+fadr	.ds 2
+fcnt	.ds 2
+regA	.ds 1
+regX	.ds 1
+regY	.ds 1
+
+old	.ds 2
+new	.ds 2
+nap	.ds 2
+sel	.ds 2
+
+
+	org $d800
+
+;	org $2000
+
+fnt5	ins 'logo.fnt',4*1024,58*8
+
+px	.ds 8
+ox	.ds 8
+
+lold	.ds 8
+
+ay	:8 dta $ff
+ax	dta 1,2,2,3,$ff,$ff-1,$ff-2,3
+siz	dta 8,16,8,16,8,16,8,16
+
+
+	.get 'kuleczki.mic'
+
+* ---	BIG BALL
+
+	.pages
+
+	?x=1+320*2+15*40
+	?s=0
+big0	:16 @word
+
+	?x=1+320*2+15*40
+	?s=2
+big2	:16 @word
+
+	?x=1+320*2+15*40
+	?s=4
+big4	:16 @word
+
+	?x=1+320*2+15*40
+	?s=6
+big6	:16 @word
+
+
+* ---	SMALL BALL
+
+	?x=10+7*40
+	?s=0
+sml0	:8 @byte
+
+	?x=10+7*40
+	?s=2
+sml2	:8 @byte
+
+	?x=10+7*40
+	?s=4
+sml4	:8 @byte
+
+	?x=10+7*40
+	?s=6
+sml6	:8 @byte
+
+	.endpg
+
+
+ladr	:128 dta l(balls+#*40)
+
+hadr	:128 dta h(balls+#*40)
+
+
+ant	dta 0,$80+$44,a(scr)
+	dta 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,$84,4
+	dta $80,0
+	dta $4f,a(balls+17*40)
+	:84 dta $f
+
+	dta $8f
+
+	dta $4f,a(line)
+
+	dta $41,a(ant)
+
+
+scr	ins 'logo.scr',0,18*40
+
+
+line	dta $11,$11,$12,$22,$23,$33,$34,$44,$45,$55,$66,$67,$77,$88,$89,$99,$aa,$ab,$cd,$ef
+	dta $fe,$dc,$ba,$aa,$99,$98,$88,$77,$76,$66,$55,$54,$44,$43,$33,$32,$22,$21,$11,$11
+
+;	:40 dta $aa
+
+
+ymax	= 96+6
+
+ypath	dta 0,1,2,4,6,8,11,14,18,22,26,31,36,42,48,54,61,68,76,84,92,ymax	; trajektoria lotu kul
+
+ylen	= *-ypath
+
+oy	:8 brk
+py	:8 brk
+cnt	:8 brk
+
+yofs	:8 brk
+
+hold	.ds 8
+
+ym	dta 32,0,40,8,48,16,56,24
+
+mx	dta 160-4, 160-8, 160-4, 160-8, 160-4, 160-8, 160-4, 160-8
+
+
+	ileFnt = 87
+
+fonty	.get 'fonty_all.fnt'		; odwracamy znaki do "góry nogami"
+
+	.rept ileFnt, #
+	:8 .put[$400+#] = .get[:1*8+7-#]
+
+	.sav [$400] 8
+	.endr
+
+
+napisy	ins 'fonty_all.scr',0,8*40		; programming / graphics: kamil walaszek
+	ins 'fonty_all.scr',4*40,2*40		; graphics
+	ins 'fonty_all.scr',8*40,2*40		; adam powroznik
+	ins 'fonty_all.scr',4*40,2*40		; graphics
+	ins 'fonty_all.scr',10*40,6*40		; maciej hauke + music: michal radecki
+
+	:80 brk
+	ins 'fonty_all.scr',16*40,6*40		; press fire to play
+
+main
+* ---	init PMG
+;	lda:cmp:req 20		;wait 1 frame
+
+	lda:rne $d40b
+
+;	sei			;stop interrups
+;	mva #0 $d40e		;stop all interrupts
+;	mva #$fe $d301		;switch off ROM to get 16k more ram
+
+	mva #3	$d01d		;enable players and missiles
+
+	mva #0	$d40e
+
+	mwa #nmi $fffa
+
+	setmem >balls #19	; czyszczenie pamiêci dla ekranu z kulami
+
+	lda #$00
+lvol	sta volume,y
+	add #$10
+	iny
+	bne lvol
+
+
+	mwa #napisy+(ile_wierszy_tekstu*2)*40 nap
+
+
+	ldy #7
+
+ipx	lda $d20a
+	:2 lsr @
+	and #3
+	add #0
+tmp	equ *-1
+	sta px,y
+
+	adb tmp #16
+
+	mva <balls lold,y
+	mva >balls hold,y
+
+	lda #0
+	sta ox,y
+	sta py,y
+
+	dey
+	bpl ipx
+
+
+	lda $d20a
+	jsr newColor
+	sta p0+1
+
+	add #$40
+	jsr newColor
+	sta p1+1
+
+	adc #$40
+	jsr newColor
+	sta p2+1
+
+	adc #$40
+	jsr newColor
+	sta p3+1
+
+
+	jsr save_color
+
+	rle #pmgrle-1 #pmg+$300+1
+
+	setmem >pmg2+$300 #5
+
+	mva #$c0 $d40e
+
+	jsr fade_in
+
+
+* ---------------------------------------------------------
+* ---------------------------------------------------------
+
+loop	lda:cmp:req cloc
+
+	mva	oy+0	_m0Old+1
+	mva	py+0	_m0New+1
+	ldy #0
+	jsr shape8
+
+	mva	oy+1	_pm0Old+1
+	mva	py+1	_pm0New+1
+	ldy #1
+	jsr shape16
+
+	mva	oy+2	_m1Old+1
+	mva	py+2	_m1New+1
+	ldy #2
+	jsr shape8
+
+	mva	oy+3	_pm1Old+1
+	mva	py+3	_pm1New+1
+	ldy #3
+	jsr shape16
+
+	jsr credits
+
+
+	lda:cmp:req cloc
+
+	mva	oy+4	_m2Old+1
+	mva	py+4	_m2New+1
+	ldy #4
+	jsr shape8
+
+	mva	oy+5	_pm2Old+1
+	mva	py+5	_pm2New+1
+	ldy #5
+	jsr shape16
+
+	mva	oy+6	_m3Old+1
+	mva	py+6	_m3New+1
+	ldy #6
+	jsr shape8
+
+	mva	oy+7	_pm3Old+1
+	mva	py+7	_pm3New+1
+	ldy #7
+	jsr shape16
+
+	jsr credits
+
+	lda credits.sync
+	cmp #6
+	scc
+	lda #0
+	sta credits.sync
+
+
+stop	jmp loop
+
+toEnd	bit _end
+
+	lda credits.sync
+	jne loop
+
+	mva <credits.ladr2 credits.la2+1
+	mva <credits.hadr2 credits.ha2+1
+
+	mwa #napisy+24*40 nap			; TOUR MODE / PANIC MODE
+	mva #0 credits.toRTS.txt
+
+	mva #$80 credits.toRTS.halt
+	sta credits.cnt
+
+	mva #{jmp*} stop
+	sta toEnd
+
+	mwa #select_mode stop+1
+
+	lda select
+	jsr select_mode._eor
+
+	jmp loop
+
+
+_end	jsr fade_out
+
+	lda #{bit}
+	sta rmtPlay
+;	sta rmtPlay+1
+;	sta rmtPlay+2
+
+;	sta rmtPlay2
+;	sta rmtPlay2+1
+;	sta rmtPlay2+2
+
+	jsr msxStop
+
+	lda #0
+help	equ *-1
+	rts
+
+newColor
+	and #$f0
+	sne
+	adc #$10
+	rts
+
+////////////////////
+// RASTER PROGRAM //
+////////////////////
+
+dli_start
+
+; line=0
+
+;	jsr wait36cycle
+
+	sta $d40a
+
+	jsr wait16cycle
+	cmp byt2
+
+/*
+; line=1
+
+	jsr wait120cycle
+
+; line=3
+
+	jsr wait120cycle
+
+; line=4
+
+	jsr wait120cycle
+
+; line=7
+
+c9	lda #$38
+	sta color2
+	jsr wait54cycle
+
+; line=8
+
+	jsr wait24cycle
+	cmp byt2
+*/
+; line=9
+
+	.put = $3C,$6E,$46,$8F,$C7,$8F,$D7,$AF,$DF,$FE,$FF,$FD,$F9,$72,$66,$3C
+
+
+c11	lda #$58
+	sta color2
+;	jsr wait54cycle
+
+
+?ofs	= 155-17
+
+
+_pm0Old	ldx #0
+	lda #0
+	:10 sta pmg2+?ofs+$400+#,x
+
+; line=10
+
+c12	lda #$48
+	sta color2
+;	jsr wait54cycle
+
+	lda #0
+	:6 sta pmg2+?ofs+$400+#+10,x
+
+_pm0New	ldx #0
+
+	:2 mva #.get[#] pmg2+?ofs+$400+#,x
+
+	:3 nop
+
+
+; line=11
+
+c13	lda #$24
+c14	ldx #$38
+	sta color0
+	stx color2
+;	jsr wait48cycle
+
+	ldx _pm0New+1
+
+	:6 mva #.get[#+2] pmg2+?ofs+$400+#+2,x
+	nop
+
+
+; line=12
+
+c15	lda #$28
+	sta color2
+;	jsr wait54cycle
+
+	ldx _pm0New+1
+
+	:6 mva #.get[#+8] pmg2+?ofs+$400+#+8,x
+
+	:4 nop
+
+
+; line=13
+
+c16	ldy #$14
+c17	ldx #$38
+	sty color0
+	stx color2
+;	jsr wait48cycle
+
+	ldx _pm0New+1
+
+	:2 mva #.get[#+14] pmg2+?ofs+$400+#+14,x
+
+	:6 inc byt2
+
+
+/****************************************************************************************/
+
+
+; line=14
+
+c18	lda #$28
+	sta color2
+;	jsr wait54cycle
+
+_pm1Old	ldx #0
+	lda #0
+	:10 sta pmg2+?ofs+$500+#,x
+
+
+; line=15
+
+c19	lda #$38
+	sta color2
+;	jsr wait54cycle
+
+	lda #0
+	:6 sta pmg2+?ofs+$500+#+10,x
+
+_pm1New	ldx #0
+
+	:2 mva #.get[#] pmg2+?ofs+$500+#,x
+
+	:3 nop
+
+
+; line=16
+
+c20	lda #$28
+	ldy #$8A
+	sta color2
+	sty hposm1
+	jsr wait15cycle
+
+; line=17
+
+c21	ldx #$38
+	stx color2
+;	jsr wait54cycle
+
+	ldx _pm1New+1
+
+	:6 mva #.get[#+2] pmg2+?ofs+$500+#+2,x
+
+	:4 nop
+
+
+; line=18
+
+c22	lda #$28
+	sta color2
+;	jsr wait54cycle
+
+	ldx _pm1New+1
+
+	:8 mva #.get[#+8] pmg2+?ofs+$500+#+8,x
+
+/*******************************************************************************/
+
+; line=19
+;	jsr wait60cycle
+; line=20
+;	jsr wait60cycle
+; line=21
+;	jsr wait120cycle
+
+_pm2Old	ldx #0
+	lda #0
+	:16 sta pmg2+?ofs+$600+#,x
+
+_pm2New	ldx #0
+	:12 mva #.get[#] pmg2+?ofs+$600+#,x
+
+	:2 nop
+
+
+; line=22
+
+	lda #$8B
+	sta hposp1
+;	jsr wait54cycle
+
+	ldx _pm2New+1
+	:4 mva #.get[#+12] pmg2+?ofs+$600+#+12,x
+
+
+/*******************************************************************************/
+
+; line=23
+;	jsr wait84cycle
+
+_pm3Old	ldx #0
+	lda #0
+	:16 sta pmg2+?ofs+$700+#,x
+
+
+; line=24
+
+	lda #$4C
+	ldx #$9D
+	sta hposp3
+	stx hposm2
+;	jsr wait15cycle
+
+	:2 inc byt2	; 13cycle
+	cmp byt2
+
+; line=25
+
+	lda #$49
+	ldx #$BA
+	sta hposp3
+	stx hposm3
+;	jsr wait48cycle
+
+_pm3New	ldx #0
+	:6 mva #.get[#] pmg2+?ofs+$700+#,x
+
+	:2 nop
+
+
+; line=26
+
+	lda #$9E
+	sta hposm2
+;	jsr wait54cycle
+
+	ldx _pm3New+1
+	:6 mva #.get[#+6] pmg2+?ofs+$700+#+6,x
+
+	:4 nop
+
+
+; line=27
+
+	lda #$AD
+	sta hposm0
+;	jsr wait54cycle
+
+	ldx _pm3New+1
+	:4 mva #.get[#+12] pmg2+?ofs+$700+#+12,x
+
+
+/***********************************************************************/
+
+?ofs	= 155-17
+
+	.put = $FF,$55,$55,$55,$FF,$FF,$FF,$FF
+
+
+_m0Old	ldx #0
+	lda pmg2+?ofs+$300,x
+	and #%11111100
+	sta pmg2+?ofs+$300,x
+
+	inc byt2
+	:2 nop
+
+; line=28
+
+	lda #$03
+	ldx #$47
+	ldy #$8D
+	sta sizep3
+	stx hposp3
+	sty hposm1
+;	jsr wait42cycle
+
+	ldx _m0Old+1
+	.rept 3
+	lda pmg2+?ofs+$300+#+1,x
+	and #%11111100
+	sta pmg2+?ofs+$300+#+1,x
+	.endr
+
+	inc byt2
+
+; line=29
+
+	lda #$B4
+	sta hposm0
+;	jsr wait54cycle
+
+	ldx _m0Old+1
+	.rept 4
+	lda pmg2+?ofs+$300+#+4,x
+	and #%11111100
+	sta pmg2+?ofs+$300+#+4,x
+	.endr
+
+	:2 nop
+	nop
+
+; line=30
+
+	lda #$73
+	ldx #$8A
+	ldy #$AD
+	sta hposp0
+	stx hposp1
+	sty hposm2
+;	jsr wait42cycle
+
+_m0New	ldx #0
+	.rept 3
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11111100^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	inc byt2
+	nop
+
+; line=31
+
+	lda #$8B
+	sta hposp1
+;	jsr wait54cycle
+
+	ldx _m0New+1
+	.rept 4
+	lda pmg2+?ofs+$300+#+3,x
+	ora #.get[#+3]&[%11111100^$ff]
+	sta pmg2+?ofs+$300+#+3,x
+	.endr
+
+	:2 nop
+	nop
+
+; line=32
+
+	lda >fnt+$400*$01
+	ldx #$8A
+	sta chbase
+	stx hposp1
+;	jsr wait15cycle
+
+	ldx _m0New+1
+	lda pmg2+?ofs+$300+7,x
+	ora #.get[7]&[%11111100^$ff]
+	sta pmg2+?ofs+$300+7,x
+
+
+/*****************************************************************************/
+
+
+; line=33
+	lda #$45
+	ldx #$B6
+	ldy #$B8
+	sta hposp3
+	stx hposm0
+	sty hposm2
+;	jsr wait42cycle
+; line=34
+;	jsr wait60cycle
+; line=35
+;	jsr wait24cycle		= 126
+
+
+_m1Old	ldx #0
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	and #%11110011
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+_m1New	ldx #0
+	.rept 2
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11110011^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	:2 inc byt2
+	nop
+
+; line=35
+c45	ldx #$2A
+c46	ldy #$0C
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=36
+
+	lda #$01
+	ldx #$89
+	sta sizep1
+	stx hposp1
+	jsr _rts
+c47	ldx #$2A
+;c48	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+
+; line=37
+
+;	jsr wait26cycle
+
+	ldx _m1New+1
+	.rept 2
+	lda pmg2+?ofs+$300+#+2,x
+	ora #.get[#+2]&[%11110011^$ff]
+	sta pmg2+?ofs+$300+#+2,x
+	.endr
+
+c49	ldx #$2A
+;c50	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+
+; line=38
+
+;	jsr wait26cycle
+
+	ldx _m1New+1
+	.rept 2
+	lda pmg2+?ofs+$300+#+4,x
+	ora #.get[#+4]&[%11110011^$ff]
+	sta pmg2+?ofs+$300+#+4,x
+	.endr
+
+c51	ldx #$2A
+;c52	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+
+; line=39
+
+;	jsr wait26cycle
+
+	ldx _m1New+1
+	.rept 2
+	lda pmg2+?ofs+$300+#+6,x
+	ora #.get[#+6]&[%11110011^$ff]
+	sta pmg2+?ofs+$300+#+6,x
+	.endr
+
+
+/*****************************************************************************/
+
+
+c53	ldx #$2A
+;c54	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=40
+
+	lda #$03
+	ldx #$A6
+	ldy #$51
+	sta sizep2
+	stx hposp0
+	sty hposp2
+c23	ldx #$2A
+	stx colpm0
+	cmp byt2
+
+; line=41
+
+	lda #$73
+	ldy #$BA
+	sta hposp0
+	sty hposm0
+	jsr _rts
+;c55	ldx #$2A
+	nop
+c56	ldy #$0C
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=42
+
+	lda #$72
+	sta hposp0
+	jsr wait18cycle
+;c57	ldx #$2A
+	nop
+;c58	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+
+; line=43
+
+	jsr wait26cycle
+;c59	ldx #$2A
+	nop
+;c60	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=44
+
+	lda #$B9
+	sta hposm0
+	jsr wait18cycle
+;c61	ldx #$2A
+	nop
+;c62	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=45
+
+	lda #$50
+	ldx #$44
+	ldy #$B8
+	sta hposp2
+	stx hposp3
+	sty hposm0
+	nop
+	:2 nop
+c63	ldx #$2A
+c64	ldy #$0C
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+
+; line=46
+
+	jsr wait26cycle
+;c65	ldx #$2A
+	nop
+;c66	ldy #$0C
+	nop
+	sty $D017
+	jsr wait16cycle
+	stx $D017
+	nop
+	sty $D017
+	nop
+
+; line=47
+
+;	jsr wait60cycle
+
+_m2Old	ldx #0
+	.rept 5
+	lda pmg2+?ofs+$300+#,x
+	and #%11001111
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	cmp byt2
+
+; line=48
+
+	lda #$51
+	sta hposp2
+;	jsr wait21cycle
+
+	ldx _m2Old+1
+
+	lda pmg2+?ofs+$300+5,x
+	and #%11001111
+	sta pmg2+?ofs+$300+5,x
+
+	:2 nop
+	nop
+
+; line=49
+
+	lda #$03
+	ldx #$75
+	ldy #$45
+	sta sizep1
+	stx hposp1
+	sty hposp3
+	lda #$B7
+	sta hposm0
+;	jsr wait36cycle
+
+	ldx _m2Old+1
+	.rept 2
+	lda pmg2+?ofs+$300+#+6,x
+	and #%11001111
+	sta pmg2+?ofs+$300+#+6,x
+	.endr
+
+	:2 inc byt2
+
+; line=50
+
+	lda #$C2
+	ldx #$BC
+	ldy #$BE
+	sta hposm1
+	stx hposm2
+	sty hposm3
+;	jsr wait42cycle
+; line=51
+;	jsr wait120cycle	= 162
+
+_m2New	ldx #0
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11001111^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+
+/******************************************************************************/
+
+
+_m3Old	ldx #0
+	.rept 6
+	lda pmg2+?ofs+$300+#,x
+	and #%00111111
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	:2 nop
+
+; line=53
+
+	lda #$50
+	ldx #$BB
+	sta hposp2
+	stx hposm0
+;	jsr wait48cycle
+
+	ldx _m3Old+1
+	.rept 2
+	lda pmg2+?ofs+$300+#+6,x
+	and #%00111111
+	sta pmg2+?ofs+$300+#+6,x
+	.endr
+
+; line=54
+;	jsr wait60cycle		= 82
+
+_m3New	ldx #0
+
+	.rept 7
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%00111111^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	cmp byt2
+
+; line=55
+
+	lda #$52
+	sta hposp2
+	jsr wait54cycle
+
+; line=56
+
+	lda >fnt+$400*$02
+	sta chbase
+;	jsr wait21cycle
+
+	ldx _m3New+1
+
+	lda pmg2+?ofs+$300+7,x
+	ora #.get[7]&[%00111111^$ff]
+	sta pmg2+?ofs+$300+7,x
+
+	:2 nop
+	nop
+
+; line=57
+
+	jsr wait60cycle
+
+; line=58
+
+	lda #$8F
+	ldx #$65
+	ldy #$46
+	sta hposp1
+	stx hposp2
+	sty hposp3
+c24	ldx #$2A
+	stx colpm3
+
+; line=59
+	jsr wait60cycle
+
+;c67	ldx #$2A
+	nop
+c68	ldy #$0C
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=60
+
+	jsr wait31cycle
+;c69	ldx #$2A
+	nop
+;c70	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=61
+
+	lda #$45
+	sta hposp3
+	jsr wait18cycle
+;c71	ldx #$2A
+	nop
+;c72	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=62
+
+	jsr wait31cycle
+;c73	ldx #$2A
+	nop
+;c74	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=63
+
+	lda #$4B
+	sta hposp3
+	jsr wait18cycle
+;c75	ldx #$2A
+	nop
+;c76	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=64
+
+	lda #$90
+	sta hposp1
+	jsr wait21cycle
+
+; line=65
+
+	jsr wait24cycle
+;c77	ldx #$2A
+	nop
+;c78	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=66
+
+	lda #$4C
+	sta hposp3
+	jsr wait18cycle
+;c79	ldx #$2A
+	nop
+;c80	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=67
+
+	lda #$4B
+	sta hposp3
+	jsr wait18cycle
+;c81	ldx #$2A
+	nop
+;c82	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=68
+
+	jsr wait31cycle
+;c83	ldx #$2A
+	nop
+;c84	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=69
+
+	jsr wait31cycle
+;c85	ldx #$2A
+	nop
+;c86	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=70
+
+	lda #$63
+	sta hposp2
+	jsr wait18cycle
+;c87	ldx #$2A
+	nop
+;c88	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=71
+
+	jsr wait31cycle
+;c89	ldx #$2A
+	nop
+;c90	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=72
+
+	lda #$01
+	ldx #$4C
+	sta sizep3
+	stx hposp3
+
+; line=73
+
+	jsr wait39cycle
+c91	ldx #$2A
+;c92	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=74
+
+c25	lda #$74
+	ldx #$BE
+c26	ldy #$04
+	sta color3
+	stx hposp0
+	sty colpm0
+	nop
+	:2 nop
+c93	ldx #$2A
+c94	ldy #$0C
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=75
+
+	lda #$B7
+	sta hposm0
+	jsr wait18cycle
+;c95	ldx #$2A
+	nop
+;c96	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=76
+
+	lda #$72
+;c27	ldx #$2A
+	nop
+	sta hposp0
+	stx colpm0
+	jsr _rts
+;c97	ldx #$2A
+	nop
+;c98	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=77
+
+	lda #$8F
+	sta hposp1
+	jsr wait18cycle
+;c99	ldx #$2A
+	nop
+;c100	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=78
+
+	jsr wait31cycle
+;c101	ldx #$2A
+	nop
+;c102	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=79
+
+	lda #$62
+	sta hposp2
+	jsr wait18cycle
+;c103	ldx #$2A
+	nop
+;c104	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=80
+
+	lda >fnt+$400*$03
+	ldx #$BA
+c28	ldy #$74
+	sta chbase
+	stx hposp0
+	sty colpm0
+	nop
+
+; line=81
+
+	jsr wait31cycle
+c105	ldx #$2A
+c106	ldy #$0C
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+
+; line=82
+
+	jsr wait31cycle
+;c107	ldx #$2A
+	nop
+;c108	ldy #$0C
+	nop
+	sty $D017
+	:2 nop
+	inc byt2
+	stx $D017
+	:2 nop
+	sty $D017
+	inc byt2
+	nop
+
+; line=83
+
+	jsr wait60cycle
+
+; line=84
+
+	lda #$04
+	ldx #$7C
+	ldy #$59
+	sta gtictl
+	stx hposp0
+	sty hposm3
+	jsr wait42cycle
+
+; line=85
+
+	lda #$61
+	sta hposp2
+	jsr wait54cycle
+
+; line=86
+
+	lda #$4D
+	sta hposp3
+	jsr wait54cycle
+
+; line=87
+
+	lda #$14
+	ldx #$6B
+	ldy #$88
+	sta gtictl
+	stx hposm0
+	sty hposm1
+	jsr wait42cycle
+
+; line=88
+
+	lda #$BC
+c29	ldx #$04
+	sta hposp0
+	stx colpm0
+	jsr wait15cycle
+
+; line=89
+
+	lda #$BE
+	sta hposm3
+	jsr wait54cycle
+
+; line=90
+
+	lda #$01
+	sta sizep2
+	jsr wait54cycle
+
+; line=91
+
+	lda #$00
+	ldx #$83
+	ldy #$72
+	sta sizep1
+	stx hposp1
+	sty hposm1
+c30	lda #$78
+	sta colpm1
+	jsr wait36cycle
+
+; line=92
+
+	jsr wait120cycle
+
+; line=94
+
+	lda #$04
+	ldx #$71
+	sta sizem
+	stx hposm1
+	jsr wait48cycle
+
+; line=95
+
+c31	lda #$28
+c32	ldx #$0C
+	ldy #$4E
+	sta color1
+	stx color2
+	sty hposp3
+	jsr wait42cycle
+
+; line=96
+
+	lda #$00
+	ldx #$59
+	ldy #$93
+	sta sizem
+	stx hposp2
+	sty hposm1
+	:2 nop
+	inc byt2
+
+; line=97
+
+	lda #$00
+	ldx #$61
+c33	ldy #$78
+	sta sizep2
+	stx hposp2
+	sty colpm2
+	nop
+	:2 nop
+c109	ldx #$28
+	stx $D017
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+
+; line=98
+
+	jsr wait34cycle
+;c111	ldx #$28
+	nop
+	stx $D017
+;c112	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=99
+
+	lda #$03
+	ldx #$5A
+c34	ldy #$9A
+	sta sizep3
+	stx hposp3
+	sty colpm3
+	nop
+	:2 nop
+c113	ldx #$28
+	stx $D017
+c114	ldy #$78
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=100
+
+	lda #$AE
+	sta hposm0
+	jsr wait18cycle
+;c115	ldx #$28
+	nop
+	stx $D017
+;c116	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=101
+
+	lda #$60
+	sta hposp3
+	jsr wait18cycle
+;c117	ldx #$28
+	nop
+	stx $D017
+;c118	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=102
+
+	lda #$01
+	ldx #$B0
+	sta sizem
+	stx hposm0
+	jsr _rts
+c119	ldx #$28
+	stx $D017
+;c120	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=103
+
+	lda #$03
+	ldx #$AD
+	sta sizem
+	stx hposm0
+	jsr _rts
+c121	ldx #$28
+	stx $D017
+;c122	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=104
+
+	lda #$7C
+	ldx #$65
+	ldy #$64
+	sta hposp2
+	stx hposp3
+	sty hposm1
+	lda #$57
+	sta hposm3
+	cmp byt2
+
+; line=105
+
+	lda #$54
+;	ldy #$64
+	nop
+	sta hposp1
+	sty hposp3
+	jsr _rts
+c123	ldx #$28
+	stx $D017
+c124	ldy #$78
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=106
+
+	lda #$62
+	sta hposm1
+	jsr wait18cycle
+;c125	ldx #$28
+	nop
+	stx $D017
+;c126	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=107
+
+	lda #$63
+c35	ldx #$9A
+	sta hposp3
+	stx colpm2
+	jsr _rts
+c127	ldx #$28
+	stx $D017
+;c128	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=108
+
+	lda #$62
+	ldx #$60
+	sta hposp3
+	stx hposm1
+	jsr _rts
+c129	ldx #$28
+	stx $D017
+;c130	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=109
+
+	lda #$61
+	sta hposp3
+	jsr wait18cycle
+;c131	ldx #$28
+	nop
+	stx $D017
+;c132	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=110
+
+	lda #$60
+	ldx #$5E
+	sta hposp3
+	stx hposm1
+	jsr _rts
+c133	ldx #$28
+	stx $D017
+;c134	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=111
+
+	lda #$5F
+	sta hposp3
+	jsr wait18cycle
+;c135	ldx #$28
+	nop
+	stx $D017
+;c136	ldy #$78
+	nop
+	:2 nop
+	nop
+	sty $D017
+	:2 nop
+	stx $D017
+	inc byt2
+	inc byt2
+
+; line=112
+
+	lda >fnt5
+	ldx #$5E
+	ldy #$5C
+	sta chbase
+	stx hposp3
+	sty hposm1
+c36	ldy #$78
+	sty colpm2
+	cmp byt2
+
+; line=113
+
+	lda #$5D
+c37	ldx #$9A
+	nop
+	sta hposp3
+	stx colpm1
+	stx colpm2
+	nop
+	:2 nop
+c137	ldx #$28
+	stx $D017
+;c138	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=114
+
+	lda #$5C
+	ldx #$5A
+	sta hposp3
+	stx hposm1
+	jsr _rts
+c139	ldx #$28
+	stx $D017
+;c140	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=115
+
+	lda #$5B
+	sta hposp3
+	jsr wait18cycle
+;c141	ldx #$28
+	nop
+	stx $D017
+;c142	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=116
+
+	lda #$76
+	ldx #$57
+	sta hposp2
+	stx hposp3
+	jsr _rts
+c143	ldx #$28
+	stx $D017
+;c144	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=117
+
+	lda #$56
+	sta hposp3
+	jsr wait18cycle
+;c145	ldx #$28
+	nop
+	stx $D017
+;c146	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=118
+
+	lda #$57
+	sta hposp3
+	jsr wait18cycle
+;c147	ldx #$28
+	nop
+	stx $D017
+;c148	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=119
+
+	lda #$58
+	sta hposp3
+	jsr wait18cycle
+;c149	ldx #$28
+	nop
+	stx $D017
+;c150	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=120
+
+	lda #$56
+;c39	ldy #$78
+	nop
+	nop
+	sta hposp3
+	sty colpm1
+	sty colpm2
+	nop
+
+; line=121
+
+	jsr wait31cycle
+;c151	ldx #$28
+	nop
+	stx $D017
+;c152	ldy #$78
+	nop
+	cmp byt2
+	sty $D017
+	nop
+	:2 nop
+	stx $D017
+	nop
+	:2 nop
+	inc byt2
+
+; line=122
+
+;c41	ldy #$78
+	nop
+	sty color1
+	jsr wait54cycle
+
+; line=123
+
+c42	lda #$74
+	sta color0
+	jsr wait54cycle
+
+; line=124
+
+	jsr wait60cycle
+
+; line=125
+
+	lda #$57
+	sta hposp3
+	jsr wait54cycle
+
+; line=126
+
+	jsr wait60cycle
+
+; line=127
+
+	lda #$5A
+	ldx #$66
+	ldy #$56
+	sta hposp0
+	stx hposp2
+	sty hposp3
+c43	lda #$9A
+	sta colpm2
+
+; line=128
+
+	mwa #dl2 dliv
+
+	jsr wait48cycle
+	cmp byt2
+
+; line=129
+
+	lda #$01
+	ldx #$58
+	sta sizep3
+	stx hposp3
+;	jsr wait48cycle
+
+; line=130
+
+;	jsr wait120cycle
+
+; line=132
+
+;	jsr wait120cycle
+
+; line=134
+
+;	jsr wait120cycle
+
+
+	lda regA
+	ldx regX
+	ldy regY
+	rti
+
+
+
+
+; line=136
+dl2	lda <dli2
+	sta $d40a
+	sta dliv
+;	jsr wait24cycle
+;	cmp byt2
+
+; line=137
+
+;	jsr wait60cycle
+	lda >dli2
+	sta $d40a
+	sta dliv+1
+
+; line=138
+
+c44	lda #$04
+	sta colpm1
+
+	lda regA
+	ldx regX
+	ldy regY
+	rti
+
+
+dli2	lda #$0a
+	ldx #$00
+	ldy <dli3
+	sta $d40a
+	sta color1
+	stx color2
+
+	sty dliv
+
+	stx	sizep0
+	stx	sizep1
+	stx	sizep2
+	stx	sizep3
+
+	mva	>pmg2	$d407
+
+	mva #%01010101	sizem
+
+	mva	#1	gtictl
+
+hposPM	mva	#0	hposm0		; !!! koniecznie w tej kolejnoœci !!!
+	mva	#0	hposp0		;
+	mva	#0	hposm1		;
+	mva	#0	hposp1		;
+	mva	#0	hposm2		;
+	mva	#0	hposp2		;
+	mva	#0	hposm3		;
+	mva	#0	hposp3		; !!! koniec modyfikacji hposPM !!!
+
+p0	mva	#$30	colpm0
+p1	mva	#$b0	colpm1
+p2	mva	#$70	colpm2
+p3	mva	#$f0	colpm3
+
+
+	mva	>dli3	dliv+1
+
+;rmtPlay2	jsr msxPlay
+
+	lda regA
+	ldx regX
+	ldy regY
+	rti
+
+
+dli3	lda #$40
+	sta $d40a
+	sta $d01b
+	mva >pmg $d407
+
+	lda regA
+	ldx regX
+	ldy regY
+	rti
+
+
+;---
+
+NMI	bit $d40f
+	bpl VBL
+
+	sta regA
+	stx regX
+	sty regY
+
+	jmp dli_start
+dliv	equ *-2
+
+VBL	phr
+	sta $d40f		;reset NMI flag
+
+	inc cloc		;little timer
+
+	mwa #ant $d402		;ANTIC address program
+
+	mva #scr40 $d400	;set new screen's width
+
+	mva >pmg $d407		;missiles and players data address
+
+
+	lda >fnt+$400*$00
+	sta chbase
+
+	lda #$00
+	sta colbak
+
+;	lda #$00
+	sta sizep0
+	sta sizem
+
+c1	lda #$14
+	sta color0
+c2	lda #$0C
+	sta color1
+c3	lda #$38
+	sta color2
+
+c4	lda #$04
+	sta color3
+	sta colpm0
+
+c6	lda #$2A
+	sta colpm1
+	sta colpm2
+
+c8	lda #$26
+	sta colpm3
+
+	lda #$14
+	sta gtictl
+
+	lda #$03
+	sta sizep1
+
+	lda #$01
+	sta sizep2
+	sta sizep3
+
+	lda #$64
+	sta hposp0
+	lda #$8D
+	sta hposp1
+	lda #$59
+	sta hposp2
+	lda #$4D
+	sta hposp3
+	lda #$50
+	sta hposm0
+	lda #$93
+	sta hposm1
+	lda #$9E
+	sta hposm2
+	lda #$A3
+	sta hposm3
+
+
+	mwa #dli_start dliv	;set the first address of DLI interrupt
+
+
+rmtPlay	jsr msxPlay
+
+	lda porta
+	and #$0f
+	cmp #$0d
+	beq newsel
+	cmp #$0e
+	beq newsel
+
+	lda consol
+	and #2
+	beq newsel
+
+	lda consol		; START
+	and #1
+	beq intro_stop
+	lda trig0		; FIRE
+	beq intro_stop
+
+	lda $d20f
+	and #4
+	beq intro_stop
+
+	plr
+	rti
+
+newsel	mva #{bit} select_mode.skip
+	plr
+	rti
+
+intro_stop
+	lda $d20f
+	and #4
+	bne next
+
+	lda kbcode
+	cmp #17				; HELP key
+	bne next
+
+	sta help
+next
+	lda #{bit}
+	sta stop
+;	sta stop+1
+;	sta stop+2
+
+	lda #$80
+	sta credits.cnt
+
+	plr
+	rti
+
+
+wait120cycle
+	jsr wait60cycle
+wait60cycle
+	cmp byt3
+	nop
+wait54cycle
+	nop
+	cmp byt3
+wait48cycle
+	cmp byt3
+wait44cycle
+	nop
+wait42cycle
+	cmp byt2
+wait39cycle
+	cmp byt2
+wait36cycle
+	nop
+wait34cycle
+	cmp byt2
+wait31cycle
+	inc byt2
+wait26cycle
+	nop
+wait24cycle
+	cmp byt2
+wait21cycle
+	cmp byt2
+wait18cycle
+	cmp byt2
+wait15cycle
+	cmp byt2
+_rts	rts
+
+
+wait16cycle
+	nop
+	nop
+	rts
+
+;---
+
+.proc	setmem (.byte a .byte x) .reg
+
+	sta clr+2
+
+	ldy #0
+	tya
+clr	sta $ff00,y
+	iny
+	bne clr
+	inc clr+2
+	dex
+	bne clr
+
+	rts
+.endp
+
+	.link 'rle\rle.obx'
+
+	icl 'logo_2.fad'
+
+pmgrle	ins 'pmg.rle'
+
+
+* ---------------------------------------------------------
+* ---------------------------------------------------------
+
+.local	getParam
+
+	lda ox,y
+	pha
+
+	mva	lold,y	old
+	mva	hold,y	old+1
+
+
+	lda px,y
+	sta ox,y
+	pha
+	:2 lsr @
+
+	ldx py,y
+
+	add ladr,x
+	sta new
+	sta lold,y
+
+	lda #0
+	adc hadr,x
+	sta new+1
+	sta hold,y
+
+	txa
+	sta oy,y
+
+
+	ldx mul5,y
+	lda px,y
+	add #48
+	sta hposPM+1,x
+
+
+	ldx cnt,y
+	lda ypath,x
+	add yofs,y
+	sta py,y
+	adc siz,y
+	cmp #ymax
+	bcc skp3
+
+	lda ym,y
+	sta yofs,y
+
+	lda #ymax
+	sub siz,y
+	sta py,y
+
+loop	dex
+	lda ypath,x
+	add siz,y
+	cmp #ymax
+	bcs loop
+	bcc skp4
+
+skp3	cpx #0
+	beq skp4
+	cpx #ylen-1
+	bne skp2
+
+skp4	lda ay,y
+	eor #$fe
+	sta ay,y
+
+skp2	txa
+	add ay,y
+	sta cnt,y
+
+
+
+	lda ax,y
+	bpl right
+
+left	add px,y
+	cmp #160
+	bcs skp1
+
+	sta px,y
+
+	quit
+
+
+right	add px,y
+	cmp mx,y
+	bcc skp0
+
+skp1	lda ax,y
+	eor #$ff
+	add #1
+	sta ax,y
+
+	lda px,y
+
+skp0	sta px,y
+
+	quit
+
+
+.macro	quit
+	pla
+	and #3
+	tax
+	pla
+	and #3
+
+	rts
+.endm
+
+
+mul5	:8 dta #*5
+
+.endl
+
+
+
+* ----	SHAPE16
+
+.local	shape16
+/*
+	mva	lpm,y	jpm+1
+	mva	hpm,y	jpm+2
+
+	ldx	oy,y
+
+	lda	#$00
+
+jpm	jmp $ffff
+
+
+
+?ofs	= 155-16
+
+	.put = $3C,$6E,$46,$8F,$C7,$8F,$D7,$AF,$DF,$FE,$FF,$FD,$F9,$72,$66,$3C
+
+
+pm0	:16 sta pmg2+?ofs+$400+#,x
+
+	ldx py,y
+
+	:16 mva #.get[#] pmg2+?ofs+$400+#,x
+	jmp	jpmEnd
+
+
+pm1	:16 sta pmg2+?ofs+$500+#,x
+
+	ldx py,y
+
+	:16 mva #.get[#] pmg2+?ofs+$500+#,x
+	jmp	jpmEnd
+
+
+pm2	:16 sta pmg2+?ofs+$600+#,x
+
+	ldx py,y
+
+	:16 mva #.get[#] pmg2+?ofs+$600+#,x
+	jmp	jpmEnd
+
+
+pm3	:16 sta pmg2+?ofs+$700+#,x
+
+	ldx py,y
+
+	:16 mva #.get[#] pmg2+?ofs+$700+#,x
+;	jmp	jpmEnd
+*/
+
+jpmEnd	jsr getParam
+
+	tay
+	lda lbig,y
+	sta old0+1
+	sta old1+1
+	sta old2+1
+
+	lda lbig,x
+	sta new0+1
+	sta new1+1
+	sta new2+1
+
+	clc
+
+	ldy #0
+	ldx #47
+loop
+	lda (old),y
+old0	eor big0,x
+	sta (old),y
+
+	lda (new),y
+new0	eor big0,x
+	sta (new),y
+
+	iny
+	dex
+
+	lda (old),y
+old1	eor big0,x
+	sta (old),y
+
+	lda (new),y
+new1	eor big0,x
+	sta (new),y
+
+	iny
+	dex
+
+	lda (old),y
+old2	eor big0,x
+	sta (old),y
+
+	lda (new),y
+new2	eor big0,x
+	sta (new),y
+
+	tya
+	adc #40-2
+	tay
+	bcc skp
+
+	inc old+1
+	inc new+1
+	clc
+skp
+	dex
+	bpl loop
+	rts
+
+lbig	dta l(big0, big2, big4, big6)
+
+;lpm	dta l(pm0,pm0, pm1,pm1, pm2,pm2, pm3,pm3)
+;hpm	dta h(pm0,pm0, pm1,pm1, pm2,pm2, pm3,pm3)
+
+.endl
+
+
+* ----	SHAPE8
+
+.local	shape8
+
+/*
+	mva	lpm,y	jpm+1
+	mva	hpm,y	jpm+2
+
+	ldx	oy,y
+
+jpm	jmp	$ffff
+
+
+?ofs	= 155-16
+
+	.put = $FF,$55,$55,$55,$FF,$FF,$FF,$FF
+
+
+pm0	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	and #%11111100
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	ldx py,y
+
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11111100^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+	jmp	jpmEnd
+
+
+pm1	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	and #%11110011
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	ldx py,y
+
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11110011^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+	jmp	jpmEnd
+
+
+pm2	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	and #%11001111
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	ldx py,y
+
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%11001111^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+	jmp	jpmEnd
+
+
+pm3	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	and #%00111111
+	sta pmg2+?ofs+$300+#,x
+	.endr
+
+	ldx py,y
+
+	.rept 8
+	lda pmg2+?ofs+$300+#,x
+	ora #.get[#]&[%00111111^$ff]
+	sta pmg2+?ofs+$300+#,x
+	.endr
+;	jmp	jpmEnd
+*/
+
+jpmEnd	jsr getParam
+
+	tay
+	lda lsml,y
+	sta old0+1
+	sta old1+1
+
+	lda lsml,x
+	sta new0+1
+	sta new1+1
+
+	clc
+
+	ldy #0
+	ldx #15
+loop
+	lda (old),y
+old0	eor big0,x
+	sta (old),y
+
+	lda (new),y
+new0	eor big0,x
+	sta (new),y
+
+	iny
+	dex
+
+	lda (old),y
+old1	eor big0,x
+	sta (old),y
+
+	lda (new),y
+new1	eor big0,x
+	sta (new),y
+
+	tya
+	adc #40-1
+	tay
+	bcc skp
+
+	inc old+1
+	inc new+1
+	clc
+skp
+	dex
+	bpl loop
+	rts
+
+lsml	dta l(sml0, sml2, sml4, sml6)
+
+;lpm	dta l(pm0,pm0, pm1,pm1, pm2,pm2, pm3,pm3)
+;hpm	dta h(pm0,pm0, pm1,pm1, pm2,pm2, pm3,pm3)
+
+.endl
+
+
+.local	credits
+
+	.var idx row cnt sync .byte
+
+	jmp toRTS
+direct	equ *-2
+
+
+.local	toRTS
+	inc cnt
+	bpl quit
+
+	lda #0
+	sta cnt
+	sta row
+
+	inc sync
+
+	sbw nap #(ile_wierszy_tekstu*2)*40
+
+gate	lda #0
+	cmp #2
+	bne skip
+
+	adw nap	#(ile_wierszy_tekstu*2)*40	;-2*40
+
+	inc txt
+
+	lda #0
+txt	equ *-1
+
+	cmp #5+1			; liczba napisow do wyswietlenia
+	bne _skp
+
+	mwa #napisy nap
+
+	mva #0 txt
+
+_skp	lda #0
+	sta gate+1
+
+skip	inc gate+1
+
+	ldx <toRight
+	ldy >toRight
+
+	lda idx
+	beq skp
+
+	ldx <toLeft
+	ldy >toLeft
+
+skp	stx direct
+	sty direct+1
+
+	lda #0
+halt	equ *-1
+	seq
+	mva #{rts} toRTS
+
+quit	rts
+.endl
+
+
+.local	toLeft
+	jsr show
+
+	dec idx
+	bpl quit
+
+	mva #0	idx
+
+	adw nap #ile_wierszy_tekstu*40
+
+	ldx <toRight
+	ldy >toRight
+
+	inc row
+	lda row
+	cmp #ile_wierszy_tekstu
+	bne skp
+
+	ldx <toRTS
+	ldy >toRTS
+
+skp	stx direct
+	sty direct+1
+
+	inc sync
+
+quit	rts
+.endl
+
+
+.local	toRight
+	jsr show
+
+	inc idx
+	lda idx
+	cmp #40
+	bne quit
+
+	mva #39	idx
+
+	adw nap #ile_wierszy_tekstu*40
+
+	ldx <toLeft
+	ldy >toLeft
+
+	inc row
+	lda row
+	cmp #ile_wierszy_tekstu
+	bne skp
+
+	ldx <toRTS
+	ldy >toRTS
+
+skp	stx direct
+	sty direct+1
+
+	inc sync
+
+quit	rts
+.endl
+
+
+show	ldx	row
+la2	mva	ladr,x	old
+ha2	mva	hadr,x	old+1
+
+	ldy idx
+	mva (nap),y	chr0+1
+
+	tya
+	add #40
+	tay
+	mva (nap),y	chr1+1
+
+;	tya
+;	adc #40
+;	tay
+;	mva (nap),y	chr2+1
+
+
+;	ldy idx
+
+chr0	ldx #0
+	jsr char
+
+chr1	ldx #0
+;	jsr char
+
+;chr2	ldx #0
+;	jmp char
+
+
+.local	char
+
+	mva 	lfnt,x	chr
+	mva	hfnt,x	chr+1
+
+	ldx #7
+	clc
+
+loop	lda (old),y
+	eor $ffff,x
+chr	equ *-2
+	sta (old),y
+
+	tya
+	adc #40
+	tay
+	bcc skp
+
+	inc old+1
+	clc
+
+skp	dex
+	bpl loop
+	rts
+.endl
+
+	.pages
+ladr	dta l(balls+16*40+8*40)
+	dta l(balls+16*40+40*40)
+	dta l(balls)
+
+hadr	dta h(balls+16*40+8*40)
+	dta h(balls+16*40+40*40)
+	dta h(balls)
+
+ladr2	dta l(balls+24*40+8*40)
+	dta l(balls+24*40+40*40)
+	dta l(balls)
+
+hadr2	dta h(balls+25*40+8*40)
+	dta h(balls+25*40+40*40)
+	dta h(balls)
+	.endpg
+
+lfnt	:ileFnt dta l(fonty+#*8)
+hfnt	:ileFnt dta h(fonty+#*8)
+
+.endl
+
+
+* ---------------------------------------------------------
+
+.local	select_mode
+
+	.var delay=6 .byte
+
+	mva #{rts} credits.toRTS	; !!! koniecznie
+
+skip	jmp loop
+
+	dec delay
+	bne quit
+
+	mva #6 delay
+
+	mva #{jmp*} skip
+
+	lda select
+	jsr _eor
+
+	inc select
+	lda select
+	and #1
+	sta select
+
+	jsr _eor
+
+quit	jmp loop
+
+_eor	tax
+	mva ladr,x sel
+	mva hadr,x sel+1
+
+	ldy #8
+lp0	lda (sel),y
+	eor #%10101010
+	sta (sel),y
+	iny
+	cpy #32
+	bne lp0
+
+	ldx #11
+lp1	sbw sel #80
+	ldy #8
+	lda (sel),y
+	eor #$80
+	sta (sel),y
+	dex
+	bne lp1
+
+	ldx #12
+lp2	ldy #32
+	lda (sel),y
+	eor #$80
+	sta (sel),y
+	adw sel #80
+	dex
+	bne lp2
+
+	sbw sel #26*40
+
+	ldy #8
+lp3	lda (sel),y
+	eor #%10101010
+	sta (sel),y
+	iny
+	cpy #32
+	bne lp3
+
+	lda (sel),y
+	eor #$80
+	sta (sel),y
+
+	rts
+
+ladr	dta l(balls+44*40+8*40)
+	dta l(balls+44*40+40*40)
+
+hadr	dta h(balls+44*40+8*40)
+	dta h(balls+44*40+40*40)
+
+.endl
+
+* ---------------------------------------------------------
+
+	.print *-$d800,' / ',$fff0-$d800
+
+
+	org	$ffe0
+	jmp	main
+
+msxPlay	jmp	_rts
+msxStop	jmp	_rts
+select	brk
+
+;	run main
+
+
+;---
+.macro	@word
+	?a = .get[?x]<<16 + .get[?x+1]<<8
+	?a = ?a >> ?s
+
+	dta [?a&$ff]
+	dta [(?a>>8)&$ff]
+	dta [(?a>>16)&$ff]
+	.def ?x -= 40
+.endm
+
+
+.macro	@byte
+	?a = .get[?x]<<8
+	?a = ?a >> ?s
+
+	dta [?a&$ff]
+	dta [(?a>>8)&$ff]
+	.def ?x -= 40
+.endm

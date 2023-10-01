@@ -1,0 +1,46 @@
+mads 2.0.4 build 7 (29 Mar 16)
+Source: D:\!Atari\Pang_2\test\range_hit.asm
+     1 				// Range Checking Byte
+     2
+     3 				; Approach by White Flame
+     4
+     5 				; In checking for the range [x,y), instead of performing 2 comparisons the idea
+     6 				; is to subtract x to align the range to [0,y-x). This then allows us to perform
+     7 				; a single unsigned comparison to check both ends of the range.
+     8
+     9 				; Any numbers lower than the original range will have wrapped the byte into
+    10 				; the high values ?255, and any number higher than the original range will
+    11 				; still be too large.
+    12
+    13 					org $2000
+    14
+    15 				; Check .A for the range [10..100)
+    16 				main
+    17 				;	sta DETECT.ay0
+    18 FFFF> 2000-2022> A9 64		lda #100
+    19
+    20 2002 8D 0E 20			sta ay
+    21
+    22 2005 A9 20			lda #32			; wysokosc bohatera
+    23 				;	sta DETECT.dy0
+    24 2007 8D 10 20			sta dy
+    25
+    26
+    27 200A A9 83			lda #131
+    28
+    29 200C 38				sec
+    30 200D E9 0A			sbc #10			; start of the range
+    31 = 200E			ay	equ *-1
+    32 200F C9 5A			cmp #90			; length of the range
+    33 = 2010			dy	equ *-1
+    34 2011 B0 08			bcs fail		; result needs to be 0-89 to pass the original 10-99 check
+    35 								; .A is in range here, and Carry is clear
+    36
+    37 2013 A9 CC 8D C8 02		mva #$cc 712
+    38 2018 4C 18 20			jmp *
+    39
+    40 201B A9 24 8D C8 02	fail	mva #$24 712
+    41 2020 4C 20 20			jmp *
+    42
+    43 02E0-02E1> 00 20			run main
+    44

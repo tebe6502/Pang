@@ -1,0 +1,40 @@
+mads 2.0.3 build 14 (23 Mar 16)
+Source: D:\!Atari\Pang_2\test\test.asm
+     1
+     2 					;icl '..\pang.hea'
+     3
+     4 = A000				pmstar = $a000
+     5
+     6 = 0000				.extrn tmpINVERS, inflate .word
+     7 = 0000				.extrn inputPointer, outputPointer .byte
+     8
+     9 					.public init_2
+    10
+    11 FFFF> 01,0000-0303> 4D + 	.reloc
+    12
+    13 					.print volume
+    13 				$03A4
+    14
+    15 01,0000			init_2
+    16 				;	lda <volume
+    17 				;	sta $80
+    18 01,0000 A9 02			lda >volume
+    19 01,0002 85 81			sta $81
+    20
+    21 				;	lda <pmStar
+    22 				;	sta $82
+    23 01,0004 A9 A0			lda >pmStar
+    24 01,0006 85 83			sta $83
+    25
+    26 01,0008 00			brk
+    27
+    28 01,0009 EA EA EA EA EA + 	:$2a5-9-1 nop
+    29
+    30 01,02A4 75 CA 51 0D C0 + volume	ins 'volume.df7'
+    31 				;pmStar	brk
+    31 01,0304			BLK UPDATE ADDRESS
+    31 01,0304 EF FF 3E		
+    31 01,0304 01 00 01 00 A4	
+    31 01,0304			BLK UPDATE EXTERNAL
+    31 01,0304			BLK UPDATE PUBLIC
+    31 01,0304 57 56 06 00 49 + INIT_2

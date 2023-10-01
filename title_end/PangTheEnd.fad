@@ -1,0 +1,246 @@
+color_nr = 25
+
+* ---
+* ---	WAIT
+* ---
+.proc	WAIT (.byte x) .reg
+
+	lda:cmp:req cloc
+	dex
+	bne	wait
+	rts
+.endp
+
+
+* ---
+* ---	FADE
+* ---
+.proc	FADE
+
+	stx	adr+1
+	sty	adr+2
+
+	WAIT	#6
+
+	mva	#16	licz
+fad
+	WAIT	#2
+
+adr	jsr	$ffff
+
+	dec	licz
+	bne	fad
+	rts
+
+licz	brk
+.endp
+
+
+* ---
+* ---	FADE IN
+* ---
+.proc	FADE_IN
+
+	ldx	<fade
+	ldy	>fade
+	jmp	:fade
+fade
+	ldx	#0
+
+	ift	color_nr>255
+	mwa	#tab.l_tcol	adr0+1
+	mwa	#tab.h_tcol	adr1+1
+	mwa	#tab.t_satur	adr2+1
+	mwa	#tab.t_color	adr3+1
+
+	stx	count+1
+	eif
+
+adr0	mva	tab.l_tcol,x	ftmp
+adr1	mva	tab.h_tcol,x	ftmp+1
+
+	ldy	#1
+	lda	(ftmp),y
+	tay
+
+	and	#$f0
+adr3	cmp	tab.t_color,x
+	beq	skp1
+
+	tya
+	add	#$10
+	tay
+skp1
+	tya
+	and	#$0f
+adr2	cmp	tab.t_satur,x
+	beq	skp0
+
+	iny
+skp0
+	tya
+	ldy	#1
+	sta	(ftmp),y
+
+	inx
+
+	ift	color_nr>255
+	bne	skp
+	inc	count+1
+
+	inc	adr0+2
+	inc	adr1+2
+	inc	adr2+2
+	inc	adr3+2
+skp
+	eif
+
+	cpx	<color_nr
+	bne	adr0
+
+	ift	color_nr>255
+count	lda	#0
+	cmp	>color_nr
+	bne	adr0
+	eif
+
+	rts
+.endp
+
+
+* ---
+* ---	FADE OUT
+* ---
+.proc	FADE_OUT
+
+	ldx	<fade
+	ldy	>fade
+	jmp	:fade
+fade
+	ldx	#0
+
+	ift	color_nr>255
+	mwa	#tab.l_tcol	adr0+1
+	mwa	#tab.h_tcol	adr1+1
+
+	stx	count+1
+	eif
+
+adr0	mva	tab.l_tcol,x	ftmp
+adr1	mva	tab.h_tcol,x	ftmp+1
+
+	ldy	#1
+	lda	(ftmp),y
+	tay
+
+	and	#$0f
+	beq	skp0
+
+	dey
+skp0
+	tya
+	and	#$f0
+	beq	skp1
+
+	tya
+	sub	#$10
+	tay
+skp1
+	tya
+
+	ldy	#1
+	sta	(ftmp),y
+
+	inx
+
+	ift	color_nr>255
+	bne	skp
+	inc	count+1
+
+	inc	adr0+2
+	inc	adr1+2
+skp
+	eif
+
+	cpx	<color_nr
+	bne	adr0
+
+	ift	color_nr>255
+count	lda	#0
+	cmp	>color_nr
+	bne	adr0
+	eif
+
+	rts
+.endp
+
+
+* ---
+* ---	SAVE COLOR
+* ---
+.proc	SAVE_COLOR
+
+	ldx	#0
+
+	ift	color_nr>255
+	mwa	#tab.l_tcol	adr0+1
+	mwa	#tab.h_tcol	adr1+1
+	mwa	#tab.t_satur	adr2+1
+	mwa	#tab.t_color	adr3+1
+
+	stx	count+1
+	eif
+
+adr0	mva	tab.l_tcol,x	ftmp
+adr1	mva	tab.h_tcol,x	ftmp+1
+
+	ldy	#1
+	lda	(ftmp),y
+	pha
+	and	#$0f
+adr2	sta	tab.t_satur,x
+	pla
+	and	#$f0
+adr3	sta	tab.t_color,x
+
+	mva	#0	(ftmp),y	; black screen (all colors = $00)
+
+	inx
+
+	ift	color_nr>255
+	bne	skp
+	inc	count+1
+
+	inc	adr0+2
+	inc	adr1+2
+	inc	adr2+2
+	inc	adr3+2
+skp
+	eif
+
+	cpx	<color_nr
+	bne	adr0
+
+	ift	color_nr>255
+count	lda	#0
+	cmp	>color_nr
+	bne	adr0
+	eif
+
+	rts
+.endp
+
+.proc tab
+l_tcol
+ dta l(NMI.c0,NMI.c1,NMI.c2,NMI.c3,NMI.c4,NMI.c5,NMI.c6,NMI.c7,NMI.c8,c9)
+ dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta l(c20,c21,c22,c23,c24)
+
+h_tcol
+ dta h(NMI.c0,NMI.c1,NMI.c2,NMI.c3,NMI.c4,NMI.c5,NMI.c6,NMI.c7,NMI.c8,c9)
+ dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+ dta h(c20,c21,c22,c23,c24)
+
+t_satur	.ds color_nr
+t_color	.ds color_nr
+.endp

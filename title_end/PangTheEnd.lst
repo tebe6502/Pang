@@ -1,0 +1,863 @@
+Mad-Assembler v1.7.8 by Tebe/Madteam
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+     1 				/***************************************/
+     2 				/*  Use MADS http://mads.atari8.info/  */
+     3 				/*  Mode: DLI (char mode)              */
+     4 				/***************************************/
+     5
+     6 = 0000			pmg	= 0
+     7
+     8 = 003F			scr48	= %00111111	;screen 48b
+     9 = 003E			scr40	= %00111110	;screen 40b
+    10 = 003D			scr32	= %00111101	;screen 32b
+    11
+    12 = 0014			cloc	= $0014		;(1)
+    13 = 0000			byt2	= $0000		;(1) <$0100
+    14 = 0100			byt3	= $0100		;(1) >$00FF
+    15
+    16 = 0080			ftmp	= $80		;(2)
+    17 = 0082			regA	= ftmp+2	;(1)
+    18 = 0083			regX	= regA+1	;(1)
+    19 = 0084			regY	= regX+1	;(1)
+    20
+    21 = D000			hposp0	= $D000
+    22 = D001			hposp1	= $D001
+    23 = D002			hposp2	= $D002
+    24 = D003			hposp3	= $D003
+    25 = D004			hposm0	= $D004
+    26 = D005			hposm1	= $D005
+    27 = D006			hposm2	= $D006
+    28 = D007			hposm3	= $D007
+    29 = D008			sizep0	= $D008
+    30 = D009			sizep1	= $D009
+    31 = D00A			sizep2	= $D00A
+    32 = D00B			sizep3	= $D00B
+    33 = D00C			sizem	= $D00C
+    34
+    35 = D012			colpm0	= $D012
+    36 = D013			colpm1	= $D013
+    37 = D014			colpm2	= $D014
+    38 = D015			colpm3	= $D015
+    39 = D016			color0	= $D016
+    40 = D017			color1	= $D017
+    41 = D018			color2	= $D018
+    42 = D019			color3	= $D019
+    43 = D01A			colbak	= $D01A
+    44 = D01B			gtictl	= $D01B
+    45
+    46 = D409			chbase	= $D409
+    47
+    48 				* ---	MAIN PROGRAM
+    49 					org $2000
+    50
+    51 FFFF> 2000-3EDA> 55 55 + fnt	ins 'PangTheEnd.fnt'
+    52
+    53 3400 00 00 00 00 00 00 + scr	ins 'PangTheEnd.scr'
+    54
+    55 39A0 C4 00 34 84 04 84 + ant	dta $C4,a(scr),$84,$04,$84,$04,$84,$84,$04,$84,$04,$04,$04,$84,$84
+    56 39B0 84 84 84 04 84 84 + 	dta $84,$84,$84,$04,$84,$84,$04,$04,$84,$04,$04,$04,$04,$04,$04,$04
+    57 39C0 41 A0 39			dta $41,a(ant)
+    58
+    59
+    60 39C3			main
+    61 				* ---	init PMG
+    62 39C3 A9 00 8D 07 D4		mva >pmg $d407		;missiles and players data address
+    63 39C8 A9 03 8D 1D D0		mva #3 $d01d		;enable players and missiles
+    64
+    65 39CD 20 83 3E			jsr save_color		;then save all colors and set value 0 for all colors
+    66
+    67
+    68 39D0 A5 14 C5 14 F0 FC		lda:cmp:req 20		;wait 1 frame
+    69
+    70 39D6 78				sei			;stop IRQ interrupts
+    71 39D7 A9 00 8D 0E D4		mva #0 $d40e		;stop NMI interrupts
+    72 39DC A9 FE 8D 01 D3		mva #$fe $d301		;switch off ROM to get 16k more ram
+    73
+    74 39E1 A9 00 8D 1B 3F A9 + 	mwa #pmg+$300 q1+1
+    75 39EB A9 3F			lda >sprites-1
+    76 39ED A2 35			ldx <sprites-1
+    77 39EF 20 0D 3F			jsr depacker
+    78
+    79 39F2 A9 4B 8D FA FF A9 + 	mwa #NMI $fffa		;new NMI handler
+    80
+    81 39FC A9 C0 8D 0E D4		mva #$c0 $d40e		;switch on NMI+DLI again
+    82
+    83
+    84 3A01 20 19 3E			jsr fade_in		;fade in colors
+    85
+    86 3A04 AD 0F D2		_lp	lda $d20f		;wait to press any key; here you can put any own routine
+    87 3A07 29 04			and #4
+    88 3A09 D0 F9			bne _lp
+    89
+    90 3A0B 20 51 3E			jsr fade_out		;fade out colors
+    91
+    92 3A0E			pmgKill
+    93 3A0E A9 00 8D 1D D0		mva #0   $d01d		;PMG disabled
+    94 					ldx #$0c\ sta:rpl $d000,x-
+    94 3A13 A2 0C			LDX #$0C
+    94 3A15 9D 00 D0 CA 10 FA	 STA:RPL $D000,X-
+    95 3A1B 60				rts
+    96
+    97
+    98 				* ---	DLI PROGRAM
+    99
+   100 = 3A1C			 ?old_dli = *
+   101
+   102
+   103 3A1C			dli_start
+   104 3A1C			dli8
+   105 3A1C 8D 0A D4			sta $d40a		;line=8
+   106 3A1F 8D 0A D4			sta $d40a		;line=9
+   107 3A22 8D 0A D4			sta $d40a		;line=10
+   108 3A25 8D 0A D4			sta $d40a		;line=11
+   109 3A28 8D 0A D4			sta $d40a		;line=12
+   110 3A2B A9 46		c9	lda #$46
+   111 3A2D 8D 0A D4			sta $d40a		;line=13
+   112 3A30 8D 17 D0			sta color1
+   113 3A33				DLINEW dli9
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3A33 A9 3B 8D 57 3D		mva <DLI9 NMI.dliv
+     6 3A38 4C E9 3D			jmp NMI.quit
+     7 = 3A3B				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   114
+   115 3A3B			dli9
+   116
+   117 3A3B A9 78		c10	lda #$78
+   118 3A3D 8D 0A D4			sta $d40a		;line=16
+   119 3A40 8D 1A D0			sta colbak
+   120 3A43				DLINEW dli10
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3A43 A9 4B 8D 57 3D		mva <DLI10 NMI.dliv
+     6 3A48 4C E9 3D			jmp NMI.quit
+     7 = 3A4B				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   121
+   122 3A4B			dli10
+   123
+   124 3A4B 8D 0A D4			sta $d40a		;line=32
+   125 3A4E 8D 0A D4			sta $d40a		;line=33
+   126 3A51 8D 0A D4			sta $d40a		;line=34
+   127 3A54 8D 0A D4			sta $d40a		;line=35
+   128 3A57 8D 0A D4			sta $d40a		;line=36
+   129 3A5A 8D 0A D4			sta $d40a		;line=37
+   130 3A5D A9 2E		c11	lda #$2E
+   131 3A5F 8D 0A D4			sta $d40a		;line=38
+   132 3A62 8D 17 D0			sta color1
+   133 3A65 A9 78		c12	lda #$78
+   134 3A67 8D 0A D4			sta $d40a		;line=39
+   135 3A6A 8D 17 D0			sta color1
+   136 3A6D 8D 0A D4			sta $d40a		;line=40
+   137 3A70 8D 0A D4			sta $d40a		;line=41
+   138 3A73 A9 FC		c13	lda #$FC
+   139 3A75 8D 0A D4			sta $d40a		;line=42
+   140 3A78 8D 1A D0			sta colbak
+   141 3A7B				DLINEW dli2
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3A7B A9 83 8D 57 3D		mva <DLI2 NMI.dliv
+     6 3A80 4C E9 3D			jmp NMI.quit
+     7 = 3A83				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   142
+   143
+   144 3A83			dli2
+   145 3A83 A9 24			lda >fnt+$400*$01
+   146 3A85 8D 0A D4			sta $d40a		;line=48
+   147 3A88 8D 09 D4			sta chbase
+   148 3A8B 8D 0A D4			sta $d40a		;line=49
+   149 3A8E 8D 0A D4			sta $d40a		;line=50
+   150 3A91 8D 0A D4			sta $d40a		;line=51
+   151 3A94 A9 03			lda #$03
+   152 3A96 A2 69			ldx #$69
+   153 3A98 8D 0A D4			sta $d40a		;line=52
+   154 3A9B 8D 0A D0			sta sizep2
+   155 3A9E 8E 02 D0			stx hposp2
+   156 3AA1 A9 01			lda #$01
+   157 3AA3 A2 35			ldx #$35
+   158 3AA5 8D 0A D4			sta $d40a		;line=53
+   159 3AA8 8D 0B D0			sta sizep3
+   160 3AAB 8E 03 D0			stx hposp3
+   161 3AAE				DLINEW dli11
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3AAE A9 B6 8D 57 3D		mva <DLI11 NMI.dliv
+     6 3AB3 4C E9 3D			jmp NMI.quit
+     7 = 3AB6				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   162
+   163 3AB6			dli11
+   164
+   165 3AB6 A9 2E		c14	lda #$2E
+   166 3AB8 8D 0A D4			sta $d40a		;line=56
+   167 3ABB 8D 17 D0			sta color1
+   168 3ABE A9 4D			lda #$4D
+   169 3AC0 8D 0A D4			sta $d40a		;line=57
+   170 3AC3 8D 05 D0			sta hposm1
+   171 3AC6 A9 4C			lda #$4C
+   172 3AC8 8D 0A D4			sta $d40a		;line=58
+   173 3ACB 8D 05 D0			sta hposm1
+   174 3ACE A9 4A			lda #$4A
+   175 3AD0 8D 0A D4			sta $d40a		;line=59
+   176 3AD3 8D 05 D0			sta hposm1
+   177 3AD6 A9 48			lda #$48
+   178 3AD8 8D 0A D4			sta $d40a		;line=60
+   179 3ADB 8D 05 D0			sta hposm1
+   180 3ADE A9 47			lda #$47
+   181 3AE0 8D 0A D4			sta $d40a		;line=61
+   182 3AE3 8D 05 D0			sta hposm1
+   183 3AE6 A9 32			lda #$32
+   184 3AE8 A2 45			ldx #$45
+   185 3AEA 8D 0A D4			sta $d40a		;line=62
+   186 3AED 8D 03 D0			sta hposp3
+   187 3AF0 8E 05 D0			stx hposm1
+   188 3AF3 8D 0A D4			sta $d40a		;line=63
+   189 3AF6 8D 0A D4			sta $d40a		;line=64
+   190 3AF9 8D 0A D4			sta $d40a		;line=65
+   191 3AFC 8D 0A D4			sta $d40a		;line=66
+   192 3AFF 8D 0A D4			sta $d40a		;line=67
+   193 3B02 8D 0A D4			sta $d40a		;line=68
+   194 3B05 A9 00			lda #$00
+   195 3B07 A2 95			ldx #$95
+   196 3B09 A0 0E		c15	ldy #$0E
+   197 3B0B 8D 0A D4			sta $d40a		;line=69
+   198 3B0E 8D 09 D0			sta sizep1
+   199 3B11 8E 01 D0			stx hposp1
+   200 3B14 8C 13 D0			sty colpm1
+   201 3B17				DLINEW dli12
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     4 3B17 A9 24 8D 57 3D A9 + 	mwa #DLI12 NMI.dliv
+     6 3B21 4C E9 3D			jmp NMI.quit
+     7 = 3B24				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   202
+   203 3B24			dli12
+   204
+   205 3B24 8D 0A D4			sta $d40a		;line=72
+   206 3B27 8D 0A D4			sta $d40a		;line=73
+   207 3B2A 8D 0A D4			sta $d40a		;line=74
+   208 3B2D 8D 0A D4			sta $d40a		;line=75
+   209 3B30 8D 0A D4			sta $d40a		;line=76
+   210 3B33 A9 55			lda #$55
+   211 3B35 8D 0A D4			sta $d40a		;line=77
+   212 3B38 8D 07 D0			sta hposm3
+   213 3B3B 8D 0A D4			sta $d40a		;line=78
+   214 3B3E A9 30			lda #$30
+   215 3B40 8D 0A D4			sta $d40a		;line=79
+   216 3B43 8D 03 D0			sta hposp3
+   217 3B46 A9 28			lda >fnt+$400*$02
+   218 3B48 A2 57			ldx #$57
+   219 3B4A 8D 0A D4			sta $d40a		;line=80
+   220 3B4D 8D 09 D4			sta chbase
+   221 3B50 8E 07 D0			stx hposm3
+   222 3B53 8D 0A D4			sta $d40a		;line=81
+   223 3B56 8D 0A D4			sta $d40a		;line=82
+   224 3B59 8D 0A D4			sta $d40a		;line=83
+   225 3B5C 8D 0A D4			sta $d40a		;line=84
+   226 3B5F 8D 0A D4			sta $d40a		;line=85
+   227 3B62 A9 F0			lda #$F0
+   228 3B64 A2 50			ldx #$50
+   229 3B66 8D 0A D4			sta $d40a		;line=86
+   230 3B69 8D 0C D0			sta sizem
+   231 3B6C 8E 07 D0			stx hposm3
+   232 3B6F A9 70			lda #$70
+   233 3B71 8D 0A D4			sta $d40a		;line=87
+   234 3B74 8D 0C D0			sta sizem
+   235 3B77 8D 0A D4			sta $d40a		;line=88
+   236 3B7A 8D 0A D4			sta $d40a		;line=89
+   237 3B7D 8D 0A D4			sta $d40a		;line=90
+   238 3B80 8D 0A D4			sta $d40a		;line=91
+   239 3B83 8D 0A D4			sta $d40a		;line=92
+   240 3B86 8D 0A D4			sta $d40a		;line=93
+   241 3B89 A9 03			lda #$03
+   242 3B8B A2 6F			ldx #$6F
+   243 3B8D A0 0E		c16	ldy #$0E
+   244 3B8F 8D 0A D4			sta $d40a		;line=94
+   245 3B92 8D 08 D0			sta sizep0
+   246 3B95 8E 00 D0			stx hposp0
+   247 3B98 8C 12 D0			sty colpm0
+   248 3B9B A9 33			lda #$33
+   249 3B9D 8D 0A D4			sta $d40a		;line=95
+   250 3BA0 8D 03 D0			sta hposp3
+   251 3BA3 8D 0A D4			sta $d40a		;line=96
+   252 3BA6 A9 86			lda #$86
+   253 3BA8 8D 0A D4			sta $d40a		;line=97
+   254 3BAB 8D 05 D0			sta hposm1
+   255 3BAE 8D 0A D4			sta $d40a		;line=98
+   256 3BB1 A9 F6		c17	lda #$F6
+   257 3BB3 8D 0A D4			sta $d40a		;line=99
+   258 3BB6 8D 18 D0			sta color2
+   259 3BB9 A9 01			lda #$01
+   260 3BBB 8D 0A D4			sta $d40a		;line=100
+   261 3BBE 8D 09 D0			sta sizep1
+   262 3BC1				DLINEW dli13
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3BC1 A9 C9 8D 57 3D		mva <DLI13 NMI.dliv
+     6 3BC6 4C E9 3D			jmp NMI.quit
+     7 = 3BC9				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   263
+   264 3BC9			dli13
+   265
+   266 3BC9 8D 0A D4			sta $d40a		;line=104
+   267 3BCC A9 85			lda #$85
+   268 3BCE 8D 0A D4			sta $d40a		;line=105
+   269 3BD1 8D 05 D0			sta hposm1
+   270 3BD4 A9 84			lda #$84
+   271 3BD6 8D 0A D4			sta $d40a		;line=106
+   272 3BD9 8D 05 D0			sta hposm1
+   273 3BDC 8D 0A D4			sta $d40a		;line=107
+   274 3BDF 8D 0A D4			sta $d40a		;line=108
+   275 3BE2 8D 0A D4			sta $d40a		;line=109
+   276 3BE5 A9 7B			lda #$7B
+   277 3BE7 8D 0A D4			sta $d40a		;line=110
+   278 3BEA 8D 05 D0			sta hposm1
+   279 3BED				DLINEW dli3
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3BED A9 F5 8D 57 3D		mva <DLI3 NMI.dliv
+     6 3BF2 4C E9 3D			jmp NMI.quit
+     7 = 3BF5				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   280
+   281 3BF5			dli3
+   282 3BF5 A9 2C			lda >fnt+$400*$03
+   283 3BF7 8D 0A D4			sta $d40a		;line=112
+   284 3BFA 8D 09 D4			sta chbase
+   285 3BFD 8D 0A D4			sta $d40a		;line=113
+   286 3C00 A9 01			lda #$01
+   287 3C02 A2 53			ldx #$53
+   288 3C04 A0 0E		c18	ldy #$0E
+   289 3C06 8D 0A D4			sta $d40a		;line=114
+   290 3C09 8D 0A D0			sta sizep2
+   291 3C0C 8E 02 D0			stx hposp2
+   292 3C0F 8C 14 D0			sty colpm2
+   293 3C12				DLINEW dli14
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     4 3C12 A9 1F 8D 57 3D A9 + 	mwa #DLI14 NMI.dliv
+     6 3C1C 4C E9 3D			jmp NMI.quit
+     7 = 3C1F				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   294
+   295 3C1F			dli14
+   296
+   297 3C1F A9 A7			lda #$A7
+   298 3C21 A2 EA		c19	ldx #$EA
+   299 3C23 8D 0A D4			sta $d40a		;line=120
+   300 3C26 8D 00 D0			sta hposp0
+   301 3C29 8E 12 D0			stx colpm0
+   302 3C2C 8D 0A D4			sta $d40a		;line=121
+   303 3C2F 8D 0A D4			sta $d40a		;line=122
+   304 3C32 A9 00			lda #$00
+   305 3C34 A2 3B			ldx #$3B
+   306 3C36 8D 0A D4			sta $d40a		;line=123
+   307 3C39 8D 0B D0			sta sizep3
+   308 3C3C 8E 03 D0			stx hposp3
+   309 3C3F				DLINEW dli15
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3C3F A9 47 8D 57 3D		mva <DLI15 NMI.dliv
+     6 3C44 4C E9 3D			jmp NMI.quit
+     7 = 3C47				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   310
+   311 3C47			dli15
+   312
+   313 3C47 8D 0A D4			sta $d40a		;line=128
+   314 3C4A 8D 0A D4			sta $d40a		;line=129
+   315 3C4D 8D 0A D4			sta $d40a		;line=130
+   316 3C50 8D 0A D4			sta $d40a		;line=131
+   317 3C53 8D 0A D4			sta $d40a		;line=132
+   318 3C56 A9 40			lda #$40
+   319 3C58 8D 0A D4			sta $d40a		;line=133
+   320 3C5B 8D 03 D0			sta hposp3
+   321 3C5E				DLINEW dli16
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3C5E A9 66 8D 57 3D		mva <DLI16 NMI.dliv
+     6 3C63 4C E9 3D			jmp NMI.quit
+     7 = 3C66				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   322
+   323 3C66			dli16
+   324
+   325 3C66 8D 0A D4			sta $d40a		;line=136
+   326 3C69 8D 0A D4			sta $d40a		;line=137
+   327 3C6C 8D 0A D4			sta $d40a		;line=138
+   328 3C6F 8D 0A D4			sta $d40a		;line=139
+   329 3C72 8D 0A D4			sta $d40a		;line=140
+   330 3C75 8D 0A D4			sta $d40a		;line=141
+   331 3C78 8D 0A D4			sta $d40a		;line=142
+   332 3C7B A9 44			lda #$44
+   333 3C7D 8D 0A D4			sta $d40a		;line=143
+   334 3C80 8D 03 D0			sta hposp3
+   335 3C83				DLINEW dli17
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3C83 A9 8B 8D 57 3D		mva <DLI17 NMI.dliv
+     6 3C88 4C E9 3D			jmp NMI.quit
+     7 = 3C8B				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   336
+   337 3C8B			dli17
+   338
+   339 3C8B 8D 0A D4			sta $d40a		;line=152
+   340 3C8E 8D 0A D4			sta $d40a		;line=153
+   341 3C91 8D 0A D4			sta $d40a		;line=154
+   342 3C94 A9 03			lda #$03
+   343 3C96 A2 7A			ldx #$7A
+   344 3C98 A0 28		c20	ldy #$28
+   345 3C9A 8D 0A D4			sta $d40a		;line=155
+   346 3C9D 8D 0B D0			sta sizep3
+   347 3CA0 8E 03 D0			stx hposp3
+   348 3CA3 8C 15 D0			sty colpm3
+   349 3CA6				DLINEW dli4
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     2 3CA6 A9 AE 8D 57 3D		mva <DLI4 NMI.dliv
+     6 3CAB 4C E9 3D			jmp NMI.quit
+     7 = 3CAE				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   350
+   351 3CAE			dli4
+   352 3CAE A9 30			lda >fnt+$400*$04
+   353 3CB0 8D 0A D4			sta $d40a		;line=160
+   354 3CB3 8D 09 D4			sta chbase
+   355 3CB6 8D 0A D4			sta $d40a		;line=161
+   356 3CB9 8D 0A D4			sta $d40a		;line=162
+   357 3CBC 8D 0A D4			sta $d40a		;line=163
+   358 3CBF 8D 0A D4			sta $d40a		;line=164
+   359 3CC2 A9 03			lda #$03
+   360 3CC4 A2 56			ldx #$56
+   361 3CC6 A0 46		c21	ldy #$46
+   362 3CC8 8D 0A D4			sta $d40a		;line=165
+   363 3CCB 8D 09 D0			sta sizep1
+   364 3CCE 8E 01 D0			stx hposp1
+   365 3CD1 8C 13 D0			sty colpm1
+   366 3CD4 A9 03			lda #$03
+   367 3CD6 A2 36			ldx #$36
+   368 3CD8 A0 46		c22	ldy #$46
+   369 3CDA 8D 0A D4			sta $d40a		;line=166
+   370 3CDD 8D 0A D0			sta sizep2
+   371 3CE0 8E 02 D0			stx hposp2
+   372 3CE3 8C 14 D0			sty colpm2
+   373 3CE6 8D 0A D4			sta $d40a		;line=167
+   374 3CE9 8D 0A D4			sta $d40a		;line=168
+   375 3CEC 8D 0A D4			sta $d40a		;line=169
+   376 3CEF 8D 0A D4			sta $d40a		;line=170
+   377 3CF2 8D 0A D4			sta $d40a		;line=171
+   378 3CF5 8D 0A D4			sta $d40a		;line=172
+   379 3CF8 8D 0A D4			sta $d40a		;line=173
+   380 3CFB A9 EA		c23	lda #$EA
+   381 3CFD 8D 0A D4			sta $d40a		;line=174
+   382 3D00 8D 17 D0			sta color1
+   383 3D03 A9 03			lda #$03
+   384 3D05 A2 82			ldx #$82
+   385 3D07 8D 0A D4			sta $d40a		;line=175
+   386 3D0A 8D 0C D0			sta sizem
+   387 3D0D 8E 04 D0			stx hposm0
+   388 3D10 8D 0A D4			sta $d40a		;line=176
+   389 3D13 8D 0A D4			sta $d40a		;line=177
+   390 3D16 A9 33			lda #$33
+   391 3D18 A2 7E			ldx #$7E
+   392 3D1A A0 76			ldy #$76
+   393 3D1C 8D 0A D4			sta $d40a		;line=178
+   394 3D1F 8D 0C D0			sta sizem
+   395 3D22 8E 05 D0			stx hposm1
+   396 3D25 8C 06 D0			sty hposm2
+   397 3D28				DLINEW dli5
+Macro: DLINEW [Source: D:\!Atari\Pang\title_end\PangTheEnd.asm]
+     4 3D28 A9 35 8D 57 3D A9 + 	mwa #DLI5 NMI.dliv
+     6 3D32 4C E9 3D			jmp NMI.quit
+     7 = 3D35				?old_dli = *
+Source: D:\!Atari\Pang\title_end\PangTheEnd.asm
+   398
+   399 3D35			dli5
+   400 3D35 A9 20			lda >fnt+$400*$00
+   401 3D37 8D 0A D4			sta $d40a		;line=184
+   402 3D3A 8D 09 D4			sta chbase
+   403 3D3D 8D 0A D4			sta $d40a		;line=185
+   404 3D40 A9 26		c24	lda #$26
+   405 3D42 8D 0A D4			sta $d40a		;line=186
+   406 3D45 8D 18 D0			sta color2
+   407 3D48 4C E9 3D			jmp NMI.quit
+   408
+   409 				;---
+   410
+   411 3D4B			.PROC NMI
+   412 3D4B 85 82			sta regA
+   413 3D4D 86 83			stx regX
+   414 3D4F 84 84			sty regY
+   415
+   416 3D51 2C 0F D4			bit $d40f
+   417 3D54 10 03			bpl VBL
+   418
+   419 3D56 4C 1C 3A			jmp dli_start
+   420 = 3D57			dliv	equ *-2
+   421
+   422 3D59			VBL
+   423 3D59 8D 0F D4			sta $d40f		;reset NMI flag
+   424
+   425 3D5C E6 14			inc cloc		;little timer
+   426
+   427 3D5E A9 A0 8D 02 D4 A9 + 	mwa #ant $d402		;ANTIC address program
+   428
+   429 3D68 A9 3F 8D 00 D4		mva #scr48 $d400	;set new screen's width
+   430
+   431 				;--- first line of screen initialization
+   432
+   433 3D6D A9 20			lda >fnt+$400*$00
+   434 3D6F 8D 09 D4			sta chbase
+   435
+   436 3D72 A9 FC		c0	lda #$FC
+   437 3D74 8D 1A D0			sta colbak
+   438 3D77 A9 00		c1	lda #$00
+   439 3D79 8D 16 D0			sta color0
+   440 3D7C A9 2E		c2	lda #$2E
+   441 3D7E 8D 17 D0			sta color1
+   442 3D81 A9 26		c3	lda #$26
+   443 3D83 8D 18 D0			sta color2
+   444 3D86 A9 8C		c4	lda #$8C
+   445 3D88 8D 19 D0			sta color3
+   446 3D8B A9 04			lda #$04
+   447 3D8D 8D 1B D0			sta gtictl
+   448 3D90 A9 03			lda #$03
+   449 3D92 8D 0B D0			sta sizep3
+   450 3D95 A9 32			lda #$32
+   451 3D97 8D 03 D0			sta hposp3
+   452 3D9A A9 EE		c5	lda #$EE
+   453 3D9C 8D 15 D0			sta colpm3
+   454
+   455 3D9F A9 01			lda #$01
+   456 3DA1 8D 0A D0			sta sizep2
+   457 				;	lda #$01
+   458 3DA4 8D 09 D0			sta sizep1
+   459 				;	lda #$01
+   460 3DA7 8D 08 D0			sta sizep0
+   461
+   462 3DAA A9 53			lda #$53
+   463 3DAC 8D 02 D0			sta hposp2
+   464 				;	lda #$53
+   465 3DAF 8D 06 D0			sta hposm2
+   466
+   467 3DB2 A9 EE		c6	lda #$EE
+   468 3DB4 8D 14 D0			sta colpm2
+   469
+   470 3DB7 A9 98			lda #$98
+   471 3DB9 8D 01 D0			sta hposp1
+   472 3DBC A9 78		c7	lda #$78
+   473 3DBE 8D 13 D0			sta colpm1
+   474 3DC1 A9 4F			lda #$4F
+   475 3DC3 8D 05 D0			sta hposm1
+   476
+   477 3DC6 A9 99			lda #$99
+   478 3DC8 8D 00 D0			sta hposp0
+   479 3DCB A9 EE		c8	lda #$EE
+   480 3DCD 8D 12 D0			sta colpm0
+   481 3DD0 A9 3C			lda #$3C
+   482 3DD2 8D 0C D0			sta sizem
+   483
+   484 3DD5 A9 59			lda #$59
+   485 3DD7 8D 07 D0			sta hposm3
+   486 3DDA A9 71			lda #$71
+   487 3DDC 8D 04 D0			sta hposm0
+   488
+   489 3DDF A9 1C 8D 57 3D A9 + 	mwa #dli_start dliv	;set the first address of DLI interrupt
+   490
+   491 				;this area is for yours routines
+   492
+   493 3DE9			quit
+   494 3DE9 A5 82			lda regA
+   495 3DEB A6 83			ldx regX
+   496 3DED A4 84			ldy regY
+   497 3DEF 40				rti
+   498
+   499 				.ENDP
+   500
+   501 				;---
+   502 3DF0				icl 'PangTheEnd.fad'
+Source: D:\!Atari\Pang\title_end\PangTheEnd.fad
+     1 = 0019			color_nr = 25
+     2
+     3 				* ---
+     4 				* ---	WAIT
+     5 				* ---
+     6 3DF0			.proc	WAIT (.byte x) .reg
+     7
+     8 3DF0 A5 14 C5 14 F0 FC		lda:cmp:req cloc
+     9 3DF6 CA				dex
+    10 3DF7 D0 F7			bne	wait
+    11 3DF9 60				rts
+    12 				.endp
+    13
+    14
+    15 				* ---
+    16 				* ---	FADE
+    17 				* ---
+    18 3DFA			.proc	FADE
+    19
+    20 3DFA 8E 10 3E			stx	adr+1
+    21 3DFD 8C 11 3E			sty	adr+2
+    22
+    23 					WAIT	#6
+     1 				 LDX# 6\ JSR WAIT
+     1 3E00 A2 06		 LDX# 6
+     1 3E02 20 F0 3D		 JSR WAIT
+    24
+    25 3E05 A9 10 8D 18 3E		mva	#16	licz
+    26 3E0A			fad
+    27 					WAIT	#2
+     1 				 LDX# 2\ JSR WAIT
+     1 3E0A A2 02		 LDX# 2
+     1 3E0C 20 F0 3D		 JSR WAIT
+    28
+    29 3E0F 20 FF FF		adr	jsr	$ffff
+    30
+    31 3E12 CE 18 3E			dec	licz
+    32 3E15 D0 F3			bne	fad
+    33 3E17 60				rts
+    34
+    35 3E18 00			licz	brk
+    36 				.endp
+    37
+    38
+    39 				* ---
+    40 				* ---	FADE IN
+    41 				* ---
+    42 3E19			.proc	FADE_IN
+    43
+    44 3E19 A2 20			ldx	<fade
+    45 3E1B A0 3E			ldy	>fade
+    46 3E1D 4C FA 3D			jmp	:fade
+    47 3E20			fade
+    48 3E20 A2 00			ldx	#0
+    49
+    50 					ift	color_nr>255
+    51 					mwa	#tab.l_tcol	adr0+1
+    52 					mwa	#tab.h_tcol	adr1+1
+    53 					mwa	#tab.t_satur	adr2+1
+    54 					mwa	#tab.t_color	adr3+1
+    55
+    56 					stx	count+1
+    57 					eif
+    58
+    59 3E22 BD A9 3E 85 80	adr0	mva	tab.l_tcol,x	ftmp
+    60 3E27 BD C2 3E 85 81	adr1	mva	tab.h_tcol,x	ftmp+1
+    61
+    62 3E2C A0 01			ldy	#1
+    63 3E2E B1 80			lda	(ftmp),y
+    64 3E30 A8				tay
+    65
+    66 3E31 29 F0			and	#$f0
+    67 3E33 DD F4 3E		adr3	cmp	tab.t_color,x
+    68 3E36 F0 05			beq	skp1
+    69
+    70 3E38 98				tya
+    71 3E39 18 69 10			add	#$10
+    72 3E3C A8				tay
+    73 3E3D			skp1
+    74 3E3D 98				tya
+    75 3E3E 29 0F			and	#$0f
+    76 3E40 DD DB 3E		adr2	cmp	tab.t_satur,x
+    77 3E43 F0 01			beq	skp0
+    78
+    79 3E45 C8				iny
+    80 3E46			skp0
+    81 3E46 98				tya
+    82 3E47 A0 01			ldy	#1
+    83 3E49 91 80			sta	(ftmp),y
+    84
+    85 3E4B E8				inx
+    86
+    87 					ift	color_nr>255
+    88 					bne	skp
+    89 					inc	count+1
+    90
+    91 					inc	adr0+2
+    92 					inc	adr1+2
+    93 					inc	adr2+2
+    94 					inc	adr3+2
+    95 				skp
+    96 					eif
+    97
+    98 3E4C E0 19			cpx	<color_nr
+    99 3E4E D0 D2			bne	adr0
+   100
+   101 					ift	color_nr>255
+   102 				count	lda	#0
+   103 					cmp	>color_nr
+   104 					bne	adr0
+   105 					eif
+   106
+   107 3E50 60				rts
+   108 				.endp
+   109
+   110
+   111 				* ---
+   112 				* ---	FADE OUT
+   113 				* ---
+   114 3E51			.proc	FADE_OUT
+   115
+   116 3E51 A2 58			ldx	<fade
+   117 3E53 A0 3E			ldy	>fade
+   118 3E55 4C FA 3D			jmp	:fade
+   119 3E58			fade
+   120 3E58 A2 00			ldx	#0
+   121
+   122 					ift	color_nr>255
+   123 					mwa	#tab.l_tcol	adr0+1
+   124 					mwa	#tab.h_tcol	adr1+1
+   125
+   126 					stx	count+1
+   127 					eif
+   128
+   129 3E5A BD A9 3E 85 80	adr0	mva	tab.l_tcol,x	ftmp
+   130 3E5F BD C2 3E 85 81	adr1	mva	tab.h_tcol,x	ftmp+1
+   131
+   132 3E64 A0 01			ldy	#1
+   133 3E66 B1 80			lda	(ftmp),y
+   134 3E68 A8				tay
+   135
+   136 3E69 29 0F			and	#$0f
+   137 3E6B F0 01			beq	skp0
+   138
+   139 3E6D 88				dey
+   140 3E6E			skp0
+   141 3E6E 98				tya
+   142 3E6F 29 F0			and	#$f0
+   143 3E71 F0 05			beq	skp1
+   144
+   145 3E73 98				tya
+   146 3E74 38 E9 10			sub	#$10
+   147 3E77 A8				tay
+   148 3E78			skp1
+   149 3E78 98				tya
+   150
+   151 3E79 A0 01			ldy	#1
+   152 3E7B 91 80			sta	(ftmp),y
+   153
+   154 3E7D E8				inx
+   155
+   156 					ift	color_nr>255
+   157 					bne	skp
+   158 					inc	count+1
+   159
+   160 					inc	adr0+2
+   161 					inc	adr1+2
+   162 				skp
+   163 					eif
+   164
+   165 3E7E E0 19			cpx	<color_nr
+   166 3E80 D0 D8			bne	adr0
+   167
+   168 					ift	color_nr>255
+   169 				count	lda	#0
+   170 					cmp	>color_nr
+   171 					bne	adr0
+   172 					eif
+   173
+   174 3E82 60				rts
+   175 				.endp
+   176
+   177
+   178 				* ---
+   179 				* ---	SAVE COLOR
+   180 				* ---
+   181 3E83			.proc	SAVE_COLOR
+   182
+   183 3E83 A2 00			ldx	#0
+   184
+   185 					ift	color_nr>255
+   186 					mwa	#tab.l_tcol	adr0+1
+   187 					mwa	#tab.h_tcol	adr1+1
+   188 					mwa	#tab.t_satur	adr2+1
+   189 					mwa	#tab.t_color	adr3+1
+   190
+   191 					stx	count+1
+   192 					eif
+   193
+   194 3E85 BD A9 3E 85 80	adr0	mva	tab.l_tcol,x	ftmp
+   195 3E8A BD C2 3E 85 81	adr1	mva	tab.h_tcol,x	ftmp+1
+   196
+   197 3E8F A0 01			ldy	#1
+   198 3E91 B1 80			lda	(ftmp),y
+   199 3E93 48				pha
+   200 3E94 29 0F			and	#$0f
+   201 3E96 9D DB 3E		adr2	sta	tab.t_satur,x
+   202 3E99 68				pla
+   203 3E9A 29 F0			and	#$f0
+   204 3E9C 9D F4 3E		adr3	sta	tab.t_color,x
+   205
+   206 3E9F A9 00 91 80			mva	#0	(ftmp),y	; black screen (all colors = $00)
+   207
+   208 3EA3 E8				inx
+   209
+   210 					ift	color_nr>255
+   211 					bne	skp
+   212 					inc	count+1
+   213
+   214 					inc	adr0+2
+   215 					inc	adr1+2
+   216 					inc	adr2+2
+   217 					inc	adr3+2
+   218 				skp
+   219 					eif
+   220
+   221 3EA4 E0 19			cpx	<color_nr
+   222 3EA6 D0 DD			bne	adr0
+   223
+   224 					ift	color_nr>255
+   225 				count	lda	#0
+   226 					cmp	>color_nr
+   227 					bne	adr0
+   228 					eif
+   229
+   230 3EA8 60				rts
+   231 				.endp
+   232
+   233 3EA9			.proc tab
+   234 3EA9			l_tcol
+   235 3EA9 72 77 7C 81 86 9A +  dta l(NMI.c0,NMI.c1,NMI.c2,NMI.c3,NMI.c4,NMI.c5,NMI.c6,NMI.c7,NMI.c8,c9)
+   236 3EB3 3B 5D 65 73 B6 09 +  dta l(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   237 3EBD 98 C6 D8 FB 40	 dta l(c20,c21,c22,c23,c24)
+   238
+   239 3EC2			h_tcol
+   240 3EC2 3D 3D 3D 3D 3D 3D +  dta h(NMI.c0,NMI.c1,NMI.c2,NMI.c3,NMI.c4,NMI.c5,NMI.c6,NMI.c7,NMI.c8,c9)
+   241 3ECC 3A 3A 3A 3A 3A 3B +  dta h(c10,c11,c12,c13,c14,c15,c16,c17,c18,c19)
+   242 3ED6 3C 3C 3C 3C 3D	 dta h(c20,c21,c22,c23,c24)
+   243
+   244 = 3EDB			t_satur	.ds color_nr
+   245 = 3EF4			t_color	.ds color_nr
+   246 				.endp
+   503
+   504
+   505 3F0D			depacker
+   506 3F0D-401D> 8D 34 3F	        sta adr+2
+   507
+   508 3F10 20 2C 3F		loop    jsr get
+   509 3F13 F0 20		        beq stop
+   510 3F15 4A			        lsr @
+   511
+   512 3F16 A8			        tay
+   513 3F17 20 2C 3F		q0      jsr get
+   514 3F1A 8D FF FF		q1      sta $ffff
+   515 3F1D EE 1B 3F		        inc q1+1
+   516 3F20 D0 03		        bne skip0
+   517 3F22 EE 1C 3F		        inc q1+2
+   518 3F25			skip0
+   519 3F25 88			        dey
+   520 3F26 30 E8		_bpl    bmi loop
+   521
+   522 3F28 B0 ED		        bcs q0
+   523 3F2A 90 EE		        bcc q1
+   524
+   525 3F2C E8			get     inx
+   526 3F2D D0 03		        bne skip1
+   527 3F2F EE 34 3F		        inc adr+2
+   528 3F32			skip1
+   529 3F32 BD 00 FF		adr     lda $ff00,x
+   530
+   531 3F35 60			stop    rts
+   532
+   533
+   534 3F36 7E 00 10 08 0C C0 + sprites	ins 'pmg.rle'
+   535
+   536 					.print 'end: ',*
+   537
+   538 02E0-02E1> C3 39			run main
+   539
+   540 				;---
+   541

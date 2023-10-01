@@ -1,0 +1,244 @@
+// Player-Missile Fade
+// v2.5 (26.07.2010 - 12.08.2013)
+
+	.ifndef pmg
+pmg	= $0000
+	eif
+
+mapBits	= pmg+$100
+
+	ert <mapBits<>0
+
+// -----------------------------------------------------------
+
+.local	fade_chars
+
+	color
+
+cont	ldx #0
+	ldy #0
+
+	ift FADECHR = 1
+	box #WIDTH #HEIGHT
+	eli FADECHR = 2
+	random
+	eli FADECHR = 3
+	left_right
+	eli FADECHR = 4
+	plasma
+	eif
+
+wait	lda:cmp:req cloc
+	rts
+
+.proc	color (.byte a) .reg
+	beq color0
+
+color1	mva #{lda $ffff,y} plot.src
+	rts
+
+color0	mva #{bit $ffff} plot.src
+	rts
+.endp
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+	ift FADECHR = 3
+.proc	left_right
+
+	mva #WIDTH/2 cnt
+
+	mva #0 x0
+	mva #WIDTH-1 x1
+
+loop	ldy #0
+x0	equ *-1
+	jsr column
+
+	ldy #0
+x1	equ *-1
+	jsr column
+
+	:2 inc x0
+	:2 dec x1
+
+	dec cnt
+	bne loop
+	rts
+
+column	ldx #HEIGHT-1
+draw	jsr plot
+	dex
+	bpl draw
+	jmp wait
+
+cnt	brk
+
+.endp
+	eif
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+.proc	movfil	(.word fadr, fhlp, fcnt) .var
+
+	LDY #0
+	LDX fcnt+1
+	BEQ MD2
+MD1	LDA (fadr),y	; move the remaining bytes
+	STA (fhlp),y
+	lda #SCHR	; fill
+	sta (fadr),y
+	INY
+	BNE MD1
+	INC fadr+1
+	INC fhlp+1
+	DEX
+	BNE MD1
+MD2	LDX fcnt
+	BEQ MD4
+MD3	LDA (fadr),y	; move the remaining bytes
+	STA (fhlp),y
+	lda #SCHR	; fill
+	sta (fadr),y
+	INY
+	DEX
+	BNE MD3
+MD4	RTS
+
+.endp
+
+init	movfil	#scr #scrn #WIDTH*HEIGHT
+
+	ldy #0
+	tya
+pmgClr	sta pmg+$300,y
+	sta pmg+$400,y
+	sta pmg+$500,y
+	sta pmg+$600,y
+	sta pmg+$700,y
+	iny
+	bne pmgClr
+	rts
+
+// -----------------------------------------------------------
+
+.proc	plot (.byte x,y) .reg
+
+	stx rx		; Y char position
+	sty ry		; X char position
+
+	mva lmul,x fadr
+	mva hmul,x fadr+1
+
+	lda fadr
+	add <scrn
+_sta0	sta src+1
+	lda fadr+1
+	adc >scrn
+_sta1	sta src+2
+
+	adw fadr #scr dst+1
+
+	lda #SCHR
+
+src	lda $ffff,y
+dst	sta $ffff,y
+
+	jsr pmg_plot
+
+	ldx #0
+rx	equ *-1
+	ldy #0
+ry	equ *-1
+
+	rts
+	
+.local	pmg_plot
+
+	mva lcol,y fcnt
+	mva hcol,y fcnt+1
+
+	txa
+	asl @
+	tay
+
+	asl @
+	asl @
+	add #8
+	tax
+
+	lda (fcnt),y
+	sta fadr
+	iny
+	lda (fcnt),y
+	sta fadr+1
+
+	ldy #0
+
+loop	lda (fadr),y
+src	equ *-2
+	sta tmp
+
+	beq stop
+
+	jmi _mis
+p0	asl tmp
+	jmi _pl0
+p1	asl tmp
+	jmi _pl1
+p2	asl tmp
+	jmi _pl2
+p3	asl tmp
+	jmi _pl3
+
+stop	rts
+
+tmp	brk
+
+_mis	@plot $300
+	jmp p0
+	
+_pl0	@plot $400
+	jmp p1
+
+_pl1	@plot $500
+	jmp p2
+
+_pl2	@plot $600
+	jmp p3
+
+_pl3	@plot $700
+	rts
+
+.macro	@plot (player)
+	.rept 8
+	iny
+	lda pmg+%%player+#,x
+	eor (fadr),y
+	sta pmg+%%player+#,x
+	.endr
+.endm
+
+.endl
+
+lcol	:WIDTH dta l(col%%1)
+hcol	:WIDTH dta h(col%%1)
+
+	.rept WIDTH,#
+col%%1	dta a(c%%1r0),a(c%%1r1),a(c%%1r2),a(c%%1r3),a(c%%1r4)
+	dta a(c%%1r5),a(c%%1r6),a(c%%1r7),a(c%%1r8),a(c%%1r9)
+	dta a(c%%1r10),a(c%%1r11),a(c%%1r12),a(c%%1r13),a(c%%1r14)
+	dta a(c%%1r15),a(c%%1r16),a(c%%1r17),a(c%%1r18),a(c%%1r19)
+	dta a(c%%1r20),a(c%%1r21),a(c%%1r22),a(c%%1r23),a(c%%1r24)
+	dta a(c%%1r25),a(c%%1r26),a(c%%1r27),a(c%%1r28),a(c%%1r29)
+	.endr
+
+lmul	:HEIGHT dta l(#*WIDTH)
+hmul	:HEIGHT dta h(#*WIDTH)
+.endp
+
+.endl
+
+scrn	.ds WIDTH*HEIGHT
