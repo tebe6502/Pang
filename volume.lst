@@ -1,7 +1,0 @@
-mads 2.0.3 build 1 (21 Mar 16)
-Source: D:\!Atari\Pang_2\volume.asm
-     1
-     2 					opt h-
-     3
-     4 					.get [$100] 'volume.dat'
-     5  00 00 00 00 00 00 00 +  	:256 dta .get[$100+#]<<4
